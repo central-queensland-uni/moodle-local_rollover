@@ -1,2 +1,2 @@
-# moodel-local_rollover
+# moodle-local_rollover
 Allow course coordinators to easily rollover courses.
