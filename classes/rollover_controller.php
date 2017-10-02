@@ -26,6 +26,7 @@ namespace local_rollover;
 use context_course;
 use local_rollover\form\form_original_course;
 use moodle_page;
+use moodle_url;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -56,24 +57,34 @@ class rollover_controller {
         require_login($this->destinationcourse);
         $this->page->set_context(context_course::instance($this->destinationcourse->id));
         $this->page->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
+        $this->page->set_heading($this->destinationcourse->fullname);
 
         $form = new form_original_course();
-        $form->set_data(['into' => $this->destinationcourse->id]);
 
-        $this->page->set_heading($this->destinationcourse->fullname);
         echo $this->output->header();
 
         if ($form->is_submitted()) {
             $data = $form->get_data();
+
+            global $DB;
+            $sourceid = $DB->get_field('course', 'id', ['shortname' => $data->sourceshortname], MUST_EXIST);
+            $worker = new rollover_worker($sourceid, $this->destinationcourse->id);
+            $worker->rollover();
+
             echo $this->output->heading(get_string('rolloversuccessful', 'local_rollover'));
             echo get_string('rolloversuccessfulmessage', 'local_rollover', [
                 'from' => htmlentities($data->sourceshortname),
                 'into' => htmlentities($this->destinationcourse->shortname),
             ]);
-        }
+            echo '<br /><br />';
 
-        echo $this->output->heading(get_string('pluginname', 'local_rollover'));
-        $form->display();
+            $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
+            echo $this->output->single_button($url, get_string('proceed', 'local_rollover'), 'get');
+        } else {
+            $form->set_data(['into' => $this->destinationcourse->id]);
+            echo $this->output->heading(get_string('pluginname', 'local_rollover'));
+            $form->display();
+        }
 
         echo $this->output->footer();
     }

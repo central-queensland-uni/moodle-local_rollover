@@ -34,32 +34,46 @@ require_once(__DIR__ . '/../../../../lib/phpunit/classes/util.php');
  * @SuppressWarnings(public) Allow as many methods as needed.
  */
 class behat_local_rollover extends behat_base {
+    /** @var stdClass[] */
+    protected $courses = [];
+
     /**
-     * @Given /^there is a course with shortname "([^"]*)" +# local_rollover$/
+     * @Given /^there is a course with shortname "([^"]*)" +\# local_rollover$/
      */
     public function there_is_a_course_with_shortname($shortname) {
         $generator = phpunit_util::get_data_generator();
-        $generator->create_course(['shortname' => $shortname]);
+        $this->courses[$shortname] = $generator->create_course(['shortname' => $shortname]);
     }
 
     /**
-     * @Given /^I am at the course "([^"]*)" page +# local_rollover$/
+     * @Given /^I am at the course "([^"]*)" page +\# local_rollover$/
      */
     public function i_am_at_the_course_page($shortname) {
         $this->getSession()->visit($this->locate_path('/course/view.php?name=' . $shortname));
     }
 
     /**
-     * @Given /^I am an administrator +# local_rollover$/
+     * @Given /^I am an administrator +\# local_rollover$/
      */
     public function i_am_an_administrator() {
         $this->execute('behat_auth::i_log_in_as', ['admin']);
     }
 
     /**
-     * @When /^I press "([^"]*)" in the Course Administration block +# local_rollover$/
+     * @When /^I press "([^"]*)" in the Course Administration block +\# local_rollover$/
      */
     public function i_press_in_the_course_administration_block($link) {
         $this->execute('behat_general::i_click_on_in_the', [$link, 'link', 'Administration', 'block']);
+    }
+
+    /**
+     * @Given /^the course "([^"]*)" has an assignment "([^"]*)" +\# local_rollover$/
+     */
+    public function the_course_has_an_assignment($shortname, $assignment) {
+        $generator = phpunit_util::get_data_generator()->get_plugin_generator('mod_assign');
+        $generator->create_instance([
+                                        'course' => $this->courses[$shortname]->id,
+                                        'name'   => $assignment,
+                                    ]);
     }
 }

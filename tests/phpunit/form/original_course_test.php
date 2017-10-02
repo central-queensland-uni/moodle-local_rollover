@@ -33,6 +33,6 @@ class local_rollover_form_original_course_test extends advanced_testcase {
         $form->display();
         $html = ob_get_clean();
 
-        self::assertNotNull($html);
+        self::assertContains('<form', $html);
     }
 }

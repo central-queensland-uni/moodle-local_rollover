@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/fixtures/mock_output.php');
 
-class local_rollover_controller_test extends advanced_testcase {
+class local_rollover_rollover_controller_test extends advanced_testcase {
     public function test_it_requires_capability_to_rollover() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
@@ -44,8 +44,9 @@ class local_rollover_controller_test extends advanced_testcase {
 
         ob_start();
         $controller->rollover_source_selection_page();
-        $html = ob_end_clean();
+        $html = ob_get_clean();
 
-        self::assertNotNull($html);
+        self::assertContains('[header]', $html);
+        self::assertContains('[footer]', $html);
     }
 }

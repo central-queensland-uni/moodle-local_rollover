@@ -25,11 +25,14 @@ defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_fixtures_mock_output {
     public function header() {
+        echo '[header]';
     }
 
     public function heading() {
+        echo '[heading]';
     }
 
     public function footer() {
+        echo '[footer]';
     }
 }

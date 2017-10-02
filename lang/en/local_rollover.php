@@ -28,6 +28,7 @@ $string['originalcourse'] = 'Original course';
 $string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
 $string['performrollover'] = 'Perform rollover';
 $string['pluginname'] = 'Course rollover';
+$string['proceed'] = 'Proceed to course';
 $string['rollover'] = 'Rollover';
 $string['rolloversuccessful'] = 'Rollover successful';
 $string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
