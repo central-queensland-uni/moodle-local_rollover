@@ -19,12 +19,20 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @var stdClass $plugin
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_phpunit_test extends advanced_testcase {
-    public function test_it_works() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
+/**
+ * This function extends the course navigation with the report items
+ *
+ * @param navigation_node $navigation The navigation node to extend
+ * @param stdClass        $course     The course to object for the report
+ * @param stdClass        $context    The context of the course
+ *
+ * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+ */
+function local_rollover_extend_navigation_course($navigation, $course, $context) {
+    (new \local_rollover\navigation())->add_course_administration($navigation, $course->id);
 }

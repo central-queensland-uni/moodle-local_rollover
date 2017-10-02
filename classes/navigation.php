@@ -19,15 +19,31 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var string[] $strings
  */
+
+namespace local_rollover;
+
+use moodle_url;
+use navigation_node;
+use pix_icon;
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['originalcourse'] = 'Original course';
-$string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
-$string['performrollover'] = 'Perform rollover';
-$string['pluginname'] = 'Course rollover';
-$string['rollover'] = 'Rollover';
-$string['rolloversuccessful'] = 'Rollover successful';
-$string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+/**
+ * @package     local_rollover
+ * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
+ * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class navigation {
+    public function add_course_administration($navigation, $courseid) {
+        $navigation->add(
+            get_string('rollover', 'local_rollover'),
+            new moodle_url('/local/rollover/index.php', ['into' => $courseid]),
+            navigation_node::TYPE_SETTING,
+            null,
+            null,
+            new pix_icon('i/return', '')
+        );
+    }
+}

@@ -19,15 +19,20 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var string[] $strings
  */
+
+use local_rollover\form\form_original_course;
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['originalcourse'] = 'Original course';
-$string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
-$string['performrollover'] = 'Perform rollover';
-$string['pluginname'] = 'Course rollover';
-$string['rollover'] = 'Rollover';
-$string['rolloversuccessful'] = 'Rollover successful';
-$string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+class local_rollover_form_original_course_test extends advanced_testcase {
+    public function test_it_renders() {
+        $form = new form_original_course();
+
+        ob_start();
+        $form->display();
+        $html = ob_get_clean();
+
+        self::assertNotNull($html);
+    }
+}

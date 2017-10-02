@@ -19,15 +19,14 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var string[] $strings
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['originalcourse'] = 'Original course';
-$string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
-$string['performrollover'] = 'Perform rollover';
-$string['pluginname'] = 'Course rollover';
-$string['rollover'] = 'Rollover';
-$string['rolloversuccessful'] = 'Rollover successful';
-$string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+class local_rollover_fixtures_mock_navigation {
+    public $data = [];
+
+    public function add(...$data) {
+        $this->data[] = $data;
+    }
+}
