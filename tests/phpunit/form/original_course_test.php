@@ -22,6 +22,7 @@
  */
 
 use local_rollover\form\form_original_course;
+use Symfony\Component\DomCrawler\Crawler;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,5 +35,19 @@ class local_rollover_form_original_course_test extends advanced_testcase {
         $html = ob_get_clean();
 
         self::assertContains('<form', $html);
+    }
+
+    public function test_it_shows_the_given_courses() {
+        $form = new form_original_course(['course-a', 'course-b']);
+
+        ob_start();
+        $form->display();
+        $html = ob_get_clean();
+
+        $crawler = new Crawler($html);
+        $found = $crawler->filter('#local_rollover-your_units')->html();
+
+        self::assertContains('course-a', $found);
+        self::assertContains('course-b', $found);
     }
 }

@@ -37,6 +37,17 @@ require_once($CFG->libdir . '/formslib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class form_original_course extends moodleform {
+    /** @var string[] */
+    private $yourcourses;
+
+    /**
+     * @param string[] $yourcourses Array of "your courses" to display,
+     */
+    public function __construct($yourcourses = []) {
+        $this->yourcourses = $yourcourses;
+        parent::__construct();
+    }
+
     /**
      * Form definition.
      */
@@ -46,7 +57,11 @@ class form_original_course extends moodleform {
         $mform->addElement('hidden', 'into');
         $mform->setType('into', PARAM_INT);
 
-        $mform->addElement('text', 'sourceshortname', get_string('originalcourse', 'local_rollover'));
+        $mform->addElement('select',
+                           'sourceshortname',
+                           get_string('originalcourse', 'local_rollover'),
+                           $this->yourcourses,
+                           ['id' => 'local_rollover-your_units', 'size' => 10]);
         $mform->setType('sourceshortname', PARAM_TEXT);
         $mform->addHelpButton('sourceshortname', 'originalcourse', 'local_rollover');
 

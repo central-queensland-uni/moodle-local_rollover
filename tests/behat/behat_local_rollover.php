@@ -141,4 +141,11 @@ class behat_local_rollover extends behat_base {
             );
         }
     }
+
+    /**
+     * @Given /^in "([^"]*)" I select "([^"]*)" +\# local_rollover$/
+     */
+    public function in_field_i_select_option($field, $option) {
+        $this->execute('behat_forms::i_set_the_field_to', [$field, $option]);
+    }
 }
