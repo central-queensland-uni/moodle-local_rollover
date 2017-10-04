@@ -49,4 +49,37 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         self::assertContains('[header]', $html);
         self::assertContains('[footer]', $html);
     }
+
+    public function test_it_gets_my_current_courses() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('destination');
+        $modifiable = $this->generator()->create_course_by_shortname('can-modify');
+        $this->generator()->create_course_by_shortname('cannot-modify');
+
+        $this->generator()->enrol_editing_teacher('someone', 'destination');
+        $this->generator()->enrol_editing_teacher('someone', 'can-modify');
+        $this->generator()->enrol_nonediting_teacher('someone', 'cannot-modify');
+
+        self::setUser($user);
+
+        $_GET['into'] = $destination->id;
+        $controller = new rollover_controller();
+
+        $courses = $controller->get_user_courses_options_for_source();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $modifiable->id => [
+                'id'        => $modifiable->id,
+                'shortname' => 'can-modify',
+                'fullname'  => $modifiable->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
+    }
 }

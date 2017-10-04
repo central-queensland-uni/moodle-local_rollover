@@ -51,15 +51,11 @@ class rollover_controller {
     /** @var stdClass */
     private $destinationcourse;
 
-    /** @var stdClass */
-    private $user;
-
     public function __construct() {
-        global $OUTPUT, $PAGE, $USER;
+        global $OUTPUT, $PAGE;
 
         $this->page = $PAGE;
         $this->output = $OUTPUT;
-        $this->user = $USER;
 
         $this->destinationcourse = get_course(required_param('into', PARAM_INT));
     }
@@ -103,5 +99,28 @@ class rollover_controller {
         }
 
         echo $this->output->footer();
+    }
+
+    /**
+     * Creates a list of courses to be used as source for the rollover, ordered by shortname.
+     *
+     * @return stdClass[] includes course id, shortname and fullname
+     */
+    public function get_user_courses_options_for_source() {
+        global $DB;
+
+        $courses = get_user_capability_course('moodle/course:update', null, false);
+        foreach ($courses as &$course) {
+            $course = $course->id;
+        }
+
+        $courses = $DB->get_records_list('course',
+                                         'id',
+                                         $courses,
+                                         'shortname ASC',
+                                         'id,shortname,fullname');
+        unset($courses[$this->destinationcourse->id]);
+
+        return $courses;
     }
 }
