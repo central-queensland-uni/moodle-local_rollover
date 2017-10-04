@@ -19,16 +19,34 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var string[] $strings
  */
+
+use local_rollover\rollover_controller;
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['originalcourse'] = 'Original course';
-$string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
-$string['performrollover'] = 'Perform rollover';
-$string['pluginname'] = 'Course rollover';
-$string['proceed'] = 'Proceed to course';
-$string['rollover'] = 'Rollover';
-$string['rolloversuccessful'] = 'Rollover successful';
-$string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+require_once(__DIR__ . '/fixtures/mock_output.php');
+
+class local_rollover_rollover_controller_test extends advanced_testcase {
+    public function test_it_requires_capability_to_rollover() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_has_the_rollover_source_route() {
+        self::setAdminUser();
+        $this->resetAfterTest(true);
+        $course = self::getDataGenerator()->create_course();
+        $_GET['into'] = $course->id;
+
+        $page = new moodle_page();
+        $output = new local_rollover_fixtures_mock_output();
+        $controller = new rollover_controller($page, $output);
+
+        ob_start();
+        $controller->rollover_source_selection_page();
+        $html = ob_get_clean();
+
+        self::assertContains('[header]', $html);
+        self::assertContains('[footer]', $html);
+    }
+}

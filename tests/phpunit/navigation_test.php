@@ -19,16 +19,25 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var string[] $strings
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['originalcourse'] = 'Original course';
-$string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
-$string['performrollover'] = 'Perform rollover';
-$string['pluginname'] = 'Course rollover';
-$string['proceed'] = 'Proceed to course';
-$string['rollover'] = 'Rollover';
-$string['rolloversuccessful'] = 'Rollover successful';
-$string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+require_once(__DIR__ . '/fixtures/mock_navigation.php');
+
+class local_rollover_navigation_test extends advanced_testcase {
+    public function test_course_rollover_option() {
+        $navigation = new local_rollover_fixtures_mock_navigation();
+
+        (new \local_rollover\navigation())->add_course_administration($navigation, 1);
+
+        /** @var moodle_url $url */
+        list($name, $url) = $navigation->data[0];
+        self::assertSame($name, 'Rollover');
+        self::assertEquals($url->param('into'), 1);
+    }
+
+    public function test_it_only_shows_options_user_has_capability() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+}
