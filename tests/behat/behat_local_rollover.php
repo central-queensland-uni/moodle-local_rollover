@@ -53,6 +53,13 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
+     * @Given /^there is a course with shortname "([^"]*)" +\# local_rollover$/
+     */
+    public function there_is_a_course_with_shortname($shortname) {
+        $this->generator()->create_course_by_shortname($shortname);
+    }
+
+    /**
      * @Given /^I am at the course "([^"]*)" page +\# local_rollover$/
      */
     public function i_am_at_the_course_page($shortname) {

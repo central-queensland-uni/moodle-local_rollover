@@ -102,7 +102,7 @@ class rollover_controller {
     public function create_form_source_course_selection() {
         global $DB;
 
-        $courses = get_user_capability_course('moodle/course:update', null, false);
+        $courses = get_user_capability_course('moodle/course:update');
         if ($courses === false) {
             $courses = [];
         }
