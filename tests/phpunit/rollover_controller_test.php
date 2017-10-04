@@ -50,7 +50,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         self::assertContains('[footer]', $html);
     }
 
-    public function test_it_gets_my_current_courses() {
+    public function test_it_creates_a_form_with_the_user_courses() {
         $this->resetAfterTest();
 
         $user = $this->generator()->create_user_by_username('someone');
@@ -67,8 +67,9 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $_GET['into'] = $destination->id;
         $controller = new rollover_controller();
+        $form = $controller->create_form_source_course_selection();
 
-        $courses = $controller->get_user_courses_options_for_source();
+        $courses = $form->get_user_courses();
         foreach ($courses as &$course) {
             $course = (array)$course;
         }

@@ -24,7 +24,7 @@
 namespace local_rollover;
 
 use context_course;
-use local_rollover\form\form_original_course;
+use local_rollover\form\form_source_course_selection;
 use moodle_page;
 use moodle_url;
 use stdClass;
@@ -66,12 +66,7 @@ class rollover_controller {
         $this->page->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
         $this->page->set_heading($this->destinationcourse->fullname);
 
-        $form = new form_original_course([
-                                             'ABC123-2017-1' => 'ABC123-2017-1',
-                                             'English-2017-1',
-                                             'English-2016-2',
-                                             'Portuguese-2017-1',
-                                         ]);
+        $form = $this->create_form_source_course_selection();
 
         echo $this->output->header();
 
@@ -102,14 +97,16 @@ class rollover_controller {
     }
 
     /**
-     * Creates a list of courses to be used as source for the rollover, ordered by shortname.
-     *
-     * @return stdClass[] includes course id, shortname and fullname
+     * @return form_source_course_selection
      */
-    public function get_user_courses_options_for_source() {
+    public function create_form_source_course_selection() {
         global $DB;
 
         $courses = get_user_capability_course('moodle/course:update', null, false);
+        if ($courses === false) {
+            $courses = [];
+        }
+
         foreach ($courses as &$course) {
             $course = $course->id;
         }
@@ -121,6 +118,6 @@ class rollover_controller {
                                          'id,shortname,fullname');
         unset($courses[$this->destinationcourse->id]);
 
-        return $courses;
+        return new form_source_course_selection($courses);
     }
 }

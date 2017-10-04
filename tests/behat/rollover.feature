@@ -8,9 +8,10 @@ Feature: Configure and perform course rollovers.
 
 
   Scenario: Perform a course rollover
-    Given I am an administrator                                   # local_rollover
-    And there is a course with shortname "ABC123-2017-1"          # local_rollover
-    And there is a course with shortname "ABC123-2017-2"          # local_rollover
+    Given I am a teacher                                          # local_rollover
+    And I can modify the following courses:                       # local_rollover
+      | ABC123-2017-1   |
+      | ABC123-2017-2   |
     And the course "ABC123-2017-1" has an assignment "Final Exam" # local_rollover
     And I am at the course "ABC123-2017-2" page                   # local_rollover
 

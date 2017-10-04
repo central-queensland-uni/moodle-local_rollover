@@ -21,7 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\form\form_original_course;
+use local_rollover\form\form_source_course_selection;
 use local_rollover\tests\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_form_original_course_test extends rollover_testcase {
     public function test_it_renders() {
-        $form = new form_original_course();
+        $form = new form_source_course_selection();
 
         ob_start();
         $form->display();
@@ -39,7 +39,20 @@ class local_rollover_form_original_course_test extends rollover_testcase {
     }
 
     public function test_it_shows_the_given_courses() {
-        $form = new form_original_course(['course-a', 'course-b']);
+        $courses = [
+            1 => (object)[
+                'id'        => '1',
+                'shortname' => 'course-a',
+                'fullname'  => 'Course A',
+            ],
+            2 => (object)[
+                'id'        => '2',
+                'shortname' => 'course-b',
+                'fullname'  => 'Course B',
+            ],
+        ];
+
+        $form = new form_source_course_selection($courses);
 
         ob_start();
         $form->display();
