@@ -84,6 +84,16 @@ class rollover_controller {
             $form->set_data(['into' => $this->destinationcourse->id]);
             echo $this->output->heading(get_string('pluginname', 'local_rollover'));
             $form->display();
+
+            echo <<<HTML
+<div id="local_rollover-your_units">
+    <label>English-2017-1</label>
+    <label>English-2016-2</label>
+    <label>Portuguese-2017-1</label>
+</div>
+
+HTML;
+
         }
 
         echo $this->output->footer();
