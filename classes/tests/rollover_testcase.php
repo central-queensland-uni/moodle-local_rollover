@@ -21,34 +21,23 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\form\form_original_course;
-use local_rollover\tests\rollover_testcase;
-use Symfony\Component\DomCrawler\Crawler;
+namespace local_rollover\tests;
+
+use advanced_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_form_original_course_test extends rollover_testcase {
-    public function test_it_renders() {
-        $form = new form_original_course();
+class rollover_testcase extends advanced_testcase {
+    /** @var generator */
+    private $generator = null;
 
-        ob_start();
-        $form->display();
-        $html = ob_get_clean();
-
-        self::assertContains('<form', $html);
-    }
-
-    public function test_it_shows_the_given_courses() {
-        $form = new form_original_course(['course-a', 'course-b']);
-
-        ob_start();
-        $form->display();
-        $html = ob_get_clean();
-
-        $crawler = new Crawler($html);
-        $found = $crawler->filter('#local_rollover-your_units')->html();
-
-        self::assertContains('course-a', $found);
-        self::assertContains('course-b', $found);
+    /**
+     * @return generator
+     */
+    public function generator() {
+        if (is_null($this->generator)) {
+            $this->generator = new generator();
+        }
+        return $this->generator;
     }
 }

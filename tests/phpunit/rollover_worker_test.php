@@ -22,21 +22,16 @@
  */
 
 use local_rollover\rollover_worker;
+use local_rollover\tests\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_controller_test extends advanced_testcase {
+class local_rollover_controller_test extends rollover_testcase {
     public function test_backup() {
         self::resetAfterTest(true);
 
-        $generator = self::getDataGenerator();
-        $sourcecourse = $generator->create_course(['shortname' => 'backup-source-course']);
-
-        $assigngenerator = $generator->get_plugin_generator('mod_assign');
-        $assigngenerator->create_instance([
-                                              'course' => $sourcecourse->id,
-                                              'name'   => 'Backup Assignment',
-                                          ]);
+        $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
+        $this->generator()->create_assignment('backup-source-course', 'Backup Assignment');
 
         $worker = new rollover_worker($sourcecourse->id, 0);
         $worker->backup();
@@ -50,8 +45,7 @@ class local_rollover_controller_test extends advanced_testcase {
     public function test_restore() {
         self::resetAfterTest(true);
 
-        $generator = self::getDataGenerator();
-        $destinationcourse = $generator->create_course(['shortname' => 'destination-course']);
+        $destinationcourse = $this->generator()->create_course_by_shortname('destination-course');
 
         $worker = new rollover_worker(0, $destinationcourse->id);
         $worker->set_backup_id('6810b32987b568760f55d626dcc5448a');
@@ -68,15 +62,9 @@ class local_rollover_controller_test extends advanced_testcase {
     public function test_rollover() {
         self::resetAfterTest(true);
 
-        $generator = self::getDataGenerator();
-        $sourcecourse = $generator->create_course(['shortname' => 'rollover-from']);
-        $destinationcourse = $generator->create_course(['shortname' => 'rollover-into']);
-
-        $assigngenerator = $generator->get_plugin_generator('mod_assign');
-        $assigngenerator->create_instance([
-                                              'course' => $sourcecourse->id,
-                                              'name'   => 'Full Rollover Assignment',
-                                          ]);
+        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
+        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
+        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
         $worker = new rollover_worker($sourcecourse->id, $destinationcourse->id);
         $worker->rollover();

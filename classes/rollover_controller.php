@@ -44,12 +44,23 @@ class rollover_controller {
     /** @var stdClass */
     private $output;
 
+    public function set_output($output) {
+        $this->output = $output;
+    }
+
     /** @var stdClass */
     private $destinationcourse;
 
-    public function __construct(moodle_page $page, $output) {
-        $this->page = $page;
-        $this->output = $output;
+    /** @var stdClass */
+    private $user;
+
+    public function __construct() {
+        global $OUTPUT, $PAGE, $USER;
+
+        $this->page = $PAGE;
+        $this->output = $OUTPUT;
+        $this->user = $USER;
+
         $this->destinationcourse = get_course(required_param('into', PARAM_INT));
     }
 

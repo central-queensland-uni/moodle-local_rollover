@@ -21,15 +21,17 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\navigation;
+use local_rollover\tests\mock_navigation;
+use local_rollover\tests\rollover_testcase;
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/fixtures/mock_navigation.php');
-
-class local_rollover_navigation_test extends advanced_testcase {
+class local_rollover_navigation_test extends rollover_testcase {
     public function test_course_rollover_option() {
-        $navigation = new local_rollover_fixtures_mock_navigation();
+        $navigation = new mock_navigation();
 
-        (new \local_rollover\navigation())->add_course_administration($navigation, 1);
+        (new navigation())->add_course_administration($navigation, 1);
 
         /** @var moodle_url $url */
         list($name, $url) = $navigation->data[0];

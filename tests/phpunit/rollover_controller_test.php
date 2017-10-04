@@ -22,12 +22,12 @@
  */
 
 use local_rollover\rollover_controller;
+use local_rollover\tests\mock_output;
+use local_rollover\tests\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/fixtures/mock_output.php');
-
-class local_rollover_rollover_controller_test extends advanced_testcase {
+class local_rollover_rollover_controller_test extends rollover_testcase {
     public function test_it_requires_capability_to_rollover() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
@@ -35,12 +35,12 @@ class local_rollover_rollover_controller_test extends advanced_testcase {
     public function test_it_has_the_rollover_source_route() {
         self::setAdminUser();
         $this->resetAfterTest(true);
-        $course = self::getDataGenerator()->create_course();
+        $course = $this->generator()->create_course();
+
         $_GET['into'] = $course->id;
 
-        $page = new moodle_page();
-        $output = new local_rollover_fixtures_mock_output();
-        $controller = new rollover_controller($page, $output);
+        $controller = new rollover_controller();
+        $controller->set_output(new mock_output());
 
         ob_start();
         $controller->rollover_source_selection_page();

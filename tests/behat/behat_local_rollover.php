@@ -24,6 +24,7 @@
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
 use Behat\Gherkin\Node\TableNode;
+use local_rollover\tests\generator;
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
@@ -35,47 +36,46 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * @SuppressWarnings(public) Allow as many methods as needed.
  */
 class behat_local_rollover extends behat_base {
-    /** @var stdClass[] */
-    protected $courses = [];
+    /** @var generator */
+    private $generator = null;
 
-    /** @var stdClass */
-    protected $user = null;
+    /** @var string */
+    protected $myusername = null;
+
+    /**
+     * @return generator
+     */
+    public function generator() {
+        if (is_null($this->generator)) {
+            $this->generator = new generator();
+        }
+        return $this->generator;
+    }
 
     /**
      * @Given /^there is a course with shortname "([^"]*)" +\# local_rollover$/
      */
     public function there_is_a_course_with_shortname($shortname) {
-        $generator = testing_util::get_data_generator();
-        $this->courses[$shortname] = $generator->create_course(
-            [
-                'shortname' => $shortname,
-                'fullname'      => "Course {$shortname}",
-            ]
-        );
+        $this->generator()->create_course_by_shortname($shortname);
     }
 
     /**
      * @Given /^I am at the course "([^"]*)" page +\# local_rollover$/
      */
     public function i_am_at_the_course_page($shortname) {
-        $this->getSession()->visit($this->locate_path('/course/view.php?name=' . $shortname));
+        $this->visitPath('/course/view.php?name=' . $shortname);
     }
 
     /**
      * @Given /^I am an? (administrator|teacher) +\# local_rollover$/
      */
-    public function i_am_an($user) {
+    public function i_am_a($user) {
         if ($user == 'administrator') {
             $user = 'admin';
         } else {
-            $generator = testing_util::get_data_generator();
-            $this->user = $generator->create_user([
-                                                      'username'  => $user,
-                                                      'password'  => $user,
-                                                      'firstname' => $user,
-                                                      'lastname'  => 'Behat',
-                                                  ]);
+            $this->generator()->create_user_by_username($user);
         }
+        $this->myusername = $user;
 
         $this->execute('behat_auth::i_log_in_as', [$user]);
     }
@@ -91,11 +91,7 @@ class behat_local_rollover extends behat_base {
      * @Given /^the course "([^"]*)" has an assignment "([^"]*)" +\# local_rollover$/
      */
     public function the_course_has_an_assignment($shortname, $assignment) {
-        $generator = testing_util::get_data_generator()->get_plugin_generator('mod_assign');
-        $generator->create_instance([
-                                        'course' => $this->courses[$shortname]->id,
-                                        'name'   => $assignment,
-                                    ]);
+        $this->generator()->create_assignment($shortname, $assignment);
     }
 
     /**
@@ -104,14 +100,11 @@ class behat_local_rollover extends behat_base {
     public function i_modify_the_following_courses($canornot, TableNode $courses) {
         $can = ($canornot == 'can');
         $courses = $courses->getColumn(0);
-        $generator = testing_util::get_data_generator();
 
         foreach ($courses as $course) {
-            $this->there_is_a_course_with_shortname($course);
+            $this->generator()->create_course_by_shortname($course);
             if ($can) {
-                $generator->enrol_user($this->user->id,
-                                       $this->courses[$course]->id,
-                                       'editingteacher');
+                $this->generator()->enrol_editing_teacher($this->myusername, $course);
             }
         }
     }
@@ -120,10 +113,7 @@ class behat_local_rollover extends behat_base {
      * @When /^I go to the rollover page for the course "([^"]*)" +\# local_rollover$/
      */
     public function i_go_to_the_rollover_page_for_the_course($shortname) {
-        $courseid = $this->courses[$shortname]->id;
-        $this->getSession()->visit(
-            $this->locate_path('/local/rollover/index.php?into=' . $courseid)
-        );
+        $this->visitPath('/local/rollover/index.php?into=' . $this->generator()->get_course_id($shortname));
     }
 
     /**
