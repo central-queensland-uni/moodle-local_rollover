@@ -22,12 +22,12 @@
  */
 
 use local_rollover\rollover_controller;
+use local_rollover\tests\mock_output;
+use local_rollover\tests\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/fixtures/mock_output.php');
-
-class local_rollover_rollover_controller_test extends advanced_testcase {
+class local_rollover_rollover_controller_test extends rollover_testcase {
     public function test_it_requires_capability_to_rollover() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
@@ -35,12 +35,12 @@ class local_rollover_rollover_controller_test extends advanced_testcase {
     public function test_it_has_the_rollover_source_route() {
         self::setAdminUser();
         $this->resetAfterTest(true);
-        $course = self::getDataGenerator()->create_course();
+        $course = $this->generator()->create_course();
+
         $_GET['into'] = $course->id;
 
-        $page = new moodle_page();
-        $output = new local_rollover_fixtures_mock_output();
-        $controller = new rollover_controller($page, $output);
+        $controller = new rollover_controller();
+        $controller->set_output(new mock_output());
 
         ob_start();
         $controller->rollover_source_selection_page();
@@ -48,5 +48,39 @@ class local_rollover_rollover_controller_test extends advanced_testcase {
 
         self::assertContains('[header]', $html);
         self::assertContains('[footer]', $html);
+    }
+
+    public function test_it_creates_a_form_with_the_user_courses() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('destination');
+        $modifiable = $this->generator()->create_course_by_shortname('can-modify');
+        $this->generator()->create_course_by_shortname('cannot-modify');
+
+        $this->generator()->enrol_editing_teacher('someone', 'destination');
+        $this->generator()->enrol_editing_teacher('someone', 'can-modify');
+        $this->generator()->enrol_nonediting_teacher('someone', 'cannot-modify');
+
+        self::setUser($user);
+
+        $_GET['into'] = $destination->id;
+        $controller = new rollover_controller();
+        $form = $controller->create_form_source_course_selection();
+
+        $courses = $form->get_user_courses();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $modifiable->id => [
+                'id'        => $modifiable->id,
+                'shortname' => 'can-modify',
+                'fullname'  => $modifiable->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
     }
 }

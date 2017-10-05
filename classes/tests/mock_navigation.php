@@ -21,18 +21,14 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_rollover\tests;
+
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_fixtures_mock_output {
-    public function header() {
-        echo '[header]';
-    }
+class mock_navigation {
+    public $data = [];
 
-    public function heading() {
-        echo '[heading]';
-    }
-
-    public function footer() {
-        echo '[footer]';
+    public function add(...$data) {
+        $this->data[] = $data;
     }
 }

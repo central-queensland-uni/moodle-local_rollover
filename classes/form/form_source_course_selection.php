@@ -36,7 +36,32 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_original_course extends moodleform {
+class form_source_course_selection extends moodleform {
+    /** @var string[] */
+    private $usercourses;
+
+    public function get_user_courses() {
+        return $this->usercourses;
+    }
+
+    /**
+     * @param string[] $usercourses Array of "your courses" to display,
+     */
+    public function __construct($usercourses = []) {
+        $this->usercourses = $usercourses;
+        parent::__construct();
+    }
+
+    private function prepare_options() {
+        $options = [];
+
+        foreach ($this->usercourses as $course) {
+            $options[$course->shortname] = "{$course->shortname}: {$course->fullname}";
+        }
+
+        return $options;
+    }
+
     /**
      * Form definition.
      */
@@ -46,7 +71,11 @@ class form_original_course extends moodleform {
         $mform->addElement('hidden', 'into');
         $mform->setType('into', PARAM_INT);
 
-        $mform->addElement('text', 'sourceshortname', get_string('originalcourse', 'local_rollover'));
+        $mform->addElement('select',
+                           'sourceshortname',
+                           get_string('originalcourse', 'local_rollover'),
+                           $this->prepare_options(),
+                           ['id' => 'local_rollover-your_units', 'size' => 10]);
         $mform->setType('sourceshortname', PARAM_TEXT);
         $mform->addHelpButton('sourceshortname', 'originalcourse', 'local_rollover');
 

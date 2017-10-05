@@ -21,25 +21,23 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\navigation;
-use local_rollover\tests\mock_navigation;
-use local_rollover\tests\rollover_testcase;
+namespace local_rollover\tests;
+
+use advanced_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_navigation_test extends rollover_testcase {
-    public function test_course_rollover_option() {
-        $navigation = new mock_navigation();
+class rollover_testcase extends advanced_testcase {
+    /** @var generator */
+    private $generator = null;
 
-        (new navigation())->add_course_administration($navigation, 1);
-
-        /** @var moodle_url $url */
-        list($name, $url) = $navigation->data[0];
-        self::assertSame($name, 'Rollover');
-        self::assertEquals($url->param('into'), 1);
-    }
-
-    public function test_it_only_shows_options_user_has_capability() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
+    /**
+     * @return generator
+     */
+    public function generator() {
+        if (is_null($this->generator)) {
+            $this->generator = new generator();
+        }
+        return $this->generator;
     }
 }

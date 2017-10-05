@@ -24,7 +24,7 @@
 namespace local_rollover;
 
 use context_course;
-use local_rollover\form\form_original_course;
+use local_rollover\form\form_source_course_selection;
 use moodle_page;
 use moodle_url;
 use stdClass;
@@ -44,12 +44,19 @@ class rollover_controller {
     /** @var stdClass */
     private $output;
 
+    public function set_output($output) {
+        $this->output = $output;
+    }
+
     /** @var stdClass */
     private $destinationcourse;
 
-    public function __construct(moodle_page $page, $output) {
-        $this->page = $page;
-        $this->output = $output;
+    public function __construct() {
+        global $OUTPUT, $PAGE;
+
+        $this->page = $PAGE;
+        $this->output = $OUTPUT;
+
         $this->destinationcourse = get_course(required_param('into', PARAM_INT));
     }
 
@@ -59,7 +66,7 @@ class rollover_controller {
         $this->page->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
         $this->page->set_heading($this->destinationcourse->fullname);
 
-        $form = new form_original_course();
+        $form = $this->create_form_source_course_selection();
 
         echo $this->output->header();
 
@@ -87,5 +94,30 @@ class rollover_controller {
         }
 
         echo $this->output->footer();
+    }
+
+    /**
+     * @return form_source_course_selection
+     */
+    public function create_form_source_course_selection() {
+        global $DB;
+
+        $courses = get_user_capability_course('moodle/course:update');
+        if ($courses === false) {
+            $courses = [];
+        }
+
+        foreach ($courses as &$course) {
+            $course = $course->id;
+        }
+
+        $courses = $DB->get_records_list('course',
+                                         'id',
+                                         $courses,
+                                         'shortname ASC',
+                                         'id,shortname,fullname');
+        unset($courses[$this->destinationcourse->id]);
+
+        return new form_source_course_selection($courses);
     }
 }

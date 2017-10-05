@@ -49,9 +49,6 @@ class rollover_worker {
     /** @var int */
     private $destinationcourseid;
 
-    /** @var string */
-    private $backuptempdir;
-
     /** @var string|null */
     private $backupid = null;
 
@@ -78,7 +75,6 @@ class rollover_worker {
                                         self::USERID);
 
         $this->backupid = $backup->get_backupid();
-        $this->backuppath = $this->backuptempdir . $this->backupid;
 
         $backup->execute_plan();
         $backup->destroy();

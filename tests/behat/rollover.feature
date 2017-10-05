@@ -15,7 +15,7 @@ Feature: Configure and perform course rollovers.
     And I am at the course "ABC123-2017-2" page                   # local_rollover
 
     When I press "Rollover" in the Course Administration block    # local_rollover
-    And I set the field "Original course" to "ABC123-2017-1"
+    And in "Original course" I select "ABC123-2017-1"             # local_rollover
     And I press "Perform rollover"
     Then I should see "Rollover successful"
     And I should see "ABC123-2017-1 rolled over into ABC123-2017-2"

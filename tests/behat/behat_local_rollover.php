@@ -23,8 +23,10 @@
 
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
+use Behat\Gherkin\Node\TableNode;
+use local_rollover\tests\generator;
+
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
-require_once(__DIR__ . '/../../../../lib/phpunit/classes/util.php');
 
 /**
  * @package     local_rollover
@@ -34,29 +36,48 @@ require_once(__DIR__ . '/../../../../lib/phpunit/classes/util.php');
  * @SuppressWarnings(public) Allow as many methods as needed.
  */
 class behat_local_rollover extends behat_base {
-    /** @var stdClass[] */
-    protected $courses = [];
+    /** @var generator */
+    private $generator = null;
+
+    /** @var string */
+    protected $myusername = null;
+
+    /**
+     * @return generator
+     */
+    public function generator() {
+        if (is_null($this->generator)) {
+            $this->generator = new generator();
+        }
+        return $this->generator;
+    }
 
     /**
      * @Given /^there is a course with shortname "([^"]*)" +\# local_rollover$/
      */
     public function there_is_a_course_with_shortname($shortname) {
-        $generator = phpunit_util::get_data_generator();
-        $this->courses[$shortname] = $generator->create_course(['shortname' => $shortname]);
+        $this->generator()->create_course_by_shortname($shortname);
     }
 
     /**
      * @Given /^I am at the course "([^"]*)" page +\# local_rollover$/
      */
     public function i_am_at_the_course_page($shortname) {
-        $this->getSession()->visit($this->locate_path('/course/view.php?name=' . $shortname));
+        $this->visitPath('/course/view.php?name=' . $shortname);
     }
 
     /**
-     * @Given /^I am an administrator +\# local_rollover$/
+     * @Given /^I am an? (administrator|teacher) +\# local_rollover$/
      */
-    public function i_am_an_administrator() {
-        $this->execute('behat_auth::i_log_in_as', ['admin']);
+    public function i_am_a($user) {
+        if ($user == 'administrator') {
+            $user = 'admin';
+        } else {
+            $this->generator()->create_user_by_username($user);
+        }
+        $this->myusername = $user;
+
+        $this->execute('behat_auth::i_log_in_as', [$user]);
     }
 
     /**
@@ -70,10 +91,51 @@ class behat_local_rollover extends behat_base {
      * @Given /^the course "([^"]*)" has an assignment "([^"]*)" +\# local_rollover$/
      */
     public function the_course_has_an_assignment($shortname, $assignment) {
-        $generator = phpunit_util::get_data_generator()->get_plugin_generator('mod_assign');
-        $generator->create_instance([
-                                        'course' => $this->courses[$shortname]->id,
-                                        'name'   => $assignment,
-                                    ]);
+        $this->generator()->create_assignment($shortname, $assignment);
+    }
+
+    /**
+     * @Given /^I (can|cannot) modify the following courses: +\# local_rollover$/
+     */
+    public function i_modify_the_following_courses($canornot, TableNode $courses) {
+        $can = ($canornot == 'can');
+        $courses = $courses->getColumn(0);
+
+        foreach ($courses as $course) {
+            $this->generator()->create_course_by_shortname($course);
+            if ($can) {
+                $this->generator()->enrol_editing_teacher($this->myusername, $course);
+            }
+        }
+    }
+
+    /**
+     * @When /^I go to the rollover page for the course "([^"]*)" +\# local_rollover$/
+     */
+    public function i_go_to_the_rollover_page_for_the_course($shortname) {
+        $this->visitPath('/local/rollover/index.php?into=' . $this->generator()->get_course_id($shortname));
+    }
+
+    /**
+     * @Then /^I (should(?: not)?) see the following source options: +\# local_rollover$/
+     */
+    public function i_see_the_following_source_options($shouldornot, TableNode $courses) {
+        $courses = $courses->getColumn(0);
+        $shouldnot = ($shouldornot == 'should') ? '' : 'not_';
+        $context = "behat_general::assert_element_{$shouldnot}contains_text";
+
+        foreach ($courses as $course) {
+            $this->execute(
+                $context,
+                [$course, '#local_rollover-your_units', 'css_element']
+            );
+        }
+    }
+
+    /**
+     * @Given /^in "([^"]*)" I select "([^"]*)" +\# local_rollover$/
+     */
+    public function in_field_i_select_option($field, $option) {
+        $this->execute('behat_forms::i_set_the_field_to', [$field, $option]);
     }
 }
