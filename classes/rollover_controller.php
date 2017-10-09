@@ -60,6 +60,10 @@ class rollover_controller {
         $this->destinationcourse = get_course(required_param('into', PARAM_INT));
     }
 
+    public function index() {
+        return $this->rollover_source_selection_page();
+    }
+
     public function rollover_source_selection_page() {
         require_login($this->destinationcourse);
         $this->page->set_context(context_course::instance($this->destinationcourse->id));

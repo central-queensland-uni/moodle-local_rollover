@@ -29,4 +29,4 @@ require(__DIR__ . '/../../config.php');
 global $PAGE, $OUTPUT;
 
 $controller = new rollover_controller();
-$controller->rollover_source_selection_page();
+$controller->index();
