@@ -22,12 +22,37 @@
  */
 
 use local_rollover\rollover_controller;
+use local_rollover\tests\mock_controller;
 use local_rollover\tests\mock_output;
 use local_rollover\tests\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_rollover_controller_test extends rollover_testcase {
+    public function provider_for_test_the_index_knows_which_route_to_use() {
+        return [
+            [['into' => 1], 'source_selection_page'],
+            [['into' => 1, 'sourceshortname' => 'source'], 'source_selection_page_next'],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_for_test_the_index_knows_which_route_to_use
+     */
+    public function test_the_index_knows_which_route_to_use($get, $expected) {
+        global $COURSE;
+        self::setAdminUser();
+        $this->resetAfterTest(true);
+
+        $_GET = $get;
+        $COURSE = $this->generator()->create_course();
+
+        $controller = new mock_controller();
+        $controller->index();
+
+        self::assertSame([$expected], $controller->mockroute);
+    }
+
     public function test_it_requires_capability_to_rollover() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
@@ -43,7 +68,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         $controller->set_output(new mock_output());
 
         ob_start();
-        $controller->rollover_source_selection_page();
+        $controller->source_selection_page();
         $html = ob_get_clean();
 
         self::assertContains('[header]', $html);
