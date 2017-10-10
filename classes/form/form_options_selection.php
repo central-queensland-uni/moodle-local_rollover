@@ -23,6 +23,7 @@
 
 namespace local_rollover\form;
 
+use local_rollover\admin\rollover_settings;
 use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
@@ -49,23 +50,7 @@ class form_options_selection extends moodleform {
         $mform->addElement('hidden', 'into');
         $mform->setType('into', PARAM_INT);
 
-        $options = [
-            'users',
-            'anonymize',
-            'role_assignments',
-            'activities',
-            'blocks',
-            'filters',
-            'comments',
-            'badges',
-            'userscompletion',
-            'logs',
-            'histories',
-            'questionbank',
-            'groups',
-        ];
-        foreach ($options as $option) {
-            $langname = str_replace('_', '', $option);
+        foreach (rollover_settings::get_rollover_options() as $option => $langname) {
             $name = "option[{$option}]";
             // FIXME
             $attributes = null;

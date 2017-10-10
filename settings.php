@@ -19,48 +19,10 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var admin_root $ADMIN
  */
+
+use local_rollover\admin\rollover_settings;
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->libdir . '/adminlib.php');
-
-$category = new admin_category('local_rollover',
-                               new lang_string('settings', 'local_rollover')
-);
-$ADMIN->add('courses', $category);
-
-
-$options = new admin_settingpage('local_rollover_options',
-                                 new lang_string('settings-options', 'local_rollover')
-);
-
-$items = [
-    'users',
-    'anonymize',
-    'role_assignments',
-    'activities',
-    'blocks',
-    'filters',
-    'comments',
-    'badges',
-    'userscompletion',
-    'logs',
-    'histories',
-    'questionbank',
-    'groups',
-];
-foreach ($items as $item) {
-    $langname = str_replace('_', '', $item);
-    $options->add(
-        new admin_setting_configcheckbox_with_lock('rollover/option_' . $item,
-                                                   new lang_string("general{$langname}", 'backup'),
-                                                   new lang_string("option_{$langname}", 'local_rollover'),
-                                                   ['value' => 0, 'locked' => 0])
-    );
-}
-
-
-$ADMIN->add('local_rollover', $options);
+(new rollover_settings())->create($ADMIN);
