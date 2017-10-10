@@ -67,9 +67,20 @@ class form_options_selection extends moodleform {
         foreach ($options as $option) {
             $langname = str_replace('_', '', $option);
             $name = "option[{$option}]";
+            // FIXME
+            $attributes = null;
+            if ($option == 'activities') {
+                $attributes = 'disabled';
+            }
+            if ($option == 'users') {
+                continue;
+            }
+            // FIXME end
             $mform->addElement('checkbox',
                                $name,
-                               get_string("general{$langname}", 'backup'));
+                               get_string("general{$langname}", 'backup'),
+                               '',
+                               $attributes);
         }
 
         $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));

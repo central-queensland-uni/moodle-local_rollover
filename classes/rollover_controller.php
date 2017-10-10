@@ -106,7 +106,12 @@ class rollover_controller {
     public function options_selection_page($sourcecourseid) {
         $form = new form_options_selection();
 
-        $form->set_data(['from' => $sourcecourseid, 'into' => $this->destinationcourse->id]);
+        $form->set_data([
+                            'from'          => $sourcecourseid,
+                            'into'          => $this->destinationcourse->id,
+                            'option[activities]' => 1, // FIXME hardcoded
+                            'option[questionbank]' => 1, // FIXME hardcoded
+                        ]);
 
         echo $this->output->header();
         echo $this->output->heading(get_string('pluginname', 'local_rollover'));

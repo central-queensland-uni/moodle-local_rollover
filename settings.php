@@ -38,27 +38,27 @@ $options = new admin_settingpage('local_rollover_options',
 );
 
 $items = [
-    ['name' => 'users', 'default' => 1, 'locked' => 0],
-    ['name' => 'anonymize', 'default' => 0, 'locked' => 0],
-    ['name' => 'role_assignments', 'default' => 1, 'locked' => 0],
-    ['name' => 'activities', 'default' => 1, 'locked' => 0],
-    ['name' => 'blocks', 'default' => 1, 'locked' => 0],
-    ['name' => 'filters', 'default' => 1, 'locked' => 0],
-    ['name' => 'comments', 'default' => 1, 'locked' => 0],
-    ['name' => 'badges', 'default' => 1, 'locked' => 0],
-    ['name' => 'userscompletion', 'default' => 1, 'locked' => 0],
-    ['name' => 'logs', 'default' => 0, 'locked' => 0],
-    ['name' => 'histories', 'default' => 0, 'locked' => 0],
-    ['name' => 'questionbank', 'default' => 1, 'locked' => 0],
-    ['name' => 'groups', 'default' => 1, 'locked' => 0],
+    'users',
+    'anonymize',
+    'role_assignments',
+    'activities',
+    'blocks',
+    'filters',
+    'comments',
+    'badges',
+    'userscompletion',
+    'logs',
+    'histories',
+    'questionbank',
+    'groups',
 ];
 foreach ($items as $item) {
-    $langname = str_replace('_', '', $item['name']);
+    $langname = str_replace('_', '', $item);
     $options->add(
-        new admin_setting_configcheckbox_with_lock('rollover/option_' . $item['name'],
+        new admin_setting_configcheckbox_with_lock('rollover/option_' . $item,
                                                    new lang_string("general{$langname}", 'backup'),
                                                    new lang_string("option_{$langname}", 'local_rollover'),
-                                                   ['value' => $item['default'], 'locked' => $item['locked']])
+                                                   ['value' => 0, 'locked' => 0])
     );
 }
 
