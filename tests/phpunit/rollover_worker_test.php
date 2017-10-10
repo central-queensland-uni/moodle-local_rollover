@@ -22,7 +22,7 @@
  */
 
 use local_rollover\rollover_worker;
-use local_rollover\tests\rollover_testcase;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 

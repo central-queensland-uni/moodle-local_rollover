@@ -21,8 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\tests\mock_admintree;
-use local_rollover\tests\rollover_testcase;
+use local_rollover\test\mock_admintree;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 

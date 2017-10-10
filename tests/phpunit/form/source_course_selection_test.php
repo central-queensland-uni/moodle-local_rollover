@@ -22,7 +22,7 @@
  */
 
 use local_rollover\form\form_source_course_selection;
-use local_rollover\tests\rollover_testcase;
+use local_rollover\test\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;
 
 defined('MOODLE_INTERNAL') || die();

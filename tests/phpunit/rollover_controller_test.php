@@ -22,8 +22,8 @@
  */
 
 use local_rollover\rollover_controller;
-use local_rollover\tests\mock_controller;
-use local_rollover\tests\rollover_testcase;
+use local_rollover\test\mock_controller;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 

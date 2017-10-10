@@ -21,7 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\tests;
+namespace local_rollover\test;
 
 use local_rollover\rollover_controller;
 
