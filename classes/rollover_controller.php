@@ -24,6 +24,7 @@
 namespace local_rollover;
 
 use context_course;
+use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
 use moodle_page;
 use moodle_url;
@@ -66,7 +67,9 @@ class rollover_controller {
         $this->page->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
         $this->page->set_heading($this->destinationcourse->fullname);
 
-        if (!is_null(optional_param('sourceshortname', null, PARAM_TEXT))) {
+        if (!is_null(optional_param('from', null, PARAM_INT))) {
+            $this->options_selection_page_next();
+        } else if (!is_null(optional_param('sourceshortname', null, PARAM_TEXT))) {
             $this->source_selection_page_next();
         } else {
             $this->source_selection_page();
@@ -76,16 +79,17 @@ class rollover_controller {
     public function source_selection_page() {
         $form = $this->create_form_source_course_selection();
 
-        echo $this->output->header();
-
         $form->set_data(['into' => $this->destinationcourse->id]);
+
+        echo $this->output->header();
         echo $this->output->heading(get_string('pluginname', 'local_rollover'));
         $form->display();
-
         echo $this->output->footer();
     }
 
     public function source_selection_page_next() {
+        global $DB;
+
         $form = $this->create_form_source_course_selection();
 
         if (!$form->is_submitted()) {
@@ -94,13 +98,53 @@ class rollover_controller {
         }
 
         $data = $form->get_data();
-
-        global $DB;
         $sourceid = $DB->get_field('course', 'id', ['shortname' => $data->sourceshortname], MUST_EXIST);
-        $worker = new rollover_worker($sourceid, $this->destinationcourse->id);
+
+        $this->options_selection_page($sourceid);
+    }
+
+    public function options_selection_page($sourcecourseid) {
+        $form = new form_options_selection();
+
+        $form->set_data(['from' => $sourcecourseid, 'into' => $this->destinationcourse->id]);
+
+        echo $this->output->header();
+        echo $this->output->heading(get_string('pluginname', 'local_rollover'));
+        $form->display();
+        echo $this->output->footer();
+    }
+
+    public function options_selection_page_next() {
+        $form = new form_options_selection();
+
+        if (!$form->is_submitted()) {
+            $this->options_selection_page(required_param('from', PARAM_INT));
+            return;
+        }
+
+        $data = $form->get_data();
+
+        $worker = new rollover_worker($data->from, $this->destinationcourse->id);
         $worker->rollover();
 
-        $this->rollover_complete($data->sourceshortname);
+        $destination = get_course($data->from);
+        $this->rollover_complete($destination->shortname);
+    }
+
+    public function rollover_complete($sourceshortname) {
+        echo $this->output->header();
+
+        echo $this->output->heading(get_string('rolloversuccessful', 'local_rollover'));
+        echo get_string('rolloversuccessfulmessage', 'local_rollover', [
+            'from' => htmlentities($sourceshortname),
+            'into' => htmlentities($this->destinationcourse->shortname),
+        ]);
+        echo '<br /><br />';
+
+        $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
+        echo $this->output->single_button($url, get_string('proceed', 'local_rollover'), 'get');
+
+        echo $this->output->footer();
     }
 
     /**
@@ -126,21 +170,5 @@ class rollover_controller {
         unset($courses[$this->destinationcourse->id]);
 
         return new form_source_course_selection($courses);
-    }
-
-    public function rollover_complete($sourceshortname) {
-        echo $this->output->header();
-
-        echo $this->output->heading(get_string('rolloversuccessful', 'local_rollover'));
-        echo get_string('rolloversuccessfulmessage', 'local_rollover', [
-            'from' => htmlentities($sourceshortname),
-            'into' => htmlentities($this->destinationcourse->shortname),
-        ]);
-        echo '<br /><br />';
-
-        $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
-        echo $this->output->single_button($url, get_string('proceed', 'local_rollover'), 'get');
-
-        echo $this->output->footer();
     }
 }

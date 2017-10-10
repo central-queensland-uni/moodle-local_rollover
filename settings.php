@@ -38,19 +38,19 @@ $options = new admin_settingpage('local_rollover_options',
 );
 
 $items = [
-    ['name' => 'users', 'visiblename' => 'generalusers', 'default' => 1, 'locked' => 0],
-    ['name' => 'anonymize', 'visiblename' => 'generalanonymize', 'default' => 0, 'locked' => 0],
-    ['name' => 'role_assignments', 'visiblename' => 'generalroleassignments', 'default' => 1, 'locked' => 0],
-    ['name' => 'activities', 'visiblename' => 'generalactivities', 'default' => 1, 'locked' => 0],
-    ['name' => 'blocks', 'visiblename' => 'generalblocks', 'default' => 1, 'locked' => 0],
-    ['name' => 'filters', 'visiblename' => 'generalfilters', 'default' => 1, 'locked' => 0],
-    ['name' => 'comments', 'visiblename' => 'generalcomments', 'default' => 1, 'locked' => 0],
-    ['name' => 'badges', 'visiblename' => 'generalbadges', 'default' => 1, 'locked' => 0],
-    ['name' => 'userscompletion', 'visiblename' => 'generaluserscompletion', 'default' => 1, 'locked' => 0],
-    ['name' => 'logs', 'visiblename' => 'generallogs', 'default' => 0, 'locked' => 0],
-    ['name' => 'histories', 'visiblename' => 'generalhistories', 'default' => 0, 'locked' => 0],
-    ['name' => 'questionbank', 'visiblename' => 'generalquestionbank', 'default' => 1, 'locked' => 0],
-    ['name' => 'groups', 'visiblename' => 'generalgroups', 'default' => 1, 'locked' => 0],
+    ['name' => 'users', 'default' => 1, 'locked' => 0],
+    ['name' => 'anonymize', 'default' => 0, 'locked' => 0],
+    ['name' => 'role_assignments', 'default' => 1, 'locked' => 0],
+    ['name' => 'activities', 'default' => 1, 'locked' => 0],
+    ['name' => 'blocks', 'default' => 1, 'locked' => 0],
+    ['name' => 'filters', 'default' => 1, 'locked' => 0],
+    ['name' => 'comments', 'default' => 1, 'locked' => 0],
+    ['name' => 'badges', 'default' => 1, 'locked' => 0],
+    ['name' => 'userscompletion', 'default' => 1, 'locked' => 0],
+    ['name' => 'logs', 'default' => 0, 'locked' => 0],
+    ['name' => 'histories', 'default' => 0, 'locked' => 0],
+    ['name' => 'questionbank', 'default' => 1, 'locked' => 0],
+    ['name' => 'groups', 'default' => 1, 'locked' => 0],
 ];
 foreach ($items as $item) {
     $langname = str_replace('_', '', $item['name']);

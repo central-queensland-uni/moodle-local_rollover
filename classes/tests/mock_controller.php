@@ -37,4 +37,8 @@ class mock_controller extends rollover_controller {
     public function source_selection_page_next() {
         $this->mockroute[] = __FUNCTION__;
     }
+
+    public function options_selection_page_next() {
+        $this->mockroute[] = __FUNCTION__;
+    }
 }
