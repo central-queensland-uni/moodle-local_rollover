@@ -47,7 +47,7 @@ class local_rollover_controller_test extends rollover_testcase {
 
         $destinationcourse = $this->generator()->create_course_by_shortname('destination-course');
 
-        $worker = new rollover_worker(['from' => 0, 'into' => $destinationcourse->id]);
+        $worker = new rollover_worker(['from' => 0, 'into' => $destinationcourse->id, 'option' => ['activities' => 1]]);
         $worker->set_backup_id('6810b32987b568760f55d626dcc5448a');
 
         $this->extract_fixture_backup_data();
@@ -59,20 +59,44 @@ class local_rollover_controller_test extends rollover_testcase {
         self::assertSame('Rollover Assignment', $cm->name);
     }
 
-    public function test_rollover() {
+    public function test_it_respects_the_include_role_assignments_option() {
         self::resetAfterTest(true);
 
         $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
-        $worker = new rollover_worker(['from' => $sourcecourse->id, 'into' => $destinationcourse->id]);
+        $worker = new rollover_worker([
+                                          'from'   => $sourcecourse->id,
+                                          'into'   => $destinationcourse->id,
+                                          'option' => ['activities' => 1],
+                                      ]);
         $worker->rollover();
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
         $cm = array_values($info->get_cms())[0];
         self::assertSame('Full Rollover Assignment', $cm->name);
+    }
+
+    public function test_it_respects_the_not_include_role_assignments_option() {
+        self::resetAfterTest(true);
+
+        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
+        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
+        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+
+        $worker = new rollover_worker([
+                                          'from'   => $sourcecourse->id,
+                                          'into'   => $destinationcourse->id,
+                                          'option' => ['activities' => 0],
+                                      ]);
+        $worker->rollover();
+
+        course_modinfo::clear_instance_cache($destinationcourse);
+        $info = get_fast_modinfo($destinationcourse);
+        $cms = $info->get_cms();
+        self::assertCount(0, $cms);
     }
 
     public function test_it_includes_the_log_in_the_backup() {
