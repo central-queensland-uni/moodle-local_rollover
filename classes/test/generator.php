@@ -79,7 +79,14 @@ class generator extends testing_data_generator {
         $this->enrol_user_role($user, $course, 'teacher');
     }
 
+    public function enrol_student($user, $course) {
+        $this->enrol_user_role($user, $course, 'student');
+    }
+
     private function enrol_user_role($user, $course, $role) {
+        if (!array_key_exists($user, $this->users)) {
+            $this->create_user_by_username($user);
+        }
         $this->enrol_user(
             $this->users[$user]->id,
             $this->courses[$course]->id,
