@@ -85,7 +85,15 @@ class behat_local_rollover extends behat_base {
      * @When /^I press "([^"]*)" in the Course Administration block +\# local_rollover$/
      */
     public function i_press_in_the_course_administration_block($link) {
-        $this->execute('behat_general::i_click_on_in_the', [$link, 'link', 'Administration', 'block']);
+        $parentnode = array_map('trim', explode('>', $link));
+        $link = array_pop($parentnode);
+        if (count($parentnode) == 0) {
+            $this->execute('behat_general::i_click_on_in_the', [$link, 'link', 'Administration', 'block']);
+        } else {
+            array_unshift($parentnode, 'Course administration');
+            $parentnode = implode(' > ', $parentnode);
+            $this->execute('behat_navigation::i_navigate_to_node_in', [$link, $parentnode]);
+        }
     }
 
     /**
@@ -158,6 +166,17 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
+     * @When /^I set the following rollover options:$/
+     */
+    public function i_set_the_following_rollover_options(TableNode $options) {
+        foreach ($options->getRows() as $option) {
+            $field = behat_field_manager::get_form_field_from_label($option[1], $this);
+            $value = $option[0] == 'X' ? 1 : 0;
+            $field->set_value($value);
+        }
+    }
+
+    /**
      * @Given /^I am at the "([^"]*)" settings page +\# local_rollover$/
      */
     public function i_am_at_the_settings_page($page) {
@@ -195,5 +214,12 @@ class behat_local_rollover extends behat_base {
         if ($disabled && !$element->getAttribute('disabled')) {
             throw new ExpectationException('"' . $checkbox . '" should be disabled.', $this->getSession());
         }
+    }
+
+    /**
+     * @Given /^the course "([^"]*)" has a student "([^"]*)" +\# local_rollover$/
+     */
+    public function the_course_has_a_student($course, $user) {
+        $this->generator()->enrol_student($user, $course);
     }
 }

@@ -25,6 +25,7 @@ namespace local_rollover;
 
 use backup;
 use backup_controller;
+use local_rollover\admin\rollover_settings;
 use restore_controller;
 
 defined('MOODLE_INTERNAL') || die();
@@ -49,6 +50,9 @@ class rollover_worker {
     /** @var int */
     private $destinationcourseid;
 
+    /** @var bool[] */
+    private $options;
+
     /** @var string|null */
     private $backupid = null;
 
@@ -56,9 +60,14 @@ class rollover_worker {
         $this->backupid = $backupid;
     }
 
-    public function __construct($sourcecourseid, $destinationcourseid) {
-        $this->sourcecourseid = (int)$sourcecourseid;
-        $this->destinationcourseid = (int)$destinationcourseid;
+    public function __construct($parameters) {
+        $this->sourcecourseid = (int)$parameters['from'];
+        $this->destinationcourseid = (int)$parameters['into'];
+
+        $this->options = [];
+        foreach (array_keys(rollover_settings::get_rollover_options()) as $option) {
+            $this->options[$option] = isset($parameters['option'][$option]) ? (bool)$parameters['option'][$option] : false;
+        }
     }
 
     public function get_backup_path() {
@@ -87,6 +96,12 @@ class rollover_worker {
                                           backup::MODE_GENERAL,
                                           self::USERID,
                                           backup::TARGET_EXISTING_ADDING);
+
+        $settings = $restore->get_plan()->get_settings();
+
+        foreach (['activities'] as $option) {
+            $settings[$option]->set_value($this->options[$option] ? 1 : 0);
+        }
 
         $restore->execute_precheck();
         $restore->execute_plan();
