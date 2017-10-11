@@ -37,11 +37,7 @@ class local_rollover_form_options_selection_test extends rollover_testcase {
             'option_activities'   => [true, true],
         ];
 
-        foreach ($options as $option => $values) {
-            list($default, $locked) = $values;
-            set_config($option, $default ? 1 : 0, 'local_rollover');
-            set_config("{$option}_locked", $locked ? 1 : 0, 'local_rollover');
-        }
+        $this->configure_options($options);
 
         $form = new form_options_selection();
 
@@ -49,6 +45,18 @@ class local_rollover_form_options_selection_test extends rollover_testcase {
         $form->display();
         $html = ob_get_clean();
 
+        $this->assert_form_defaults_and_locks($options, $html);
+    }
+
+    private function configure_options($options) {
+        foreach ($options as $option => $values) {
+            list($default, $locked) = $values;
+            set_config($option, $default ? 1 : 0, 'local_rollover');
+            set_config("{$option}_locked", $locked ? 1 : 0, 'local_rollover');
+        }
+    }
+
+    private function assert_form_defaults_and_locks($options, $html) {
         $crawler = new Crawler($html);
 
         foreach ($options as $option => $values) {

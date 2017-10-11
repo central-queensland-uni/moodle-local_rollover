@@ -169,9 +169,15 @@ class behat_local_rollover extends behat_base {
      * @Given /^I am rolling over a course at the "([^"]*)" step +\# local_rollover$/
      */
     public function i_am_rolling_over_a_course_at_the_step($step) {
-        $from = $this->generator()->create_course_by_shortname('source')->id;
-        $into = $this->generator()->create_course_by_shortname('destination')->id;
-        $this->visitPath("/local/rollover/index.php?from={$from}&into={$into}");
+        switch ($step) {
+            case 'Rollover options':
+                $from = $this->generator()->create_course_by_shortname('source')->id;
+                $into = $this->generator()->create_course_by_shortname('destination')->id;
+                $this->visitPath("/local/rollover/index.php?from={$from}&into={$into}");
+                return;
+            default:
+                throw new \Behat\Behat\Tester\Exception\PendingException();
+        }
     }
 
     /**
