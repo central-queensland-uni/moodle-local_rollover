@@ -21,14 +21,24 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\tests;
+namespace local_rollover\test;
+
+use local_rollover\rollover_controller;
 
 defined('MOODLE_INTERNAL') || die();
 
-class mock_admintree {
-    public $tree = [];
+class mock_controller extends rollover_controller {
+    public $mockroute = [];
 
-    public function add($parent, $element) {
-        $this->tree[$element->name] = $parent;
+    public function source_selection_page() {
+        $this->mockroute[] = __FUNCTION__;
+    }
+
+    public function source_selection_page_next() {
+        $this->mockroute[] = __FUNCTION__;
+    }
+
+    public function options_selection_page_next() {
+        $this->mockroute[] = __FUNCTION__;
     }
 }

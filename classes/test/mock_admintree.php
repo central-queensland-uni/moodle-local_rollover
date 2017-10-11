@@ -21,20 +21,14 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\tests;
+namespace local_rollover\test;
 
 defined('MOODLE_INTERNAL') || die();
 
-class mock_output {
-    public function header() {
-        echo '[header]';
-    }
+class mock_admintree {
+    public $tree = [];
 
-    public function heading() {
-        echo '[heading]';
-    }
-
-    public function footer() {
-        echo '[footer]';
+    public function add($parent, $element) {
+        $this->tree[$element->name] = $parent;
     }
 }

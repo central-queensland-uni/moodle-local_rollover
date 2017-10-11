@@ -22,12 +22,12 @@
  */
 
 use local_rollover\form\form_source_course_selection;
-use local_rollover\tests\rollover_testcase;
+use local_rollover\test\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_form_original_course_test extends rollover_testcase {
+class local_rollover_form_source_course_selection_test extends rollover_testcase {
     public function test_it_renders() {
         $form = new form_source_course_selection();
 

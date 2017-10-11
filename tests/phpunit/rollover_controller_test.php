@@ -22,32 +22,39 @@
  */
 
 use local_rollover\rollover_controller;
-use local_rollover\tests\mock_output;
-use local_rollover\tests\rollover_testcase;
+use local_rollover\test\mock_controller;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_rollover_controller_test extends rollover_testcase {
-    public function test_it_requires_capability_to_rollover() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
+    public function provider_for_test_the_index_knows_which_route_to_use() {
+        return [
+            [['into' => 1], 'source_selection_page'],
+            [['into' => 1, 'sourceshortname' => 'source'], 'source_selection_page_next'],
+            [['into' => 1, 'from' => 2], 'options_selection_page_next'],
+        ];
     }
 
-    public function test_it_has_the_rollover_source_route() {
+    /**
+     * @dataProvider provider_for_test_the_index_knows_which_route_to_use
+     */
+    public function test_the_index_knows_which_route_to_use($get, $expected) {
+        global $COURSE;
         self::setAdminUser();
         $this->resetAfterTest(true);
-        $course = $this->generator()->create_course();
 
-        $_GET['into'] = $course->id;
+        $_GET = $get;
+        $COURSE = $this->generator()->create_course();
 
-        $controller = new rollover_controller();
-        $controller->set_output(new mock_output());
+        $controller = new mock_controller();
+        $controller->index();
 
-        ob_start();
-        $controller->rollover_source_selection_page();
-        $html = ob_get_clean();
+        self::assertSame([$expected], $controller->mockroute);
+    }
 
-        self::assertContains('[header]', $html);
-        self::assertContains('[footer]', $html);
+    public function test_it_requires_capability_to_rollover() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 
     public function test_it_creates_a_form_with_the_user_courses() {

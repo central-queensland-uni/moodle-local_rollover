@@ -23,7 +23,9 @@
 
 namespace local_rollover\form;
 
+use local_rollover\admin\rollover_settings;
 use moodleform;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,30 +38,13 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_source_course_selection extends moodleform {
-    /** @var string[] */
-    private $usercourses;
+class form_options_selection extends moodleform {
+    /** @var stdClass */
+    private $config;
 
-    public function get_user_courses() {
-        return $this->usercourses;
-    }
-
-    /**
-     * @param string[] $usercourses Array of "your courses" to display,
-     */
-    public function __construct($usercourses = []) {
-        $this->usercourses = $usercourses;
+    public function __construct() {
+        $this->config = get_config('local_rollover');
         parent::__construct();
-    }
-
-    private function prepare_options() {
-        $options = [];
-
-        foreach ($this->usercourses as $course) {
-            $options[$course->shortname] = "{$course->shortname}: {$course->fullname}";
-        }
-
-        return $options;
     }
 
     /**
@@ -68,18 +53,46 @@ class form_source_course_selection extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
+        $mform->addElement('hidden', 'from');
+        $mform->setType('from', PARAM_INT);
+
         $mform->addElement('hidden', 'into');
         $mform->setType('into', PARAM_INT);
 
-        $mform->addElement('select',
-                           'sourceshortname',
-                           get_string('originalcourse', 'local_rollover'),
-                           $this->prepare_options(),
-                           ['id' => 'local_rollover-your_units', 'size' => 10]);
-        $mform->setType('sourceshortname', PARAM_TEXT);
-        $mform->addHelpButton('sourceshortname', 'originalcourse', 'local_rollover');
+        foreach (rollover_settings::get_rollover_options() as $option => $langname) {
+            $this->definition_add_option($option, $langname);
+        }
 
-        $this->add_action_buttons(false, get_string('next'));
+        $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
+    }
+
+    private function definition_add_option($option, $langname) {
+        list($default, $locked) = $this->definition_add_option_get_settings($option);
+
+        if ($locked && !$default) {
+            return;
+        }
+
+        $mform = $this->_form;
+        $name = "option[{$option}]";
+
+        $attributes = $locked ? 'disabled' : null;
+        $mform->addElement('checkbox',
+                           $name,
+                           get_string("general{$langname}", 'backup'),
+                           '',
+                           $attributes);
+        $mform->setDefault($name, $default);
+    }
+
+    private function definition_add_option_get_settings($option) {
+        $default = "option_{$option}";
+        $default = isset($this->config->$default) ? $this->config->$default : 0;
+
+        $locked = "option_{$option}_locked";
+        $locked = isset($this->config->$locked) ? $this->config->$locked : 0;
+
+        return [$default, $locked];
     }
 
     /**

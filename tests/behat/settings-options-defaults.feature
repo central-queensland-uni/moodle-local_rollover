@@ -21,3 +21,20 @@ Feature: Adjust rollover settings
     And I should see "Include histories"
     And I should see "Include question bank"
     And I should see "Include groups and groupings"
+
+
+  Scenario: I can set rollover option defaults and lock them
+    Given I am an administrator                                                               # local_rollover
+    And I am at the "Rollover options" settings page                                          # local_rollover
+    When I set the following default options:                                                 # local_rollover
+      | Option                           | Selected | Locked |
+      | Include blocks                   |          |        |
+      | Include question bank            | X        |        |
+      | Include users                    |          | X      |
+      | Include activities and resources | X        | X      |
+    And I press "Save changes"
+    And I am rolling over a course at the "Rollover options" step                             # local_rollover
+    Then I should see the checkbox "Include blocks" unselected                                # local_rollover
+    And I should see the checkbox "Include question bank" selected                            # local_rollover
+    And I should not see "Include users"
+    And I should see the checkbox "Include activities and resources" selected and disabled    # local_rollover

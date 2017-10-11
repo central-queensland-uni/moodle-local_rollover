@@ -24,7 +24,8 @@
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
 use Behat\Gherkin\Node\TableNode;
-use local_rollover\tests\generator;
+use Behat\Mink\Exception\ExpectationException;
+use local_rollover\test\generator;
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
@@ -60,9 +61,9 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
-     * @Given /^I am at the course "([^"]*)" page +\# local_rollover$/
+     * @Given /^I (?:am at|go to) the course "([^"]*)" page +\# local_rollover$/
      */
-    public function i_am_at_the_course_page($shortname) {
+    public function i_the_course_page($shortname) {
         $this->visitPath('/course/view.php?name=' . $shortname);
     }
 
@@ -137,5 +138,62 @@ class behat_local_rollover extends behat_base {
      */
     public function in_field_i_select_option($field, $option) {
         $this->execute('behat_forms::i_set_the_field_to', [$field, $option]);
+    }
+
+    /**
+     * @Given /^I set the following default options: +\# local_rollover$/
+     */
+    public function i_set_the_following_default_options(TableNode $options) {
+        foreach ($options->getHash() as $option) {
+            $field = behat_field_manager::get_form_field_from_label($option['Option'], $this);
+            $value = $option['Selected'] == 'X' ? 1 : 0;
+            $field->set_value($value);
+
+            $fieldnode = $this->find_field($option['Option']);
+            $name = $fieldnode->getAttribute('name');
+            $field = behat_field_manager::get_form_field_from_label("{$name}_locked", $this);
+            $value = $option['Locked'] == 'X' ? 1 : 0;
+            $field->set_value($value);
+        }
+    }
+
+    /**
+     * @Given /^I am at the "([^"]*)" settings page +\# local_rollover$/
+     */
+    public function i_am_at_the_settings_page($page) {
+        $page = str_replace(' ', '_', strtolower($page));
+        $this->visitPath("/admin/settings.php?section=local_{$page}");
+    }
+
+    /**
+     * @Given /^I am rolling over a course at the "([^"]*)" step +\# local_rollover$/
+     */
+    public function i_am_rolling_over_a_course_at_the_step($step) {
+        switch ($step) {
+            case 'Rollover options':
+                $from = $this->generator()->create_course_by_shortname('source')->id;
+                $into = $this->generator()->create_course_by_shortname('destination')->id;
+                $this->visitPath("/local/rollover/index.php?from={$from}&into={$into}");
+                return;
+            default:
+                throw new \Behat\Behat\Tester\Exception\PendingException();
+        }
+    }
+
+    /**
+     * @Then /^I should see the checkbox "([^"]*)" ((?:un)?selected)( and disabled)? +\# local_rollover$/
+     */
+    public function i_should_see_the_checkbox($checkbox, $selectedornot, $disabled = null) {
+        $selected = ($selectedornot == 'selected');
+        $disabled = ($disabled != null);
+        $element = $this->find_field($checkbox);
+
+        if ($element->isChecked() != $selected) {
+            throw new ExpectationException('"' . $checkbox . '" should be ' . $selectedornot, $this->getSession());
+        }
+
+        if ($disabled && !$element->getAttribute('disabled')) {
+            throw new ExpectationException('"' . $checkbox . '" should be disabled.', $this->getSession());
+        }
     }
 }
