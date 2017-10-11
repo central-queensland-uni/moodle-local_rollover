@@ -50,16 +50,9 @@ class rollover_settings {
     public static function get_rollover_options() {
         $options = [];
         $rawoptions = [
-            'anonymize',
-            'role_assignments',
             'activities',
             'blocks',
             'filters',
-            'comments',
-            'badges',
-            'userscompletion',
-            'logs',
-            'histories',
             'questionbank',
             'groups',
         ];
