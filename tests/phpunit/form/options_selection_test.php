@@ -23,17 +23,46 @@
 
 use local_rollover\form\form_options_selection;
 use local_rollover\test\rollover_testcase;
+use Symfony\Component\DomCrawler\Crawler;
 
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_form_options_selection_test extends rollover_testcase {
-    public function test_it_renders() {
+    public function test_it_uses_defaults_and_locks() {
+        self::resetAfterTest(true);
+        $options = [
+            'option_blocks'       => [false, false],
+            'option_users'        => [false, true],
+            'option_questionbank' => [true, false],
+            'option_activities'   => [true, true],
+        ];
+
+        foreach ($options as $option => $values) {
+            list($default, $locked) = $values;
+            set_config($option, $default ? 1 : 0, 'local_rollover');
+            set_config("{$option}_locked", $locked ? 1 : 0, 'local_rollover');
+        }
+
         $form = new form_options_selection();
 
         ob_start();
         $form->display();
         $html = ob_get_clean();
 
-        self::assertContains('<form', $html);
+        $crawler = new Crawler($html);
+
+        foreach ($options as $option => $values) {
+            list($default, $locked) = $values;
+            $checkbox = $crawler->filter("#id_{$option}")->getNode(0);
+
+            if ($locked && !$default) {
+                self::assertNull($checkbox, "{$option} should not appear.");
+            } else {
+                $default = $default ? 'checked' : '';
+                $locked = $locked ? 'disabled' : '';
+                self::assertSame($default, $checkbox->getAttribute('checked'), "{$option} default");
+                self::assertSame($locked, $checkbox->getAttribute('disabled'), "{$option} lock");
+            }
+        }
     }
 }

@@ -109,8 +109,6 @@ class rollover_controller {
         $form->set_data([
                             'from'          => $sourcecourseid,
                             'into'          => $this->destinationcourse->id,
-                            'option[activities]' => 1, // FIXME hardcoded
-                            'option[questionbank]' => 1, // FIXME hardcoded
                         ]);
 
         echo $this->output->header();

@@ -50,22 +50,25 @@ class form_options_selection extends moodleform {
         $mform->addElement('hidden', 'into');
         $mform->setType('into', PARAM_INT);
 
+        $config = get_config('local_rollover');
         foreach (rollover_settings::get_rollover_options() as $option => $langname) {
             $name = "option[{$option}]";
-            // FIXME
-            $attributes = null;
-            if ($option == 'activities') {
-                $attributes = 'disabled';
-            }
-            if ($option == 'users') {
+            $default = "option_{$option}";
+            $default = isset($config->$default) ? $config->$default : 0;
+            $locked = "option_{$option}_locked";
+            $locked = isset($config->$locked) ? $config->$locked : 0;
+
+            if ($locked && !$default) {
                 continue;
             }
-            // FIXME end
+
+            $attributes = $locked ? 'disabled' : null;
             $mform->addElement('checkbox',
                                $name,
                                get_string("general{$langname}", 'backup'),
                                '',
                                $attributes);
+            $mform->setDefault($name, $default);
         }
 
         $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
