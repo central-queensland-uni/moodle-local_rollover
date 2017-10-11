@@ -56,9 +56,9 @@ class rollover_worker {
         $this->backupid = $backupid;
     }
 
-    public function __construct($sourcecourseid, $destinationcourseid) {
-        $this->sourcecourseid = (int)$sourcecourseid;
-        $this->destinationcourseid = (int)$destinationcourseid;
+    public function __construct($parameters) {
+        $this->sourcecourseid = (int)$parameters['from'];
+        $this->destinationcourseid = (int)$parameters['into'];
     }
 
     public function get_backup_path() {

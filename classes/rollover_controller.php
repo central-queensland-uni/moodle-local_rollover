@@ -125,7 +125,7 @@ class rollover_controller {
 
         $data = $form->get_data();
 
-        $worker = new rollover_worker($data->from, $this->destinationcourse->id);
+        $worker = new rollover_worker((array)$data);
         $worker->rollover();
 
         $destination = get_course($data->from);
