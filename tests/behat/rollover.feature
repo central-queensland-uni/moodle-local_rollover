@@ -15,22 +15,11 @@ Feature: Configure and perform course rollovers.
     And I am at the course "ABC123-2017-2" page                   # local_rollover
 
     When I press "Rollover" in the Course Administration block    # local_rollover
-    And in "Original course" I select "ABC123-2017-1"             # local_rollover
-    And I press "Next"
-    Then I should see "Include users"
-    And I should see "Anonymise information"
-    And I should see "Include role assignments"
-    And I should see "Include activities and resources"
-    And I should see "Include blocks"
-    And I should see "Include filters"
-    And I should see "Include comments"
-    And I should see "Include badges"
-    And I should see "Include user completion information"
-    And I should see "Include logs"
-    And I should see "Include histories"
-    And I should see "Include question bank"
-    And I should see "Include groups and groupings"
+    Then I should see "Rollover: Select source course"
 
+    When I select "ABC123-2017-1" in "Original course"            # local_rollover
+    And I press "Next"
+    Then I should see "Rollover: Select content options"
 
     When I press "Perform rollover"
     Then I should see "Rollover successful"
