@@ -81,10 +81,9 @@ class rollover_controller {
 
         $form->set_data(['into' => $this->destinationcourse->id]);
 
-        echo $this->output->header();
-        echo $this->output->heading(get_string('pluginname', 'local_rollover'));
+        $this->show_header('select_course');
         $form->display();
-        echo $this->output->footer();
+        $this->show_footer();
     }
 
     public function source_selection_page_next() {
@@ -111,10 +110,9 @@ class rollover_controller {
                             'into'          => $this->destinationcourse->id,
                         ]);
 
-        echo $this->output->header();
-        echo $this->output->heading(get_string('pluginname', 'local_rollover'));
+        $this->show_header('select_options');
         $form->display();
-        echo $this->output->footer();
+        $this->show_footer();
     }
 
     public function options_selection_page_next() {
@@ -135,9 +133,8 @@ class rollover_controller {
     }
 
     public function rollover_complete($sourceshortname) {
-        echo $this->output->header();
+        $this->show_header('complete');
 
-        echo $this->output->heading(get_string('rolloversuccessful', 'local_rollover'));
         echo get_string('rolloversuccessfulmessage', 'local_rollover', [
             'from' => htmlentities($sourceshortname),
             'into' => htmlentities($this->destinationcourse->shortname),
@@ -147,7 +144,7 @@ class rollover_controller {
         $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
         echo $this->output->single_button($url, get_string('proceed', 'local_rollover'), 'get');
 
-        echo $this->output->footer();
+        $this->show_footer();
     }
 
     /**
@@ -173,5 +170,14 @@ class rollover_controller {
         unset($courses[$this->destinationcourse->id]);
 
         return new form_source_course_selection($courses);
+    }
+
+    private function show_header($stepname) {
+        echo $this->output->header();
+        echo $this->output->heading(get_string("step_{$stepname}", 'local_rollover'));
+    }
+
+    private function show_footer() {
+        echo $this->output->footer();
     }
 }

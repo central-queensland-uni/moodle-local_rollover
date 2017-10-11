@@ -134,9 +134,9 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
-     * @Given /^in "([^"]*)" I select "([^"]*)" +\# local_rollover$/
+     * @Given /^I select "([^"]*)" in "([^"]*)" +\# local_rollover$/
      */
-    public function in_field_i_select_option($field, $option) {
+    public function i_select_in_field($option, $field) {
         $this->execute('behat_forms::i_set_the_field_to', [$field, $option]);
     }
 
