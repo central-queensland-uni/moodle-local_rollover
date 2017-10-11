@@ -25,17 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['option_activities'] = 'Sets the default for including activities in a rollover.';
-$string['option_badges'] = 'Sets the default for including badges in a rollover.';
-$string['option_anonymize'] = 'If enabled all information pertaining to users will be anonymised by default.';
 $string['option_blocks'] = 'Sets the default for including blocks in a rollover.';
-$string['option_comments'] = 'Sets the default for including comments in a rollover.';
+$string['option_ents'] = 'Sets the default for including comments in a rollover.';
 $string['option_filters'] = 'Sets the default for including filters in a rollover.';
-$string['option_histories'] = 'Sets the default for including user history within a rollover.';
-$string['option_logs'] = 'If enabled logs will be included in rollovers by default.';
 $string['option_questionbank'] = 'If enabled the question bank will be included in rollovers by default. PLEASE NOTE: Disabling this setting will disable the rollover of activities which use the question bank, such as the quiz.';
 $string['option_groups'] = 'Sets the default for including groups and groupings in a rollover.';
-$string['option_roleassignments'] = 'If enabled by default roles assignments will also be rolled over.';
-$string['option_userscompletion'] = 'If enabled user completion information will be included in rollovers by default.';
 $string['originalcourse'] = 'Original course';
 $string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
 $string['performrollover'] = 'Perform rollover';

@@ -8,16 +8,9 @@ Feature: Adjust rollover settings
   Scenario: I can navigate to the settings
     Given I am an administrator                                             # local_rollover
     When I navigate to "Courses > Rollover settings > Options defaults" in site administration
-    Then I should see "Anonymise information"
-    And I should see "Include role assignments"
-    And I should see "Include activities and resources"
+    Then I should see "Include activities and resources"
     And I should see "Include blocks"
     And I should see "Include filters"
-    And I should see "Include comments"
-    And I should see "Include badges"
-    And I should see "Include user completion information"
-    And I should see "Include logs"
-    And I should see "Include histories"
     And I should see "Include question bank"
     And I should see "Include groups and groupings"
 
@@ -29,7 +22,7 @@ Feature: Adjust rollover settings
       | Option                           | Selected | Locked |
       | Include blocks                   |          |        |
       | Include question bank            | X        |        |
-      | Include role assignments         |          | X      |
+      | Include filters                  |          | X      |
       | Include activities and resources | X        | X      |
     And I press "Save changes"
     And I am rolling over a course at the "Rollover options" step                             # local_rollover
