@@ -28,12 +28,6 @@ use local_rollover\test\rollover_testcase;
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_rollover_controller_test extends rollover_testcase {
-    public function provider_for_rollover_steps() {
-        return [
-            'complete' => [['into' => 1, 'from' => 2], 'options_selection_page_next'],
-        ];
-    }
-
     public function test_it_shows_source_selection() {
         global $COURSE;
 

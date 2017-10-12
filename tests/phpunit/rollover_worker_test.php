@@ -33,7 +33,7 @@ class local_rollover_controller_test extends rollover_testcase {
         $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
         $this->generator()->create_assignment('backup-source-course', 'Backup Assignment');
 
-        $worker = new rollover_worker(['from' => $sourcecourse->id, 'into' => 0]);
+        $worker = new rollover_worker(['from' => $sourcecourse->id]);
         $worker->get_backup_worker()->backup();
 
         self::assertFileExists($worker->get_backup_worker()->get_path());
@@ -47,7 +47,7 @@ class local_rollover_controller_test extends rollover_testcase {
 
         $destinationcourse = $this->generator()->create_course_by_shortname('destination-course');
 
-        $worker = new rollover_worker(['from' => 0, 'into' => $destinationcourse->id, 'option' => ['activities' => 1]]);
+        $worker = new rollover_worker(['into' => $destinationcourse->id, 'option' => ['activities' => 1]]);
 
         $this->extract_fixture_backup_data();
         $worker->get_restore_worker()->restore('6810b32987b568760f55d626dcc5448a', $worker->get_options());

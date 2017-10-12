@@ -42,14 +42,14 @@ class rollover_worker {
     const USERID = 2;
 
     /** @var backup_worker */
-    private $backupworker;
+    private $backupworker = null;
 
     public function get_backup_worker() {
         return $this->backupworker;
     }
 
     /** @var restore_worker */
-    private $restoreworker;
+    private $restoreworker = null;
 
     public function get_restore_worker() {
         return $this->restoreworker;
@@ -63,8 +63,13 @@ class rollover_worker {
     }
 
     public function __construct($parameters) {
-        $this->backupworker = new backup_worker($parameters['from']);
-        $this->restoreworker = new restore_worker($parameters['into']);
+        if (!empty($parameters['from'])) {
+            $this->backupworker = new backup_worker($parameters['from']);
+        }
+
+        if (!empty($parameters['into'])) {
+            $this->restoreworker = new restore_worker($parameters['into']);
+        }
 
         $this->options = [];
         foreach (array_keys(rollover_settings::get_rollover_options()) as $option) {
