@@ -24,6 +24,8 @@
 namespace local_rollover;
 
 use context_course;
+use local_rollover\backup\backup_worker;
+use local_rollover\backup\restore_worker;
 use local_rollover\backup\rollover_worker;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
@@ -40,6 +42,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rollover_controller {
+    /** Run backup/restore as admin (bypass normal capability check for courses). */
+    const USERID = 2;
+
     /** @var moodle_page */
     private $page;
 
@@ -182,6 +187,11 @@ class rollover_controller {
         echo $this->output->footer();
     }
 
-    /** Run backup/restore as admin (bypass normal capability check for courses). */
-    const USERID = 2;
+    public function rollover($from, $into, $options) {
+        $backupworker = new backup_worker($from);
+        $backupworker->backup();
+
+        $restoreworker = new restore_worker($into);
+        $restoreworker->restore($backupworker->get_backup_id(), $options);
+    }
 }

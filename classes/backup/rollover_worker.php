@@ -51,11 +51,4 @@ class rollover_worker {
             $this->options[$option] = isset($parameters['option'][$option]) ? (bool)$parameters['option'][$option] : false;
         }
     }
-
-    public function rollover($from, $into) {
-        $backupworker = new backup_worker($from);
-        $backupworker->backup();
-        $restoreworker = new restore_worker($into);
-        $restoreworker->restore($backupworker->get_backup_id(), $this->options);
-    }
 }

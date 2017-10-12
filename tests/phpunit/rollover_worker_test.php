@@ -24,6 +24,7 @@
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\backup\rollover_worker;
+use local_rollover\rollover_controller;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
@@ -69,7 +70,9 @@ class local_rollover_controller_test extends rollover_testcase {
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
         $worker = new rollover_worker(['option' => ['activities' => 1]]);
-        $worker->rollover($sourcecourse->id, $destinationcourse->id);
+        $_GET['into'] = $sourcecourse->id;
+        $controller = new rollover_controller();
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, $worker->get_options());
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
@@ -85,7 +88,9 @@ class local_rollover_controller_test extends rollover_testcase {
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
         $worker = new rollover_worker(['option' => ['activities' => 0]]);
-        $worker->rollover($sourcecourse->id, $destinationcourse->id);
+        $_GET['into'] = $sourcecourse->id;
+        $controller = new rollover_controller();
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, $worker->get_options());
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
