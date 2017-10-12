@@ -29,7 +29,6 @@ use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
-use moodle_page;
 use moodle_url;
 use stdClass;
 
@@ -45,33 +44,20 @@ class rollover_controller {
     /** Run backup/restore as admin (bypass normal capability check for courses). */
     const USERID = 2;
 
-    /** @var moodle_page */
-    private $page;
-
-    /** @var stdClass */
-    private $output;
-
-    public function set_output($output) {
-        $this->output = $output;
-    }
-
     /** @var stdClass */
     private $destinationcourse;
 
     public function __construct() {
-        global $OUTPUT, $PAGE;
-
-        $this->page = $PAGE;
-        $this->output = $OUTPUT;
-
         $this->destinationcourse = get_course(required_param('into', PARAM_INT));
     }
 
     public function index() {
+        global $PAGE;
+
         require_login($this->destinationcourse);
-        $this->page->set_context(context_course::instance($this->destinationcourse->id));
-        $this->page->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
-        $this->page->set_heading($this->destinationcourse->fullname);
+        $PAGE->set_context(context_course::instance($this->destinationcourse->id));
+        $PAGE->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
+        $PAGE->set_heading($this->destinationcourse->fullname);
 
         if (!is_null(optional_param('from', null, PARAM_INT))) {
             $this->options_selection_page_next();
@@ -139,6 +125,8 @@ class rollover_controller {
     }
 
     public function rollover_complete($sourceshortname) {
+        global $OUTPUT;
+
         $this->show_header('complete');
 
         echo get_string('rolloversuccessfulmessage', 'local_rollover', [
@@ -148,7 +136,7 @@ class rollover_controller {
         echo '<br /><br />';
 
         $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
-        echo $this->output->single_button($url, get_string('proceed', 'local_rollover'), 'get');
+        echo $OUTPUT->single_button($url, get_string('proceed', 'local_rollover'), 'get');
 
         $this->show_footer();
     }
@@ -179,12 +167,16 @@ class rollover_controller {
     }
 
     private function show_header($stepname) {
-        echo $this->output->header();
-        echo $this->output->heading(get_string("step_{$stepname}", 'local_rollover'));
+        global $OUTPUT;
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string("step_{$stepname}", 'local_rollover'));
     }
 
     private function show_footer() {
-        echo $this->output->footer();
+        global $OUTPUT;
+        
+        echo $OUTPUT->footer();
     }
 
     public function rollover($from, $into, $parameters) {
