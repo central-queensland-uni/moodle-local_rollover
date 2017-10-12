@@ -38,13 +38,6 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rollover_worker {
-    /** @var backup_worker */
-    private $backupworker = null;
-
-    public function get_backup_worker() {
-        return $this->backupworker;
-    }
-
     /** @var bool[] */
     private $options;
 
@@ -53,19 +46,16 @@ class rollover_worker {
     }
 
     public function __construct($parameters) {
-        if (!empty($parameters['from'])) {
-            $this->backupworker = new backup_worker($parameters['from']);
-        }
-
         $this->options = [];
         foreach (array_keys(rollover_settings::get_rollover_options()) as $option) {
             $this->options[$option] = isset($parameters['option'][$option]) ? (bool)$parameters['option'][$option] : false;
         }
     }
 
-    public function rollover($into) {
-        $this->backupworker->backup();
-        $worket = new restore_worker($into);
-        $worket->restore($this->backupworker->get_backup_id(), $this->options);
+    public function rollover($from, $into) {
+        $backupworker = new backup_worker($from);
+        $backupworker->backup();
+        $restoreworker = new restore_worker($into);
+        $restoreworker->restore($backupworker->get_backup_id(), $this->options);
     }
 }

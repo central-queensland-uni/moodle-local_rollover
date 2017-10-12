@@ -21,6 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\backup\rollover_worker;
 use local_rollover\test\rollover_testcase;
@@ -34,11 +35,11 @@ class local_rollover_controller_test extends rollover_testcase {
         $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
         $this->generator()->create_assignment('backup-source-course', 'Backup Assignment');
 
-        $worker = new rollover_worker(['from' => $sourcecourse->id]);
-        $worker->get_backup_worker()->backup();
+        $backupworker = new backup_worker($sourcecourse->id);
+        $backupworker->backup();
 
-        self::assertFileExists($worker->get_backup_worker()->get_path());
-        $xml = file_get_contents($worker->get_backup_worker()->get_path() . '/moodle_backup.xml');
+        self::assertFileExists($backupworker->get_path());
+        $xml = file_get_contents($backupworker->get_path() . '/moodle_backup.xml');
         self::assertContains('<original_course_shortname>backup-source-course</original_course_shortname>', $xml);
         self::assertContains('<title>Backup Assignment</title>', $xml);
     }
@@ -67,11 +68,8 @@ class local_rollover_controller_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
-        $worker = new rollover_worker([
-                                          'from'   => $sourcecourse->id,
-                                          'option' => ['activities' => 1],
-                                      ]);
-        $worker->rollover($destinationcourse->id);
+        $worker = new rollover_worker(['option' => ['activities' => 1]]);
+        $worker->rollover($sourcecourse->id, $destinationcourse->id);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
@@ -86,11 +84,8 @@ class local_rollover_controller_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
-        $worker = new rollover_worker([
-                                          'from'   => $sourcecourse->id,
-                                          'option' => ['activities' => 0],
-                                      ]);
-        $worker->rollover($destinationcourse->id);
+        $worker = new rollover_worker(['option' => ['activities' => 0]]);
+        $worker->rollover($sourcecourse->id, $destinationcourse->id);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
