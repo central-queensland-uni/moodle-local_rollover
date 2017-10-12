@@ -21,34 +21,28 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\backup;
-
-use local_rollover\admin\rollover_settings;
+use local_rollover\backup\backup_worker;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
-require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+class local_rollover_backup_backup_worker_test extends rollover_testcase {
+    public function test_backup() {
+        self::resetAfterTest(true);
 
-/**
- * @package     local_rollover
- * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
- * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class rollover_worker {
-    /** @var bool[] */
-    private $options;
+        $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
+        $this->generator()->create_assignment('backup-source-course', 'Backup Assignment');
 
-    public function get_options() {
-        return $this->options;
+        $backupworker = new backup_worker($sourcecourse->id);
+        $backupworker->backup();
+
+        self::assertFileExists($backupworker->get_path());
+        $xml = file_get_contents($backupworker->get_path() . '/moodle_backup.xml');
+        self::assertContains('<original_course_shortname>backup-source-course</original_course_shortname>', $xml);
+        self::assertContains('<title>Backup Assignment</title>', $xml);
     }
 
-    public function __construct($parameters) {
-        $this->options = [];
-        foreach (array_keys(rollover_settings::get_rollover_options()) as $option) {
-            $this->options[$option] = isset($parameters['option'][$option]) ? (bool)$parameters['option'][$option] : false;
-        }
+    public function test_it_includes_the_log_in_the_backup() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 }

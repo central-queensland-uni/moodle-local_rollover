@@ -24,9 +24,9 @@
 namespace local_rollover;
 
 use context_course;
+use local_rollover\admin\rollover_settings;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
-use local_rollover\backup\rollover_worker;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
 use moodle_page;
@@ -130,9 +130,9 @@ class rollover_controller {
         }
 
         $data = $form->get_data();
+        $data->option = isset($data->option) ? $data->option : [];
 
-        $worker = new rollover_worker((array)$data);
-        $worker->rollover();
+        $this->rollover($data->from, $data->into, ['options' => $data->option]);
 
         $destination = get_course($data->from);
         $this->rollover_complete($destination->shortname);
@@ -187,7 +187,9 @@ class rollover_controller {
         echo $this->output->footer();
     }
 
-    public function rollover($from, $into, $options) {
+    public function rollover($from, $into, $parameters) {
+        $options = rollover_settings::prepare_rollover_options($parameters);
+
         $backupworker = new backup_worker($from);
         $backupworker->backup();
 

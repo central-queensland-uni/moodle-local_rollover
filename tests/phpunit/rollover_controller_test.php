@@ -100,4 +100,44 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         ];
         self::assertSame($expected, $courses);
     }
+
+    public function test_it_respects_the_include_role_assignments_option() {
+        self::resetAfterTest(true);
+
+        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
+        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
+        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+
+        $_GET['into'] = $sourcecourse->id;
+        $controller = new rollover_controller();
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['option' => ['activities' => 1]]);
+
+        course_modinfo::clear_instance_cache($destinationcourse);
+        $info = get_fast_modinfo($destinationcourse);
+        $cm = array_values($info->get_cms())[0];
+        self::assertSame('Full Rollover Assignment', $cm->name);
+    }
+
+    public function test_it_respects_the_not_include_role_assignments_option() {
+        self::resetAfterTest(true);
+
+        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
+        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
+        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+
+        $_GET['into'] = $sourcecourse->id;
+        $controller = new rollover_controller();
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['option' => ['activities' => 0]]);
+
+        course_modinfo::clear_instance_cache($destinationcourse);
+        $info = get_fast_modinfo($destinationcourse);
+        $cms = $info->get_cms();
+        self::assertCount(0, $cms);
+    }
+
+    public function test_it_runs_as_admin() {
+        // Is it really needed to run as user 2 (admin)?
+        // Let's figure out when we the specific capabilities.
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
 }
