@@ -45,13 +45,6 @@ class rollover_worker {
         return $this->backupworker;
     }
 
-    /** @var restore_worker */
-    private $restoreworker = null;
-
-    public function get_restore_worker() {
-        return $this->restoreworker;
-    }
-
     /** @var bool[] */
     private $options;
 
@@ -64,18 +57,15 @@ class rollover_worker {
             $this->backupworker = new backup_worker($parameters['from']);
         }
 
-        if (!empty($parameters['into'])) {
-            $this->restoreworker = new restore_worker($parameters['into']);
-        }
-
         $this->options = [];
         foreach (array_keys(rollover_settings::get_rollover_options()) as $option) {
             $this->options[$option] = isset($parameters['option'][$option]) ? (bool)$parameters['option'][$option] : false;
         }
     }
 
-    public function rollover() {
+    public function rollover($into) {
         $this->backupworker->backup();
-        $this->restoreworker->restore($this->backupworker->get_backup_id(), $this->options);
+        $worket = new restore_worker($into);
+        $worket->restore($this->backupworker->get_backup_id(), $this->options);
     }
 }

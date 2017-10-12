@@ -21,6 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\backup\restore_worker;
 use local_rollover\backup\rollover_worker;
 use local_rollover\test\rollover_testcase;
 
@@ -47,10 +48,11 @@ class local_rollover_controller_test extends rollover_testcase {
 
         $destinationcourse = $this->generator()->create_course_by_shortname('destination-course');
 
-        $worker = new rollover_worker(['into' => $destinationcourse->id, 'option' => ['activities' => 1]]);
-
         $this->extract_fixture_backup_data();
-        $worker->get_restore_worker()->restore('6810b32987b568760f55d626dcc5448a', $worker->get_options());
+
+        $worker = new rollover_worker(['option' => ['activities' => 1]]);
+        $restoreworker = new restore_worker($destinationcourse->id);
+        $restoreworker->restore('6810b32987b568760f55d626dcc5448a', $worker->get_options());
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
@@ -67,10 +69,9 @@ class local_rollover_controller_test extends rollover_testcase {
 
         $worker = new rollover_worker([
                                           'from'   => $sourcecourse->id,
-                                          'into'   => $destinationcourse->id,
                                           'option' => ['activities' => 1],
                                       ]);
-        $worker->rollover();
+        $worker->rollover($destinationcourse->id);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
@@ -87,10 +88,9 @@ class local_rollover_controller_test extends rollover_testcase {
 
         $worker = new rollover_worker([
                                           'from'   => $sourcecourse->id,
-                                          'into'   => $destinationcourse->id,
                                           'option' => ['activities' => 0],
                                       ]);
-        $worker->rollover();
+        $worker->rollover($destinationcourse->id);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
