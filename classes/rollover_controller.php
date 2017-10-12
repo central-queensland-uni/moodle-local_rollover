@@ -24,6 +24,7 @@
 namespace local_rollover;
 
 use context_course;
+use local_rollover\backup\rollover_worker;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
 use moodle_page;

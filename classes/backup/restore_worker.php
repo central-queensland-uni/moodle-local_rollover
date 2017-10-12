@@ -21,11 +21,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover;
+namespace local_rollover\backup;
 
 use backup;
-use backup_controller;
-use local_rollover\admin\rollover_settings;
 use restore_controller;
 
 defined('MOODLE_INTERNAL') || die();
@@ -40,76 +38,30 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class rollover_worker {
-    /** Run backup/restore as admin (bypass normal capability check for courses). */
-    const USERID = 2;
-
-    /** @var int */
-    private $sourcecourseid;
-
+class restore_worker {
     /** @var int */
     private $destinationcourseid;
 
-    /** @var bool[] */
-    private $options;
-
-    /** @var string|null */
-    private $backupid = null;
-
-    public function set_backup_id($backupid) {
-        $this->backupid = $backupid;
+    public function __construct($destinationcourseid) {
+        $this->destinationcourseid = (int)$destinationcourseid;
     }
 
-    public function __construct($parameters) {
-        $this->sourcecourseid = (int)$parameters['from'];
-        $this->destinationcourseid = (int)$parameters['into'];
-
-        $this->options = [];
-        foreach (array_keys(rollover_settings::get_rollover_options()) as $option) {
-            $this->options[$option] = isset($parameters['option'][$option]) ? (bool)$parameters['option'][$option] : false;
-        }
-    }
-
-    public function get_backup_path() {
-        global $CFG;
-        return $CFG->tempdir . '/backup/' . $this->backupid;
-    }
-
-    public function backup() {
-        $backup = new backup_controller(backup::TYPE_1COURSE,
-                                        $this->sourcecourseid,
-                                        backup::FORMAT_MOODLE,
-                                        backup::INTERACTIVE_NO,
-                                        backup::MODE_IMPORT,
-                                        self::USERID);
-
-        $this->backupid = $backup->get_backupid();
-
-        $backup->execute_plan();
-        $backup->destroy();
-    }
-
-    public function restore() {
-        $restore = new restore_controller($this->backupid,
+    public function restore($backupid, $options) {
+        $restore = new restore_controller($backupid,
                                           $this->destinationcourseid,
                                           backup::INTERACTIVE_NO,
                                           backup::MODE_GENERAL,
-                                          self::USERID,
+                                          rollover_worker::USERID,
                                           backup::TARGET_EXISTING_ADDING);
 
         $settings = $restore->get_plan()->get_settings();
 
         foreach (['activities'] as $option) {
-            $settings[$option]->set_value($this->options[$option] ? 1 : 0);
+            $settings[$option]->set_value($options[$option] ? 1 : 0);
         }
 
         $restore->execute_precheck();
         $restore->execute_plan();
         $restore->destroy();
-    }
-
-    public function rollover() {
-        $this->backup();
-        $this->restore();
     }
 }
