@@ -24,6 +24,7 @@
 namespace local_rollover\backup;
 
 use backup;
+use local_rollover\rollover_controller;
 use restore_controller;
 
 defined('MOODLE_INTERNAL') || die();
@@ -51,7 +52,7 @@ class restore_worker {
                                           $this->destinationcourseid,
                                           backup::INTERACTIVE_NO,
                                           backup::MODE_GENERAL,
-                                          rollover_worker::USERID,
+                                          rollover_controller::USERID,
                                           backup::TARGET_EXISTING_ADDING);
 
         $settings = $restore->get_plan()->get_settings();

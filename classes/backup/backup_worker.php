@@ -25,6 +25,7 @@ namespace local_rollover\backup;
 
 use backup;
 use backup_controller;
+use local_rollover\rollover_controller;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -68,7 +69,7 @@ class backup_worker {
                                         backup::FORMAT_MOODLE,
                                         backup::INTERACTIVE_NO,
                                         backup::MODE_IMPORT,
-                                        rollover_worker::USERID);
+                                        rollover_controller::USERID);
 
         $this->backupid = $backup->get_backupid();
 

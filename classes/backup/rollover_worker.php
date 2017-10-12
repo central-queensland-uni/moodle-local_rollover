@@ -38,9 +38,6 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rollover_worker {
-    /** Run backup/restore as admin (bypass normal capability check for courses). */
-    const USERID = 2;
-
     /** @var backup_worker */
     private $backupworker = null;
 

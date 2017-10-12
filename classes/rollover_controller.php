@@ -181,4 +181,7 @@ class rollover_controller {
     private function show_footer() {
         echo $this->output->footer();
     }
+
+    /** Run backup/restore as admin (bypass normal capability check for courses). */
+    const USERID = 2;
 }
