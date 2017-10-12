@@ -110,7 +110,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $_GET['into'] = $sourcecourse->id;
         $controller = new rollover_controller();
-        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['option' => ['activities' => 1]]);
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['options' => ['activities' => 1]]);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
@@ -127,7 +127,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $_GET['into'] = $sourcecourse->id;
         $controller = new rollover_controller();
-        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['option' => ['activities' => 0]]);
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['options' => ['activities' => 0]]);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);

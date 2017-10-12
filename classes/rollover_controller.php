@@ -175,7 +175,7 @@ class rollover_controller {
 
     private function show_footer() {
         global $OUTPUT;
-        
+
         echo $OUTPUT->footer();
     }
 
