@@ -21,26 +21,36 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\navigation;
+use local_rollover\form\form_options_selection;
+use local_rollover\rollover_controller;
 use local_rollover\rollover_parameters;
-use local_rollover\test\mock_navigation;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_navigation_test extends rollover_testcase {
-    public function test_course_rollover_option() {
-        $navigation = new mock_navigation();
+class local_rollover_steps_rollover_complete_test extends rollover_testcase {
+    public function test_it_is_used_after_it_is_done() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
 
-        (new navigation())->add_course_administration($navigation, 1);
+        $destinationcourse = $this->generator()->create_course_by_shortname('destination');
+        $sourcecourse = $this->generator()->create_course_by_shortname('from');
 
-        /** @var moodle_url $url */
-        list($name, $url) = $navigation->data[0];
-        self::assertSame($name, 'Rollover');
-        self::assertEquals(1, $url->param(rollover_parameters::PARAM_DESTINATION_COURSE_ID));
+        form_options_selection::mock_submit([
+                                                rollover_parameters::PARAM_STEP                  => 1,
+                                                rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
+                                                rollover_parameters::PARAM_SOURCE_COURSE_ID      => $sourcecourse->id,
+                                            ]);
+        $controller = new rollover_controller();
+
+        ob_start();
+        $controller->index();
+        $html = ob_get_clean();
+
+        self::assertContains('Rollover successful', $html);
     }
 
-    public function test_it_only_shows_options_user_has_capability() {
+    public function test_it_works_if_validation_fails() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 }

@@ -25,6 +25,7 @@
 
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
+use local_rollover\rollover_parameters;
 use local_rollover\test\generator;
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
@@ -122,7 +123,8 @@ class behat_local_rollover extends behat_base {
      * @When /^I go to the rollover page for the course "([^"]*)" +\# local_rollover$/
      */
     public function i_go_to_the_rollover_page_for_the_course($shortname) {
-        $this->visitPath('/local/rollover/index.php?into=' . $this->generator()->get_course_id($shortname));
+        $param = rollover_parameters::PARAM_DESTINATION_COURSE_ID . '=' . $this->generator()->get_course_id($shortname);
+        $this->visitPath("/local/rollover/index.php?{$param}");
     }
 
     /**
@@ -188,15 +190,16 @@ class behat_local_rollover extends behat_base {
      * @Given /^I am rolling over a course at the "([^"]*)" step +\# local_rollover$/
      */
     public function i_am_rolling_over_a_course_at_the_step($step) {
-        switch ($step) {
-            case 'Rollover options':
-                $from = $this->generator()->create_course_by_shortname('source')->id;
-                $into = $this->generator()->create_course_by_shortname('destination')->id;
-                $this->visitPath("/local/rollover/index.php?from={$from}&into={$into}");
-                return;
-            default:
-                throw new \Behat\Behat\Tester\Exception\PendingException();
+        if ($step != 'Rollover options') {
+            throw new \Behat\Behat\Tester\Exception\PendingException();
         }
+
+        $this->generator()->create_course_by_shortname('source')->id;
+        $this->generator()->create_course_by_shortname('destination')->id;
+
+        $this->i_go_to_the_rollover_page_for_the_course('destination');
+        $this->i_select_in_field('source', 'Original course');
+        $this->execute('behat_forms::press_button', ['Next']);
     }
 
     /**

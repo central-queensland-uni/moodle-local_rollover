@@ -37,7 +37,7 @@ class local_rollover_backup_restore_worker_test extends rollover_testcase {
 
         $restoreworker = new restore_worker($destinationcourse->id);
         $restoreworker->restore('6810b32987b568760f55d626dcc5448a',
-                                rollover_settings::prepare_rollover_options(['options' => ['activities' => 1]]));
+                                rollover_settings::prepare_rollover_options(['activities' => 1]));
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);

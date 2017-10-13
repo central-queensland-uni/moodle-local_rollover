@@ -23,6 +23,7 @@
 
 use local_rollover\form\form_source_course_selection;
 use local_rollover\rollover_controller;
+use local_rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,7 +35,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         $this->resetAfterTest(true);
         self::setAdminUser();
         $COURSE = $this->generator()->create_course();
-        $_GET = ['into' => 1];
+        $_GET = [rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1];
 
         $controller = new rollover_controller();
 
@@ -52,7 +53,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         self::setAdminUser();
         $COURSE = $this->generator()->create_course_by_shortname('source');
 
-        form_source_course_selection::mock_submit(['into' => 1, 'sourceshortname' => 'source']);
+        form_source_course_selection::mock_submit([rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1]);
 
         $controller = new rollover_controller();
 
@@ -82,7 +83,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         self::setUser($user);
 
-        $_GET['into'] = $destination->id;
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
         $controller = new rollover_controller();
         $form = $controller->create_form_source_course_selection();
 
@@ -108,9 +109,9 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
-        $_GET['into'] = $sourcecourse->id;
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
         $controller = new rollover_controller();
-        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['options' => ['activities' => 1]]);
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['activities' => 1]);
 
         course_modinfo::clear_instance_cache($destinationcourse);
         $info = get_fast_modinfo($destinationcourse);
@@ -125,7 +126,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
         $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
 
-        $_GET['into'] = $sourcecourse->id;
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
         $controller = new rollover_controller();
         $controller->rollover($sourcecourse->id, $destinationcourse->id, ['options' => ['activities' => 0]]);
 

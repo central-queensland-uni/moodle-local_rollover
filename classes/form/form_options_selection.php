@@ -24,6 +24,7 @@
 namespace local_rollover\form;
 
 use local_rollover\admin\rollover_settings;
+use local_rollover\rollover_parameters;
 use moodleform;
 use stdClass;
 
@@ -53,11 +54,14 @@ class form_options_selection extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('hidden', 'from');
-        $mform->setType('from', PARAM_INT);
+        $mform->addElement('hidden', rollover_parameters::PARAM_STEP);
+        $mform->setType(rollover_parameters::PARAM_STEP, PARAM_INT);
 
-        $mform->addElement('hidden', 'into');
-        $mform->setType('into', PARAM_INT);
+        $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
+        $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
+
+        $mform->addElement('hidden', rollover_parameters::PARAM_SOURCE_COURSE_ID);
+        $mform->setType(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
 
         foreach (rollover_settings::get_rollover_options() as $option => $langname) {
             $this->definition_add_option($option, $langname);

@@ -39,7 +39,7 @@ class navigation {
     public function add_course_administration($navigation, $courseid) {
         $navigation->add(
             get_string('rollover', 'local_rollover'),
-            new moodle_url('/local/rollover/index.php', ['into' => $courseid]),
+            new moodle_url('/local/rollover/index.php', [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $courseid]),
             navigation_node::TYPE_SETTING,
             null,
             null,
