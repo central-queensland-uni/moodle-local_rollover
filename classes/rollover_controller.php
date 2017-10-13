@@ -81,10 +81,12 @@ class rollover_controller {
 
         $this->process();
 
-        $this->show_header();
-        $this->form->set_data([rollover_parameters::PARAM_STEP => $this->currentstep]);
-        $this->form->display();
-        $this->show_footer();
+        if (!is_null(($this->form))) {
+            $this->show_header();
+            $this->form->set_data([rollover_parameters::PARAM_STEP => $this->currentstep]);
+            $this->form->display();
+            $this->show_footer();
+        }
     }
 
     private function process() {
@@ -101,6 +103,7 @@ class rollover_controller {
             $options = isset($data->option) ? $data->option : [];
             $this->rollover($data->rollover_source_course_id, $data->rollover_destination_course_id, $options);
             $this->show_rollover_complete($data->rollover_source_course_id, $data->rollover_destination_course_id);
+            $this->form = null;
             return;
         }
 
