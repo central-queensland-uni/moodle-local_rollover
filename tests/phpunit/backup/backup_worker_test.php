@@ -55,4 +55,17 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         self::assertNotEmpty($backupworker->get_backup_id());
         self::assertEquals($sourcecourse->id, $backupworker->get_source_course_id());
     }
+
+    public function test_it_loads_given_a_backup_id() {
+        self::resetAfterTest(true);
+        $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
+
+        $backupworker = backup_worker::create($sourcecourse->id);
+        $backupid = $backupworker->get_backup_id();
+
+        $backupworker = backup_worker::load($backupid);
+        self::assertNotNull($backupworker);
+        self::assertNotEmpty($backupworker->get_backup_id());
+        self::assertEquals($sourcecourse->id, $backupworker->get_source_course_id());
+    }
 }

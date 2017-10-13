@@ -41,7 +41,18 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  */
 class backup_worker {
     public static function create($sourcecourseid) {
-        return new static($sourcecourseid);
+        $backupcontroller = new backup_controller(backup::TYPE_1COURSE,
+                                                  $sourcecourseid,
+                                                  backup::FORMAT_MOODLE,
+                                                  backup::INTERACTIVE_NO,
+                                                  backup::MODE_IMPORT,
+                                                  rollover_controller::USERID);
+        return new static($backupcontroller);
+    }
+
+    public static function load($backupid) {
+        $backupcontroller = backup_controller::load_controller($backupid);
+        return new static($backupcontroller);
     }
 
     /** @var backup_controller */
@@ -65,12 +76,7 @@ class backup_worker {
         $this->backupcontroller->destroy();
     }
 
-    protected function __construct($sourcecourseid) {
-        $this->backupcontroller = new backup_controller(backup::TYPE_1COURSE,
-                                                        $sourcecourseid,
-                                                        backup::FORMAT_MOODLE,
-                                                        backup::INTERACTIVE_NO,
-                                                        backup::MODE_IMPORT,
-                                                        rollover_controller::USERID);
+    protected function __construct(backup_controller $backupcontroller) {
+        $this->backupcontroller = $backupcontroller;
     }
 }
