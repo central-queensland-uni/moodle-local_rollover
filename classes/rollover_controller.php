@@ -30,6 +30,7 @@ use local_rollover\backup\restore_worker;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
 use moodle_url;
+use moodleform;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -61,6 +62,9 @@ class rollover_controller {
     /** @var stdClass */
     private $destinationcourse;
 
+    /** @var moodleform */
+    private $form;
+
     public function __construct() {
         $this->destinationcourse = get_course(required_param(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT));
         $this->currentstep = (int)optional_param(rollover_parameters::PARAM_STEP, 0, PARAM_INT);
@@ -75,28 +79,34 @@ class rollover_controller {
                        [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
         $PAGE->set_heading($this->destinationcourse->fullname);
 
-        $form = $this->create_form();
-        $data = $form->get_data();
+        $this->process();
+
+        $this->show_header();
+        $this->form->set_data([rollover_parameters::PARAM_STEP => $this->currentstep]);
+        $this->form->display();
+        $this->show_footer();
+    }
+
+    private function process() {
+        $this->form = $this->create_form();
+
+        $data = $this->form->get_data();
         if (empty($data)) {
-            $form->set_data([rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
-        } else {
-            $this->currentstep++;
-            if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
-                $options = isset($data->option) ? $data->option : [];
-                $this->rollover($data->rollover_source_course_id, $data->rollover_destination_course_id, $options);
-                $this->show_rollover_complete($data->rollover_source_course_id, $data->rollover_destination_course_id);
-                return;
-            } else {
-                $form = $this->create_form();
-                unset($data->submitbutton);
-                $form->set_data($data);
-            }
+            $this->form->set_data([rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
+            return;
         }
 
-        $form->set_data([rollover_parameters::PARAM_STEP => $this->currentstep]);
-        $this->show_header();
-        $form->display();
-        $this->show_footer();
+        $this->currentstep++;
+        if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
+            $options = isset($data->option) ? $data->option : [];
+            $this->rollover($data->rollover_source_course_id, $data->rollover_destination_course_id, $options);
+            $this->show_rollover_complete($data->rollover_source_course_id, $data->rollover_destination_course_id);
+            return;
+        }
+
+        $this->form = $this->create_form();
+        unset($data->submitbutton);
+        $this->form->set_data($data);
     }
 
     public function rollover($from, $destination, $parameters) {
