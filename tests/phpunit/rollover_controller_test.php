@@ -47,13 +47,15 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
     }
 
     public function test_it_shows_options_selection() {
-        global $COURSE;
-
         $this->resetAfterTest(true);
         self::setAdminUser();
-        $COURSE = $this->generator()->create_course_by_shortname('source');
+        $source = $this->generator()->create_course_by_shortname('source');
+        $destination = $this->generator()->create_course_by_shortname('destination');
 
-        form_source_course_selection::mock_submit([rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1]);
+        form_source_course_selection::mock_submit([
+                                                      rollover_parameters::PARAM_SOURCE_COURSE_ID      => $source->id,
+                                                      rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+                                                  ]);
 
         $controller = new rollover_controller();
 
@@ -103,6 +105,8 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
     }
 
     public function test_it_respects_the_include_role_assignments_option() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+
         self::resetAfterTest(true);
 
         $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
@@ -120,6 +124,8 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
     }
 
     public function test_it_respects_the_not_include_role_assignments_option() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+
         self::resetAfterTest(true);
 
         $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');

@@ -25,6 +25,7 @@ namespace local_rollover\backup;
 
 use backup;
 use backup_controller;
+use backup_root_task;
 use local_rollover\rollover_controller;
 
 defined('MOODLE_INTERNAL') || die();
@@ -78,5 +79,34 @@ class backup_worker {
 
     protected function __construct(backup_controller $backupcontroller) {
         $this->backupcontroller = $backupcontroller;
+    }
+
+    public function get_backup_root_task() {
+        $plan = $this->backupcontroller->get_plan();
+        $tasks = $plan->get_tasks();
+
+        foreach ($tasks as $task) {
+            if ($task instanceof backup_root_task) {
+                return $task;
+            }
+        }
+
+        debugging('backup_root_task not found');
+        return null;
+    }
+
+    public function get_backup_root_settings() {
+        /** @var backup_root_task $task */
+        $task = $this->get_backup_root_task();
+        $indexed = $task->get_settings();
+        $settings = [];
+
+        foreach ($indexed as $setting) {
+            $settings[$setting->get_name()] = $setting;
+        }
+
+        unset($settings['filename']);
+
+        return $settings;
     }
 }

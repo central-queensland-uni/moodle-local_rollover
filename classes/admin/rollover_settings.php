@@ -50,9 +50,17 @@ class rollover_settings {
     public static function get_rollover_options() {
         $options = [];
         $rawoptions = [
+            'users',
+            'anonymize',
+            'role_assignments',
             'activities',
             'blocks',
             'filters',
+            'comments',
+            'badges',
+            'userscompletion',
+            'logs',
+            'histories',
             'questionbank',
             'groups',
         ];
@@ -63,6 +71,7 @@ class rollover_settings {
     }
 
     public static function prepare_rollover_options($parameters) {
+        $parameters = (array)$parameters;
         $options = [];
         foreach (array_keys(static::get_rollover_options()) as $option) {
             $options[$option] = isset($parameters[$option]) ? (bool)$parameters[$option] : false;

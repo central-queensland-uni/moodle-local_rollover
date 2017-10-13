@@ -65,6 +65,17 @@ class rollover_controller {
     /** @var moodleform */
     private $form;
 
+    /** @var backup_worker */
+    private $backupworker = null;
+
+    private function get_backup_worker() {
+        if (is_null($this->backupworker)) {
+            $sourceid = required_param(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
+            $this->backupworker = backup_worker::create($sourceid);
+        }
+        return $this->backupworker;
+    }
+
     public function __construct() {
         $this->destinationcourse = get_course(required_param(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT));
         $this->currentstep = (int)optional_param(rollover_parameters::PARAM_STEP, 0, PARAM_INT);
@@ -100,8 +111,7 @@ class rollover_controller {
 
         $this->currentstep++;
         if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
-            $options = isset($data->option) ? $data->option : [];
-            $this->rollover($data->rollover_source_course_id, $data->rollover_destination_course_id, $options);
+            $this->rollover($data);
             $this->show_rollover_complete($data->rollover_source_course_id, $data->rollover_destination_course_id);
             $this->form = null;
             return;
@@ -112,7 +122,10 @@ class rollover_controller {
         $this->form->set_data($data);
     }
 
-    public function rollover($from, $destination, $parameters) {
+    public function rollover($parameters) {
+        $from = $parameters->rollover_source_course_id;
+        $destination = $parameters->rollover_destination_course_id;
+
         $options = rollover_settings::prepare_rollover_options($parameters);
 
         $backupworker = backup_worker::create($from);
@@ -190,7 +203,7 @@ class rollover_controller {
             case self::STEP_SELECT_SOURCE_COURSE:
                 return $this->create_form_source_course_selection();
             case self::STEP_SELECT_CONTENT_OPTIONS:
-                return new form_options_selection();
+                return new form_options_selection($this->get_backup_worker()->get_backup_root_settings());
             default:
                 debugging("Invalid step: {$this->currentstep}");
                 return null;

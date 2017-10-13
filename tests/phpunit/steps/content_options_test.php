@@ -39,7 +39,7 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $sourcecourse = $this->generator()->create_course_by_shortname('from');
 
         form_source_course_selection::mock_submit([
-                                                      rollover_parameters::PARAM_STEP                  => 1,
+                                                      rollover_parameters::PARAM_STEP                  => 0,
                                                       rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
                                                       rollover_parameters::PARAM_SOURCE_COURSE_ID      => $sourcecourse->id,
                                                   ]);

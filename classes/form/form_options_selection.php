@@ -23,6 +23,7 @@
 
 namespace local_rollover\form;
 
+use backup_generic_setting;
 use local_rollover\admin\rollover_settings;
 use local_rollover\rollover_parameters;
 use moodleform;
@@ -43,8 +44,12 @@ class form_options_selection extends moodleform {
     /** @var stdClass */
     private $config;
 
-    public function __construct() {
+    /** @var backup_generic_setting */
+    private $settings;
+
+    public function __construct($settings) {
         $this->config = get_config('local_rollover');
+        $this->settings = $settings;
         parent::__construct();
     }
 
@@ -63,37 +68,40 @@ class form_options_selection extends moodleform {
         $mform->addElement('hidden', rollover_parameters::PARAM_SOURCE_COURSE_ID);
         $mform->setType(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
 
-        foreach (rollover_settings::get_rollover_options() as $option => $langname) {
-            $this->definition_add_option($option, $langname);
+        foreach ($this->settings as $setting) {
+            $this->definition_add_setting($setting);
         }
 
         $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
     }
 
-    private function definition_add_option($option, $langname) {
-        list($default, $locked) = $this->definition_add_option_get_settings($option);
+    private function definition_add_setting($setting) {
+        $name = $setting->get_name();
+        list($default, $locked) = $this->definition_get_default_and_locked($name);
 
-        if ($locked && !$default) {
-            return;
-        }
-
-        $mform = $this->_form;
-        $name = "option[{$option}]";
+        $hidden = ($locked && !$default);
 
         $attributes = $locked ? 'disabled' : null;
-        $mform->addElement('checkbox',
-                           $name,
-                           get_string("general{$langname}", 'backup'),
-                           '',
-                           $attributes);
+        $mform = $this->_form;
+
+        if ($hidden) {
+            $mform->addElement('hidden', $name);
+            $mform->setType($name, PARAM_BOOL);
+        } else {
+            $mform->addElement('checkbox',
+                               $name,
+                               get_string($this->get_label_for_setting($name), 'backup'),
+                               '',
+                               $attributes);
+        }
         $mform->setDefault($name, $default);
     }
 
-    private function definition_add_option_get_settings($option) {
-        $default = "option_{$option}";
+    private function definition_get_default_and_locked($name) {
+        $default = "option_{$name}";
         $default = isset($this->config->$default) ? $this->config->$default : 0;
 
-        $locked = "option_{$option}_locked";
+        $locked = "option_{$name}_locked";
         $locked = isset($this->config->$locked) ? $this->config->$locked : 0;
 
         return [$default, $locked];
@@ -109,5 +117,10 @@ class form_options_selection extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         return $errors;
+    }
+
+    private function get_label_for_setting($name) {
+        $name = str_replace('_', '', $name);
+        return "rootsetting{$name}";
     }
 }
