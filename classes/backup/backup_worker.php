@@ -40,40 +40,37 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_worker {
-    /** @var int */
-    private $sourcecourseid;
+    public static function create($sourcecourseid) {
+        return new static($sourcecourseid);
+    }
 
-    /** @var  string */
-    private $backupid = null;
+    /** @var backup_controller */
+    private $backupcontroller;
+
+    public function get_source_course_id() {
+        return $this->backupcontroller->get_courseid();
+    }
 
     public function get_backup_id() {
-        return $this->backupid;
-    }
-
-    public function set_backup_id($backupid) {
-        $this->backupid = $backupid;
-    }
-
-    public function __construct($sourcecourseid) {
-        $this->sourcecourseid = (int)$sourcecourseid;
+        return $this->backupcontroller->get_backupid();
     }
 
     public function get_path() {
         global $CFG;
-        return $CFG->tempdir . '/backup/' . $this->backupid;
+        return $CFG->tempdir . '/backup/' . $this->get_backup_id();
     }
 
     public function backup() {
-        $backup = new backup_controller(backup::TYPE_1COURSE,
-                                        $this->sourcecourseid,
-                                        backup::FORMAT_MOODLE,
-                                        backup::INTERACTIVE_NO,
-                                        backup::MODE_IMPORT,
-                                        rollover_controller::USERID);
+        $this->backupcontroller->execute_plan();
+        $this->backupcontroller->destroy();
+    }
 
-        $this->backupid = $backup->get_backupid();
-
-        $backup->execute_plan();
-        $backup->destroy();
+    protected function __construct($sourcecourseid) {
+        $this->backupcontroller = new backup_controller(backup::TYPE_1COURSE,
+                                                        $sourcecourseid,
+                                                        backup::FORMAT_MOODLE,
+                                                        backup::INTERACTIVE_NO,
+                                                        backup::MODE_IMPORT,
+                                                        rollover_controller::USERID);
     }
 }

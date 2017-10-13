@@ -33,7 +33,7 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
         $this->generator()->create_assignment('backup-source-course', 'Backup Assignment');
 
-        $backupworker = new backup_worker($sourcecourse->id);
+        $backupworker = backup_worker::create($sourcecourse->id);
         $backupworker->backup();
 
         self::assertFileExists($backupworker->get_path());
@@ -44,5 +44,15 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
 
     public function test_it_includes_the_log_in_the_backup() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_creates_given_a_source_course_id() {
+        self::resetAfterTest(true);
+        $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
+
+        $backupworker = backup_worker::create($sourcecourse->id);
+        self::assertNotNull($backupworker);
+        self::assertNotEmpty($backupworker->get_backup_id());
+        self::assertEquals($sourcecourse->id, $backupworker->get_source_course_id());
     }
 }

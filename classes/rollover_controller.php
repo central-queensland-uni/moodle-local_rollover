@@ -112,7 +112,7 @@ class rollover_controller {
     public function rollover($from, $destination, $parameters) {
         $options = rollover_settings::prepare_rollover_options($parameters);
 
-        $backupworker = new backup_worker($from);
+        $backupworker = backup_worker::create($from);
         $backupworker->backup();
 
         $restoreworker = new restore_worker($destination);
