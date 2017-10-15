@@ -112,7 +112,8 @@ class rollover_controller {
         $this->currentstep++;
         if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
             $this->rollover($data);
-            $this->show_rollover_complete($data->rollover_source_course_id, $data->rollover_destination_course_id);
+            $this->show_rollover_complete($data->{rollover_parameters::PARAM_SOURCE_COURSE_ID},
+                                          $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
             $this->form = null;
             return;
         }
@@ -123,8 +124,8 @@ class rollover_controller {
     }
 
     public function rollover($parameters) {
-        $from = $parameters->rollover_source_course_id;
-        $destination = $parameters->rollover_destination_course_id;
+        $from = $parameters->{rollover_parameters::PARAM_SOURCE_COURSE_ID};
+        $destination = $parameters->{rollover_parameters::PARAM_DESTINATION_COURSE_ID};
 
         $options = rollover_settings::prepare_rollover_options($parameters);
 
