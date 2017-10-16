@@ -45,7 +45,7 @@ class backup_worker {
         $backupcontroller = new backup_controller(backup::TYPE_1COURSE,
                                                   $sourcecourseid,
                                                   backup::FORMAT_MOODLE,
-                                                  backup::INTERACTIVE_NO,
+                                                  backup::INTERACTIVE_YES,
                                                   backup::MODE_IMPORT,
                                                   rollover_controller::USERID);
         return new static($backupcontroller);
@@ -73,6 +73,7 @@ class backup_worker {
     }
 
     public function backup() {
+        $this->backupcontroller->finish_ui();
         $this->backupcontroller->execute_plan();
         $this->backupcontroller->destroy();
     }
@@ -108,5 +109,9 @@ class backup_worker {
         unset($settings['filename']);
 
         return $settings;
+    }
+
+    public function save() {
+        $this->backupcontroller->save_controller();
     }
 }

@@ -62,6 +62,7 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
 
         $backupworker = backup_worker::create($sourcecourse->id);
         $backupid = $backupworker->get_backup_id();
+        $backupworker->save();
 
         $backupworker = backup_worker::load($backupid);
         self::assertNotNull($backupworker);
