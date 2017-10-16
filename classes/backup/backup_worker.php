@@ -27,6 +27,7 @@ use backup;
 use backup_controller;
 use backup_root_task;
 use local_rollover\rollover_controller;
+use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -47,7 +48,7 @@ class backup_worker {
                                                   $sourcecourseid,
                                                   backup::FORMAT_MOODLE,
                                                   backup::INTERACTIVE_YES,
-                                                  backup::MODE_IMPORT,
+                                                  backup::MODE_GENERAL,
                                                   rollover_controller::USERID);
         return new static($backupcontroller);
     }
@@ -74,9 +75,15 @@ class backup_worker {
     }
 
     public function backup() {
+        $setting = $this->get_backup_root_setting_filename();
+        $setting->set_value($this->get_db_filename());
+
         $this->backupcontroller->finish_ui();
         $this->backupcontroller->execute_plan();
+        $results = $this->backupcontroller->get_results();
         $this->backupcontroller->destroy();
+
+        $this->extract_file($results['backup_destination']);
     }
 
     protected function __construct(backup_controller $backupcontroller) {
@@ -112,10 +119,32 @@ class backup_worker {
         return $settings;
     }
 
+    public function get_backup_root_setting_filename() {
+        $tasks = $this->get_backup_root_task()->get_settings();
+        foreach ($tasks as $setting) {
+            if ($setting->get_name() == 'filename') {
+                return $setting;
+            }
+        }
+
+        debugging('backup_root_task filename not found');
+        return null;
+    }
+
     public function save() {
         $this->backupcontroller->save_controller();
 
         // It cannot be reused, need to be reloaded.
         $this->backupcontroller = backup_controller::load_controller($this->get_backup_id());
+    }
+
+    private function extract_file(stored_file $file) {
+        $packer = get_file_packer('application/vnd.moodle.backup');
+        $file->extract_to_pathname($packer, $this->get_path());
+        $file->delete();
+    }
+
+    public function get_db_filename() {
+        return 'local_rollover_' . $this->get_backup_id() . '.mbz';
     }
 }
