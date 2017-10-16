@@ -70,16 +70,6 @@ class rollover_settings {
         return $options;
     }
 
-    public static function prepare_rollover_options($parameters) {
-        $parameters = (array)$parameters;
-        $options = [];
-        foreach (array_keys(static::get_rollover_options()) as $option) {
-            $options[$option] = isset($parameters[$option]) ? (bool)$parameters[$option] : false;
-        }
-        return $options;
-    }
-
-
     /**
      * @param admin_root $admin
      */

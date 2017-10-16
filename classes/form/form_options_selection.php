@@ -24,7 +24,6 @@
 namespace local_rollover\form;
 
 use backup_generic_setting;
-use local_rollover\admin\rollover_settings;
 use local_rollover\rollover_parameters;
 use moodleform;
 use stdClass;
@@ -59,14 +58,14 @@ class form_options_selection extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('hidden', rollover_parameters::PARAM_STEP);
-        $mform->setType(rollover_parameters::PARAM_STEP, PARAM_INT);
+        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
+        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
 
         $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
-        $mform->addElement('hidden', rollover_parameters::PARAM_SOURCE_COURSE_ID);
-        $mform->setType(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
+        $mform->addElement('hidden', rollover_parameters::PARAM_BACKUP_ID);
+        $mform->setType(rollover_parameters::PARAM_BACKUP_ID, PARAM_ALPHANUM);
 
         foreach ($this->settings as $setting) {
             $this->definition_add_setting($setting);
@@ -84,17 +83,18 @@ class form_options_selection extends moodleform {
         $attributes = $locked ? 'disabled' : null;
         $mform = $this->_form;
 
+        $uiname = $setting->get_ui_name();
         if ($hidden) {
-            $mform->addElement('hidden', $name);
-            $mform->setType($name, PARAM_BOOL);
+            $mform->addElement('hidden', $uiname);
+            $mform->setType($uiname, PARAM_BOOL);
         } else {
             $mform->addElement('checkbox',
-                               $name,
+                               $uiname,
                                get_string($this->get_label_for_setting($name), 'backup'),
                                '',
                                $attributes);
         }
-        $mform->setDefault($name, $default);
+        $mform->setDefault($uiname, $default);
     }
 
     private function definition_get_default_and_locked($name) {

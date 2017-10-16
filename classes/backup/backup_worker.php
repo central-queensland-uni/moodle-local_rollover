@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
 
 /**
  * @package     local_rollover
@@ -113,5 +114,8 @@ class backup_worker {
 
     public function save() {
         $this->backupcontroller->save_controller();
+
+        // It cannot be reused, need to be reloaded.
+        $this->backupcontroller = backup_controller::load_controller($this->get_backup_id());
     }
 }

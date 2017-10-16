@@ -69,8 +69,8 @@ class form_source_course_selection extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('hidden', rollover_parameters::PARAM_STEP);
-        $mform->setType(rollover_parameters::PARAM_STEP, PARAM_INT);
+        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
+        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
 
         $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);

@@ -56,6 +56,10 @@ class rollover_controller {
         ];
     }
 
+    public static function get_step_index($step) {
+        return array_search($step, static::get_steps(), true);
+    }
+
     /** @var int */
     private $currentstep;
 
@@ -70,15 +74,20 @@ class rollover_controller {
 
     private function get_backup_worker() {
         if (is_null($this->backupworker)) {
-            $sourceid = required_param(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
-            $this->backupworker = backup_worker::create($sourceid);
+            $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
+            if (is_null($backupid)) {
+                $sourceid = required_param(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
+                $this->backupworker = backup_worker::create($sourceid);
+            } else {
+                $this->backupworker = backup_worker::load($backupid);
+            }
         }
         return $this->backupworker;
     }
 
     public function __construct() {
         $this->destinationcourse = get_course(required_param(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT));
-        $this->currentstep = (int)optional_param(rollover_parameters::PARAM_STEP, 0, PARAM_INT);
+        $this->currentstep = (int)optional_param(rollover_parameters::PARAM_CURRENT_STEP, 0, PARAM_INT);
     }
 
     public function index() {
@@ -94,7 +103,7 @@ class rollover_controller {
 
         if (!is_null(($this->form))) {
             $this->show_header();
-            $this->form->set_data([rollover_parameters::PARAM_STEP => $this->currentstep]);
+            $this->form->set_data([rollover_parameters::PARAM_CURRENT_STEP => $this->currentstep]);
             $this->form->display();
             $this->show_footer();
         }
@@ -109,10 +118,26 @@ class rollover_controller {
             return;
         }
 
+        if ($this->get_current_step_name() == self::STEP_SELECT_SOURCE_COURSE) {
+            $data->rollover_backup_id = $this->get_backup_worker()->get_backup_id();
+            $this->backupworker->save();
+        }
+
+        if ($this->get_current_step_name() == self::STEP_SELECT_CONTENT_OPTIONS) {
+            $settings = $this->get_backup_worker()->get_backup_root_settings();
+            foreach ($settings as $setting) {
+                $name = $setting->get_ui_name();
+                $value = isset($data->$name) ? $data->$name : 0;
+                $setting->set_value($value);
+            }
+            $this->backupworker->save();
+        }
+
         $this->currentstep++;
+
         if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
             $this->rollover($data);
-            $this->show_rollover_complete($data->{rollover_parameters::PARAM_SOURCE_COURSE_ID},
+            $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
                                           $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
             $this->form = null;
             return;
@@ -124,16 +149,12 @@ class rollover_controller {
     }
 
     public function rollover($parameters) {
-        $from = $parameters->{rollover_parameters::PARAM_SOURCE_COURSE_ID};
-        $destination = $parameters->{rollover_parameters::PARAM_DESTINATION_COURSE_ID};
-
-        $options = rollover_settings::prepare_rollover_options($parameters);
-
-        $backupworker = backup_worker::create($from);
+        $backupworker = $this->get_backup_worker();
         $backupworker->backup();
 
+        $destination = $parameters->{rollover_parameters::PARAM_DESTINATION_COURSE_ID};
         $restoreworker = new restore_worker($destination);
-        $restoreworker->restore($backupworker->get_backup_id(), $options);
+        $restoreworker->restore($backupworker->get_backup_id());
     }
 
     public function show_rollover_complete($from, $destination) {

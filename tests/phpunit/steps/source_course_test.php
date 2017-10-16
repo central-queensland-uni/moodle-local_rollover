@@ -55,7 +55,8 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $actual = $crawler->filter($selector1)->getNode(0)->getAttribute('value');
         self::assertSame((string)$destinationcourse->id, $actual, 'Must provide destination course id.');
 
-        $actual = $crawler->filter('input[name="' . rollover_parameters::PARAM_STEP . '"]')->getNode(0)->getAttribute('value');
+        $selector = 'input[name="' . rollover_parameters::PARAM_CURRENT_STEP . '"]';
+        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
         self::assertSame('0', $actual, 'It is the first step.');
 
         $actual = $crawler->filter('select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"]')->count();

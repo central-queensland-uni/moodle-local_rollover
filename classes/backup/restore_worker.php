@@ -47,19 +47,13 @@ class restore_worker {
         $this->destinationcourseid = (int)$destinationcourseid;
     }
 
-    public function restore($backupid, $options) {
+    public function restore($backupid) {
         $restore = new restore_controller($backupid,
                                           $this->destinationcourseid,
                                           backup::INTERACTIVE_NO,
                                           backup::MODE_GENERAL,
                                           rollover_controller::USERID,
                                           backup::TARGET_EXISTING_ADDING);
-
-        $settings = $restore->get_plan()->get_settings();
-
-        foreach (['activities'] as $option) {
-            $settings[$option]->set_value($options[$option] ? 1 : 0);
-        }
 
         $restore->execute_precheck();
         $restore->execute_plan();

@@ -23,6 +23,7 @@
 
 use local_rollover\backup\backup_worker;
 use local_rollover\form\form_options_selection;
+use local_rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -64,7 +65,8 @@ class local_rollover_form_options_selection_test extends rollover_testcase {
 
         foreach ($options as $option => $values) {
             list($default, $locked) = $values;
-            $input = $crawler->filter("input[name='{$option}']")->getNode(0);
+            $selector = 'input[name="' . rollover_parameters::PARAM_OPTION_PREFIX . $option . '"]';
+            $input = $crawler->filter($selector)->getNode(0);
 
             if ($locked && !$default) {
                 self::assertSame('hidden', $input->getAttribute('type'), "{$option} default");

@@ -32,7 +32,14 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rollover_parameters {
-    const PARAM_STEP = 'rollover_step';
+    /** Available after any submit, it is used without valiation to determine which form to create. */
+    const PARAM_CURRENT_STEP = 'rollover_step';
+    /** Available at all steps, it detemines the "current course" and will be used at the restore step. */
     const PARAM_DESTINATION_COURSE_ID = 'rollover_destination_course_id';
+    /** Available only when selecting source course, after that it can be retrieved using the backup id. */
     const PARAM_SOURCE_COURSE_ID = 'rollover_source_course_id';
+    /** Available after source course is selected. */
+    const PARAM_BACKUP_ID = 'rollover_backup_id';
+    /** Prefix for content options (linked to backup root task ui names). */
+    const PARAM_OPTION_PREFIX = 'setting_root_';
 }

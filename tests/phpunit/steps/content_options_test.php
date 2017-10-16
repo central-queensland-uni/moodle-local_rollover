@@ -39,7 +39,7 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $sourcecourse = $this->generator()->create_course_by_shortname('from');
 
         form_source_course_selection::mock_submit([
-                                                      rollover_parameters::PARAM_STEP                  => 0,
+                                                      rollover_parameters::PARAM_CURRENT_STEP          => 0,
                                                       rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
                                                       rollover_parameters::PARAM_SOURCE_COURSE_ID      => $sourcecourse->id,
                                                   ]);
@@ -59,7 +59,8 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
         self::assertSame((string)$destinationcourse->id, $actual, 'Must provide destination course id.');
 
-        $actual = $crawler->filter('input[name="' . rollover_parameters::PARAM_STEP . '"]')->getNode(0)->getAttribute('value');
+        $selector = 'input[name="' . rollover_parameters::PARAM_CURRENT_STEP . '"]';
+        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
         self::assertSame('1', $actual, 'It is the first step.');
     }
 
