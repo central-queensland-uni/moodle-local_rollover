@@ -21,13 +21,17 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover;
+namespace local_rollover\backup;
 
-use moodle_url;
-use navigation_node;
-use pix_icon;
+use backup;
+use local_rollover\rollover_controller;
+use restore_controller;
 
 defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
 /**
  * @package     local_rollover
@@ -35,15 +39,24 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class navigation {
-    public function add_course_administration($navigation, $courseid) {
-        $navigation->add(
-            get_string('rollover', 'local_rollover'),
-            new moodle_url('/local/rollover/index.php', [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $courseid]),
-            navigation_node::TYPE_SETTING,
-            null,
-            null,
-            new pix_icon('i/return', '')
-        );
+class restore_worker {
+    /** @var int */
+    private $destinationcourseid;
+
+    public function __construct($destinationcourseid) {
+        $this->destinationcourseid = (int)$destinationcourseid;
+    }
+
+    public function restore($backupid) {
+        $restore = new restore_controller($backupid,
+                                          $this->destinationcourseid,
+                                          backup::INTERACTIVE_NO,
+                                          backup::MODE_GENERAL,
+                                          rollover_controller::USERID,
+                                          backup::TARGET_EXISTING_ADDING);
+
+        $restore->execute_precheck();
+        $restore->execute_plan();
+        $restore->destroy();
     }
 }

@@ -24,10 +24,13 @@
 namespace local_rollover;
 
 use context_course;
+use local_rollover\admin\rollover_settings;
+use local_rollover\backup\backup_worker;
+use local_rollover\backup\restore_worker;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
-use moodle_page;
 use moodle_url;
+use moodleform;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -39,110 +42,137 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rollover_controller {
-    /** @var moodle_page */
-    private $page;
+    /** Run backup/restore as admin (bypass normal capability check for courses). */
+    const USERID = 2;
+    const STEP_SELECT_SOURCE_COURSE = 'source_course';
+    const STEP_SELECT_CONTENT_OPTIONS = 'content_options';
+    const STEP_ROLLOVER_COMPLETE = 'complete';
 
-    /** @var stdClass */
-    private $output;
-
-    public function set_output($output) {
-        $this->output = $output;
+    public static function get_steps() {
+        return [
+            self::STEP_SELECT_SOURCE_COURSE,
+            self::STEP_SELECT_CONTENT_OPTIONS,
+            self::STEP_ROLLOVER_COMPLETE,
+        ];
     }
+
+    public static function get_step_index($step) {
+        return array_search($step, static::get_steps(), true);
+    }
+
+    /** @var int */
+    private $currentstep;
 
     /** @var stdClass */
     private $destinationcourse;
 
+    /** @var moodleform */
+    private $form;
+
+    /** @var backup_worker */
+    private $backupworker = null;
+
+    private function get_backup_worker() {
+        if (is_null($this->backupworker)) {
+            $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
+            if (is_null($backupid)) {
+                $sourceid = required_param(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
+                $this->backupworker = backup_worker::create($sourceid);
+            } else {
+                $this->backupworker = backup_worker::load($backupid);
+            }
+        }
+        return $this->backupworker;
+    }
+
     public function __construct() {
-        global $OUTPUT, $PAGE;
-
-        $this->page = $PAGE;
-        $this->output = $OUTPUT;
-
-        $this->destinationcourse = get_course(required_param('into', PARAM_INT));
+        $this->destinationcourse = get_course(required_param(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT));
+        $this->currentstep = (int)optional_param(rollover_parameters::PARAM_CURRENT_STEP, 0, PARAM_INT);
     }
 
     public function index() {
+        global $PAGE;
+
         require_login($this->destinationcourse);
-        $this->page->set_context(context_course::instance($this->destinationcourse->id));
-        $this->page->set_url('/local/rollover/index.php', ['into' => $this->destinationcourse->id]);
-        $this->page->set_heading($this->destinationcourse->fullname);
+        $PAGE->set_context(context_course::instance($this->destinationcourse->id));
+        $PAGE->set_url('/local/rollover/index.php',
+                       [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
+        $PAGE->set_heading($this->destinationcourse->fullname);
 
-        if (!is_null(optional_param('from', null, PARAM_INT))) {
-            $this->options_selection_page_next();
-        } else if (!is_null(optional_param('sourceshortname', null, PARAM_TEXT))) {
-            $this->source_selection_page_next();
-        } else {
-            $this->source_selection_page();
+        $this->process();
+
+        if (!is_null(($this->form))) {
+            $this->show_header();
+            $this->form->set_data([rollover_parameters::PARAM_CURRENT_STEP => $this->currentstep]);
+            $this->form->display();
+            $this->show_footer();
         }
     }
 
-    public function source_selection_page() {
-        $form = $this->create_form_source_course_selection();
+    private function process() {
+        $this->form = $this->create_form();
 
-        $form->set_data(['into' => $this->destinationcourse->id]);
-
-        $this->show_header('select_course');
-        $form->display();
-        $this->show_footer();
-    }
-
-    public function source_selection_page_next() {
-        global $DB;
-
-        $form = $this->create_form_source_course_selection();
-
-        if (!$form->is_submitted()) {
-            $this->source_selection_page();
+        $data = $this->form->get_data();
+        if (empty($data)) {
+            $this->form->set_data([rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
             return;
         }
 
-        $data = $form->get_data();
-        $sourceid = $DB->get_field('course', 'id', ['shortname' => $data->sourceshortname], MUST_EXIST);
+        if ($this->get_current_step_name() == self::STEP_SELECT_SOURCE_COURSE) {
+            $data->rollover_backup_id = $this->get_backup_worker()->get_backup_id();
+            $this->backupworker->save();
+        }
 
-        $this->options_selection_page($sourceid);
-    }
+        if ($this->get_current_step_name() == self::STEP_SELECT_CONTENT_OPTIONS) {
+            $settings = $this->get_backup_worker()->get_backup_root_settings();
+            foreach ($settings as $setting) {
+                $name = $setting->get_ui_name();
+                $value = isset($data->$name) ? $data->$name : 0;
+                $setting->set_value($value);
+            }
+            $this->backupworker->save();
+        }
 
-    public function options_selection_page($sourcecourseid) {
-        $form = new form_options_selection();
+        $this->currentstep++;
 
-        $form->set_data([
-                            'from'          => $sourcecourseid,
-                            'into'          => $this->destinationcourse->id,
-                        ]);
-
-        $this->show_header('select_options');
-        $form->display();
-        $this->show_footer();
-    }
-
-    public function options_selection_page_next() {
-        $form = new form_options_selection();
-
-        if (!$form->is_submitted()) {
-            $this->options_selection_page(required_param('from', PARAM_INT));
+        if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
+            $this->rollover($data);
+            $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
+                                          $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
+            $this->form = null;
             return;
         }
 
-        $data = $form->get_data();
-
-        $worker = new rollover_worker((array)$data);
-        $worker->rollover();
-
-        $destination = get_course($data->from);
-        $this->rollover_complete($destination->shortname);
+        $this->form = $this->create_form();
+        unset($data->submitbutton);
+        $this->form->set_data($data);
     }
 
-    public function rollover_complete($sourceshortname) {
-        $this->show_header('complete');
+    public function rollover($parameters) {
+        $backupworker = $this->get_backup_worker();
+        $backupworker->backup();
+
+        $destination = $parameters->{rollover_parameters::PARAM_DESTINATION_COURSE_ID};
+        $restoreworker = new restore_worker($destination);
+        $restoreworker->restore($backupworker->get_backup_id());
+    }
+
+    public function show_rollover_complete($from, $destination) {
+        global $OUTPUT;
+
+        $this->show_header();
+
+        $from = get_course($from);
+        $destination = get_course($destination);
 
         echo get_string('rolloversuccessfulmessage', 'local_rollover', [
-            'from' => htmlentities($sourceshortname),
-            'into' => htmlentities($this->destinationcourse->shortname),
+            'from' => htmlentities($from->shortname),
+            'into' => htmlentities($destination->shortname),
         ]);
         echo '<br /><br />';
 
-        $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
-        echo $this->output->single_button($url, get_string('proceed', 'local_rollover'), 'get');
+        $url = new moodle_url('/course/view.php', ['id' => $destination->id]);
+        echo $OUTPUT->single_button($url, get_string('proceed', 'local_rollover'), 'get');
 
         $this->show_footer();
     }
@@ -167,17 +197,42 @@ class rollover_controller {
                                          $courses,
                                          'shortname ASC',
                                          'id,shortname,fullname');
+
+        // Remove site-level and destionation course.
+        unset($courses[1]);
         unset($courses[$this->destinationcourse->id]);
 
         return new form_source_course_selection($courses);
     }
 
-    private function show_header($stepname) {
-        echo $this->output->header();
-        echo $this->output->heading(get_string("step_{$stepname}", 'local_rollover'));
+    private function show_header() {
+        global $OUTPUT;
+
+        $stepname = $this->get_current_step_name();
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string("step_{$stepname}", 'local_rollover'));
     }
 
     private function show_footer() {
-        echo $this->output->footer();
+        global $OUTPUT;
+
+        echo $OUTPUT->footer();
+    }
+
+    private function create_form() {
+        $stepname = $this->get_current_step_name();
+        switch ($stepname) {
+            case self::STEP_SELECT_SOURCE_COURSE:
+                return $this->create_form_source_course_selection();
+            case self::STEP_SELECT_CONTENT_OPTIONS:
+                return new form_options_selection($this->get_backup_worker()->get_backup_root_settings());
+            default:
+                debugging("Invalid step: {$this->currentstep}");
+                return null;
+        }
+    }
+
+    private function get_current_step_name() {
+        return self::get_steps()[$this->currentstep];
     }
 }

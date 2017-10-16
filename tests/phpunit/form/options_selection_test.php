@@ -21,7 +21,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\backup\backup_worker;
 use local_rollover\form\form_options_selection;
+use local_rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -31,15 +33,17 @@ class local_rollover_form_options_selection_test extends rollover_testcase {
     public function test_it_uses_defaults_and_locks() {
         self::resetAfterTest(true);
         $options = [
-            'option_blocks'       => [false, false],
-            'option_users'        => [false, true],
-            'option_questionbank' => [true, false],
-            'option_activities'   => [true, true],
+            'blocks'       => [false, false],
+            'users'        => [false, true],
+            'questionbank' => [true, false],
+            'activities'   => [true, true],
         ];
 
         $this->configure_options($options);
 
-        $form = new form_options_selection();
+        $source = $this->generator()->create_course();
+        $worker = backup_worker::create($source->id);
+        $form = new form_options_selection($worker->get_backup_root_settings());
 
         ob_start();
         $form->display();
@@ -51,8 +55,8 @@ class local_rollover_form_options_selection_test extends rollover_testcase {
     private function configure_options($options) {
         foreach ($options as $option => $values) {
             list($default, $locked) = $values;
-            set_config($option, $default ? 1 : 0, 'local_rollover');
-            set_config("{$option}_locked", $locked ? 1 : 0, 'local_rollover');
+            set_config("option_{$option}", $default ? 1 : 0, 'local_rollover');
+            set_config("option_{$option}_locked", $locked ? 1 : 0, 'local_rollover');
         }
     }
 
@@ -61,15 +65,16 @@ class local_rollover_form_options_selection_test extends rollover_testcase {
 
         foreach ($options as $option => $values) {
             list($default, $locked) = $values;
-            $checkbox = $crawler->filter("#id_{$option}")->getNode(0);
+            $selector = 'input[name="' . rollover_parameters::PARAM_OPTION_PREFIX . $option . '"]';
+            $input = $crawler->filter($selector)->getNode(0);
 
             if ($locked && !$default) {
-                self::assertNull($checkbox, "{$option} should not appear.");
+                self::assertSame('hidden', $input->getAttribute('type'), "{$option} default");
             } else {
                 $default = $default ? 'checked' : '';
                 $locked = $locked ? 'disabled' : '';
-                self::assertSame($default, $checkbox->getAttribute('checked'), "{$option} default");
-                self::assertSame($locked, $checkbox->getAttribute('disabled'), "{$option} lock");
+                self::assertSame($default, $input->getAttribute('checked'), "{$option} default");
+                self::assertSame($locked, $input->getAttribute('disabled'), "{$option} lock");
             }
         }
     }

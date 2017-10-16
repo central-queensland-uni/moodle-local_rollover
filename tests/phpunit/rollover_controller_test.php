@@ -23,24 +23,19 @@
 
 use local_rollover\form\form_source_course_selection;
 use local_rollover\rollover_controller;
+use local_rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_rollover_controller_test extends rollover_testcase {
-    public function provider_for_rollover_steps() {
-        return [
-            'complete' => [['into' => 1, 'from' => 2], 'options_selection_page_next'],
-        ];
-    }
-
     public function test_it_shows_source_selection() {
         global $COURSE;
 
         $this->resetAfterTest(true);
         self::setAdminUser();
         $COURSE = $this->generator()->create_course();
-        $_GET = ['into' => 1];
+        $_GET = [rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1];
 
         $controller = new rollover_controller();
 
@@ -52,13 +47,15 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
     }
 
     public function test_it_shows_options_selection() {
-        global $COURSE;
-
         $this->resetAfterTest(true);
         self::setAdminUser();
-        $COURSE = $this->generator()->create_course_by_shortname('source');
+        $source = $this->generator()->create_course_by_shortname('source');
+        $destination = $this->generator()->create_course_by_shortname('destination');
 
-        form_source_course_selection::mock_submit(['into' => 1, 'sourceshortname' => 'source']);
+        form_source_course_selection::mock_submit([
+                                                      rollover_parameters::PARAM_SOURCE_COURSE_ID      => $source->id,
+                                                      rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+                                                  ]);
 
         $controller = new rollover_controller();
 
@@ -88,7 +85,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         self::setUser($user);
 
-        $_GET['into'] = $destination->id;
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
         $controller = new rollover_controller();
         $form = $controller->create_form_source_course_selection();
 
@@ -105,5 +102,49 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
             ],
         ];
         self::assertSame($expected, $courses);
+    }
+
+    public function test_it_respects_the_include_role_assignments_option() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+
+        self::resetAfterTest(true);
+
+        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
+        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
+        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
+        $controller = new rollover_controller();
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['activities' => 1]);
+
+        course_modinfo::clear_instance_cache($destinationcourse);
+        $info = get_fast_modinfo($destinationcourse);
+        $cm = array_values($info->get_cms())[0];
+        self::assertSame('Full Rollover Assignment', $cm->name);
+    }
+
+    public function test_it_respects_the_not_include_role_assignments_option() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+
+        self::resetAfterTest(true);
+
+        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
+        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
+        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
+        $controller = new rollover_controller();
+        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['options' => ['activities' => 0]]);
+
+        course_modinfo::clear_instance_cache($destinationcourse);
+        $info = get_fast_modinfo($destinationcourse);
+        $cms = $info->get_cms();
+        self::assertCount(0, $cms);
+    }
+
+    public function test_it_runs_as_admin() {
+        // Is it really needed to run as user 2 (admin)?
+        // Let's figure out when we the specific capabilities.
+        $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 }

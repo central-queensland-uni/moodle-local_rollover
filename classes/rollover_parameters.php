@@ -23,10 +23,6 @@
 
 namespace local_rollover;
 
-use moodle_url;
-use navigation_node;
-use pix_icon;
-
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -35,15 +31,15 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class navigation {
-    public function add_course_administration($navigation, $courseid) {
-        $navigation->add(
-            get_string('rollover', 'local_rollover'),
-            new moodle_url('/local/rollover/index.php', [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $courseid]),
-            navigation_node::TYPE_SETTING,
-            null,
-            null,
-            new pix_icon('i/return', '')
-        );
-    }
+class rollover_parameters {
+    /** Available after any submit, it is used without valiation to determine which form to create. */
+    const PARAM_CURRENT_STEP = 'rollover_step';
+    /** Available at all steps, it detemines the "current course" and will be used at the restore step. */
+    const PARAM_DESTINATION_COURSE_ID = 'rollover_destination_course_id';
+    /** Available only when selecting source course, after that it can be retrieved using the backup id. */
+    const PARAM_SOURCE_COURSE_ID = 'rollover_source_course_id';
+    /** Available after source course is selected. */
+    const PARAM_BACKUP_ID = 'rollover_backup_id';
+    /** Prefix for content options (linked to backup root task ui names). */
+    const PARAM_OPTION_PREFIX = 'setting_root_';
 }

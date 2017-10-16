@@ -22,6 +22,7 @@
  */
 
 use local_rollover\navigation;
+use local_rollover\rollover_parameters;
 use local_rollover\test\mock_navigation;
 use local_rollover\test\rollover_testcase;
 
@@ -36,7 +37,7 @@ class local_rollover_navigation_test extends rollover_testcase {
         /** @var moodle_url $url */
         list($name, $url) = $navigation->data[0];
         self::assertSame($name, 'Rollover');
-        self::assertEquals($url->param('into'), 1);
+        self::assertEquals(1, $url->param(rollover_parameters::PARAM_DESTINATION_COURSE_ID));
     }
 
     public function test_it_only_shows_options_user_has_capability() {
