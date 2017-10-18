@@ -272,4 +272,11 @@ class behat_local_rollover extends behat_base {
             set_config("option_{$option}", 0, 'local_rollover');
         }
     }
+
+    /**
+     * @Given /^the course "([^"]*)" has an HTML block "([^"]*)" +\# local_rollover$/
+     */
+    public function the_course_has_an_html_block($course, $text) {
+        $this->generator()->create_html_block($course, $text);
+    }
 }
