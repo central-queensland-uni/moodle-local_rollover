@@ -19,12 +19,34 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
 
 use local_rollover\admin\settings_controller;
+use local_rollover\test\rollover_testcase;
 
-require(__DIR__ . '/../../config.php');
+defined('MOODLE_INTERNAL') || die();
 
-$controller = new settings_controller();
-$controller->past_instances_settings();
+class local_rollover_admin_settings_controller_test extends rollover_testcase {
+    public function test_it_requires_an_admin() {
+        $this->resetAfterTest();
+
+        self::setAdminUser();
+        $controller = new settings_controller();
+        ob_start();
+        $controller->past_instances_settings();
+        $html = ob_end_clean();
+        self::assertNotEmpty($html);
+
+        $user = $this->generator()->create_user();
+        self::setUser($user);
+        $caught = null;
+        try {
+            $controller = new settings_controller();
+            $controller->past_instances_settings();
+        } catch (moodle_exception $exception) {
+            $caught = $exception;
+        }
+        self::assertNotNull($caught);
+        self::assertSame('Access denied', $caught->getMessage());
+    }
+}

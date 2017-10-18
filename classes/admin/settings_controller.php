@@ -19,12 +19,27 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
 
-use local_rollover\admin\settings_controller;
+namespace local_rollover\admin;
 
-require(__DIR__ . '/../../config.php');
+defined('MOODLE_INTERNAL') || die();
 
-$controller = new settings_controller();
-$controller->past_instances_settings();
+require(__DIR__ . '/../../../../lib/adminlib.php');
+
+/**
+ * @package     local_rollover
+ * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
+ * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class settings_controller {
+    public function __construct() {
+        admin_externalpage_setup('local_rollover_filter');
+    }
+
+    public function past_instances_settings() {
+        global $OUTPUT;
+        echo $OUTPUT->render_from_template('local_rollover/settings-past-instances-filter', []);
+    }
+}

@@ -5,7 +5,7 @@ Feature: Adjust past instances filter
   I want to define a regular expression that defines how to identify past instances
 
 
-  Scenario: I can navigate to the settings
+  Scenario: I can navigate to it.
     Given I am an administrator                                             # local_rollover
     When I navigate to "Courses > Rollover settings > Past instances filter" in site administration
     Then I should see "Past instances filter"
