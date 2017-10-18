@@ -62,6 +62,7 @@ class form_past_instances_filter extends moodleform {
         $mform->addElement('text', self::FIELD_REGEX, get_string('regex', 'local_rollover'));
         $mform->setType(self::FIELD_REGEX, PARAM_TEXT);
         $mform->setDefault(self::FIELD_REGEX, $regex ? $regex : '');
+        $mform->addHelpButton(self::FIELD_REGEX, 'regex', 'local_rollover');
 
         $this->add_action_buttons(false, get_string('save', 'local_rollover'));
     }
