@@ -22,11 +22,12 @@
  */
 
 use local_rollover\admin\settings_controller;
+use local_rollover\form\form_past_instances_filter;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_admin_settings_controller_test extends rollover_testcase {
+class local_rollover_admin_past_instances_filter_test extends rollover_testcase {
     public function test_it_requires_an_admin() {
         $this->resetAfterTest();
 
@@ -48,5 +49,32 @@ class local_rollover_admin_settings_controller_test extends rollover_testcase {
         }
         self::assertNotNull($caught);
         self::assertSame('Access denied', $caught->getMessage());
+    }
+
+    public function provider_for_test_it_validates_the_regex() {
+        return [
+            ['', true, 'Empty RegEx is valid.'],
+            ['/^(.*)$/', true, 'Capture-all RegEx is valid.'],
+            ['.', false, 'RegEx is too short.'],
+            ['/(.*)$/', false, 'RegEx must match beggining.'],
+            ['/^(.*)/', false, 'RegEx must match end.'],
+            ['/^.*$/', false, 'RegEx must have a capture group.'],
+            ['/^a(.*b$/', false, 'Malformed RegEx.'],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_for_test_it_validates_the_regex
+     */
+    public function test_it_validates_the_regex($regex, $acceptable, $reason) {
+        $form = new form_past_instances_filter();
+        $data = ['regex' => $regex];
+        $errors = $form->validation($data, []);
+
+        if ($acceptable) {
+            self::assertEmpty($errors, $reason);
+        } else {
+            self::assertNotEmpty($errors, $reason);
+        }
     }
 }

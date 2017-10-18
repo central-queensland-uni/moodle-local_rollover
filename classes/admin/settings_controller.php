@@ -23,6 +23,8 @@
 
 namespace local_rollover\admin;
 
+use local_rollover\form\form_past_instances_filter;
+
 defined('MOODLE_INTERNAL') || die();
 
 require(__DIR__ . '/../../../../lib/adminlib.php');
@@ -34,12 +36,25 @@ require(__DIR__ . '/../../../../lib/adminlib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class settings_controller {
+    const SETTING_PAST_INSTANCES_REGEX = 'past_instances_regex';
+
     public function __construct() {
         admin_externalpage_setup('local_rollover_filter');
     }
 
     public function past_instances_settings() {
         global $OUTPUT;
-        echo $OUTPUT->render_from_template('local_rollover/settings-past-instances-filter', []);
+
+        require_login();
+
+        $form = new form_past_instances_filter();
+
+        echo $OUTPUT->header();
+        if ($form->is_saved()) {
+            echo $OUTPUT->notification(get_string('settings-saved', 'local_rollover'), 'notifysuccess');
+        }
+        echo $OUTPUT->heading(get_string('settings-filter', 'local_rollover'));
+        $form->display();
+        echo $OUTPUT->footer();
     }
 }

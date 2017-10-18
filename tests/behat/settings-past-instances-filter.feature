@@ -9,10 +9,11 @@ Feature: Adjust past instances filter
     When I navigate to "Courses > Rollover settings > Past instances filter" in site administration
     Then I should see "Past instances filter"
     And I should see "Regular Expression"
+    But I should not see "saved"
 
   Scenario: I can change the regex.
     Given I am an administrator                                       # local_rollover
     When I go to the "Rollover past instances filter" settings page   # local_rollover
-    And I set the field "Regular Expression" to "^RegEx$"
+    And I set the field "Regular Expression" to "/^Reg(Ex)$/"
     And I press "Save"
     Then I should see "saved"
