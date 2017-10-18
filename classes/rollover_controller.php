@@ -23,10 +23,11 @@
 
 namespace local_rollover;
 
+use backup_root_task;
 use context_course;
-use local_rollover\admin\rollover_settings;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
+use local_rollover\form\form_activities_and_resources_selection;
 use local_rollover\form\form_options_selection;
 use local_rollover\form\form_source_course_selection;
 use moodle_url;
@@ -46,12 +47,14 @@ class rollover_controller {
     const USERID = 2;
     const STEP_SELECT_SOURCE_COURSE = 'source_course';
     const STEP_SELECT_CONTENT_OPTIONS = 'content_options';
+    const STEP_SELECT_ACTIVITIES_AND_RESOURCES = 'activities_and_resources';
     const STEP_ROLLOVER_COMPLETE = 'complete';
 
     public static function get_steps() {
         return [
             self::STEP_SELECT_SOURCE_COURSE,
             self::STEP_SELECT_CONTENT_OPTIONS,
+            self::STEP_SELECT_ACTIVITIES_AND_RESOURCES,
             self::STEP_ROLLOVER_COMPLETE,
         ];
     }
@@ -98,6 +101,7 @@ class rollover_controller {
         $PAGE->set_url('/local/rollover/index.php',
                        [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
         $PAGE->set_heading($this->destinationcourse->fullname);
+        $PAGE->add_body_class('path-backup');
 
         $this->process();
 
@@ -118,34 +122,62 @@ class rollover_controller {
             return;
         }
 
-        if ($this->get_current_step_name() == self::STEP_SELECT_SOURCE_COURSE) {
-            $data->rollover_backup_id = $this->get_backup_worker()->get_backup_id();
-            $this->backupworker->save();
-        }
-
-        if ($this->get_current_step_name() == self::STEP_SELECT_CONTENT_OPTIONS) {
-            $settings = $this->get_backup_worker()->get_backup_root_settings();
-            foreach ($settings as $setting) {
-                $name = $setting->get_ui_name();
-                $value = isset($data->$name) ? $data->$name : 0;
-                $setting->set_value($value);
-            }
-            $this->backupworker->save();
-        }
-
+        $this->process_form_data($data);
         $this->currentstep++;
 
-        if ($this->get_current_step_name() == self::STEP_ROLLOVER_COMPLETE) {
-            $this->rollover($data);
-            $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
-                                          $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
-            $this->form = null;
+        if ($this->process_rollover_completed($data)) {
             return;
         }
 
         $this->form = $this->create_form();
         unset($data->submitbutton);
         $this->form->set_data($data);
+    }
+
+    private function process_rollover_completed($data) {
+        if ($this->get_current_step_name() != self::STEP_ROLLOVER_COMPLETE) {
+            return false;
+        }
+
+        $this->rollover($data);
+        $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
+                                      $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
+        $this->form = null;
+        return true;
+    }
+
+    private function process_form_data($data) {
+        $step = $this->get_current_step_name();
+        switch ($step) {
+            case self::STEP_SELECT_SOURCE_COURSE:
+                return $this->process_form_data_step_select_source_course($data);
+            case  self::STEP_SELECT_CONTENT_OPTIONS:
+                return $this->process_form_data_step_select_content_options($data);
+            case self::STEP_SELECT_ACTIVITIES_AND_RESOURCES:
+                $this->process_form_data_select_activities_and_resources($data);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private function process_form_data_step_select_source_course($data) {
+        $data->rollover_backup_id = $this->get_backup_worker()->get_backup_id();
+        $this->backupworker->save();
+        return true;
+    }
+
+    private function process_form_data_step_select_content_options($data) {
+        $settings = $this->get_backup_worker()->get_backup_root_settings();
+        foreach ($settings as $setting) {
+            $name = $setting->get_ui_name();
+            $value = isset($data->$name) ? $data->$name : 0;
+            if ($value != $setting->get_value()) {
+                $setting->set_value($value);
+            }
+        }
+        $this->backupworker->save();
+        return true;
     }
 
     public function rollover($parameters) {
@@ -226,6 +258,8 @@ class rollover_controller {
                 return $this->create_form_source_course_selection();
             case self::STEP_SELECT_CONTENT_OPTIONS:
                 return new form_options_selection($this->get_backup_worker()->get_backup_root_settings());
+            case self::STEP_SELECT_ACTIVITIES_AND_RESOURCES:
+                return new form_activities_and_resources_selection($this->get_backup_worker()->get_backup_tasks());
             default:
                 debugging("Invalid step: {$this->currentstep}");
                 return null;
@@ -234,5 +268,23 @@ class rollover_controller {
 
     private function get_current_step_name() {
         return self::get_steps()[$this->currentstep];
+    }
+
+    private function process_form_data_select_activities_and_resources($data) {
+        $tasks = $this->get_backup_worker()->get_backup_tasks();
+        foreach ($tasks as &$task) {
+            if ($task instanceof backup_root_task) {
+                continue;
+            }
+            $settings = $task->get_settings();
+            foreach ($settings as &$setting) {
+                $name = $setting->get_ui_name();
+                $value = isset($data->$name) ? $data->$name : 0;
+                if ($value != $setting->get_value()) {
+                    $setting->set_value($value);
+                }
+            }
+        }
+        return true;
     }
 }

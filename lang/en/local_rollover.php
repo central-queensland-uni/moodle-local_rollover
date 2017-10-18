@@ -46,6 +46,7 @@ $string['rollover'] = 'Rollover';
 $string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
 $string['settings'] = 'Rollover settings';
 $string['settings-options'] = 'Options defaults';
+$string['step_activities_and_resources'] = 'Rollover: Select activities and resources';
 $string['step_complete'] = 'Rollover successful';
 $string['step_content_options'] = 'Rollover: Select content options';
 $string['step_source_course'] = 'Rollover: Select source course';

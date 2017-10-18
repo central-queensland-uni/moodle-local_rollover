@@ -22,7 +22,7 @@
  */
 
 use local_rollover\backup\backup_worker;
-use local_rollover\form\form_options_selection;
+use local_rollover\form\form_activities_and_resources_selection;
 use local_rollover\rollover_controller;
 use local_rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
@@ -40,7 +40,7 @@ class local_rollover_steps_rollover_complete_test extends rollover_testcase {
 
         $worker = backup_worker::create($sourcecourse->id);
         $worker->save();
-        form_options_selection::mock_submit([
+        form_activities_and_resources_selection::mock_submit([
                                                 rollover_parameters::PARAM_CURRENT_STEP          => $step,
                                                 rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
                                                 rollover_parameters::PARAM_BACKUP_ID             => $worker->get_backup_id(),
