@@ -25,6 +25,7 @@
 
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
+use local_rollover\admin\rollover_settings;
 use local_rollover\rollover_parameters;
 use local_rollover\test\generator;
 
@@ -259,6 +260,16 @@ class behat_local_rollover extends behat_base {
                 continue;
             }
             $this->execute("behat_general::{$assertion}", [$text]);
+        }
+    }
+
+    /**
+     * @Given /^the default rollover settings do not include anything by default +\# local_rollover$/
+     */
+    public function the_default_rollover_settings_do_not_include_anything_by_default() {
+        $options = array_keys(rollover_settings::get_rollover_options_defaults());
+        foreach ($options as $option) {
+            set_config("option_{$option}", 0, 'local_rollover');
         }
     }
 }
