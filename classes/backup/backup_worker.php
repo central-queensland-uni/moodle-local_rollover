@@ -91,8 +91,7 @@ class backup_worker {
     }
 
     public function get_backup_root_task() {
-        $plan = $this->backupcontroller->get_plan();
-        $tasks = $plan->get_tasks();
+        $tasks = $this->get_backup_tasks();
 
         foreach ($tasks as $task) {
             if ($task instanceof backup_root_task) {
@@ -102,6 +101,12 @@ class backup_worker {
 
         debugging('backup_root_task not found');
         return null;
+    }
+
+    public function get_backup_tasks() {
+        $plan = $this->backupcontroller->get_plan();
+        $tasks = $plan->get_tasks();
+        return $tasks;
     }
 
     public function get_backup_root_settings() {

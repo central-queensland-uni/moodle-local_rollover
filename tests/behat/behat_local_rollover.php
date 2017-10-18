@@ -168,14 +168,11 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
-     * @When /^I set the following rollover options:$/
+     * @When /^I select the rollover option "([^"]*)" +\# local_rollover$/
      */
-    public function i_set_the_following_rollover_options(TableNode $options) {
-        foreach ($options->getRows() as $option) {
-            $field = behat_field_manager::get_form_field_from_label($option[1], $this);
-            $value = $option[0] == 'X' ? 1 : 0;
-            $field->set_value($value);
-        }
+    public function i_select_the_rollover_option($option) {
+        $field = behat_field_manager::get_form_field_from_label($option, $this);
+        $field->set_value(1);
     }
 
     /**
@@ -224,5 +221,20 @@ class behat_local_rollover extends behat_base {
      */
     public function the_course_has_a_student($course, $user) {
         $this->generator()->enrol_student($user, $course);
+    }
+
+    /**
+     * @When /^I ((?:de)?select) "([^"]*)" in the list of activities\/resources +\# local_rollover$/
+     */
+    public function i_select_in_the_list_of_activities_resources($selectornot, $selection) {
+        $field = behat_field_manager::get_form_field_from_label($selection, $this);
+        $field->set_value($selectornot == 'select' ? '1' : '0');
+    }
+
+    /**
+     * @When /^I do not select any rollover option +\# local_rollover$/
+     */
+    public function i_do_not_select_any_rollover_option() {
+        // Cool, then don't do anything ...
     }
 }

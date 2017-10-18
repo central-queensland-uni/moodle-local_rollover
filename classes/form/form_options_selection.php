@@ -71,7 +71,7 @@ class form_options_selection extends moodleform {
             $this->definition_add_setting($setting);
         }
 
-        $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
+        $this->add_action_buttons(false, get_string('next'));
     }
 
     private function definition_add_setting($setting) {
