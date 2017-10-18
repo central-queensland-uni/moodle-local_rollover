@@ -23,6 +23,8 @@
 
 namespace local_rollover\test;
 
+use block_manager;
+use context_course;
 use stdClass;
 use testing_data_generator;
 
@@ -92,5 +94,37 @@ class generator extends testing_data_generator {
             $this->courses[$course]->id,
             $role
         );
+    }
+
+    public function create_html_block($course, $text) {
+        global $CFG, $DB, $PAGE;
+        require_once($CFG->libdir . '/blocklib.php');
+
+        // Add block relies on the current context, so we fake it...
+        $oldcontext = $PAGE->context;
+        $PAGE->set_context(context_course::instance($this->get_course_id($course)));
+
+        $manager = new block_manager($PAGE);
+        $manager->add_region('side-pre');
+        $manager->add_block('html', 'side-pre', 0, false,
+                            'course-view-*', null);
+
+        // Why add_block above does not return an id? Oh no, hacky code below...
+        $block = $DB->get_records('block_instances', null, 'id DESC', '*', 0, 1);
+        $block = array_pop($block);
+
+        // Ouch, we did it... more hacky code! Set it back and hope for the best...
+        $PAGE->set_context($oldcontext);
+
+        // Set HTML data.
+        $configdata = (object)[
+            'text'   => "<p>{$text}</p>",
+            'title'  => $text,
+            'format' => '1',
+        ];
+        $block->configdata = base64_encode(serialize($configdata));
+        $DB->update_record('block_instances', $block);
+
+        return $block;
     }
 }

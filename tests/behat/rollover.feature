@@ -12,6 +12,7 @@ Feature: Configure and perform course rollovers.
     And the default rollover settings do not include anything by default                 # local_rollover
     And there is a course with shortname "ABC123-2017-1"                                 # local_rollover
     And the course "ABC123-2017-1" has an assignment "Final Exam"                        # local_rollover
+    And the course "ABC123-2017-1" has an HTML block "Why study ABC?"                    # local_rollover
     And there is a course with shortname "ABC123-2017-2"                                 # local_rollover
     And I am at the course "ABC123-2017-2" page                                          # local_rollover
 
@@ -37,9 +38,9 @@ Feature: Configure and perform course rollovers.
     And I should see the following "<rollover>"                                          # local_rollover
     But I should not see the following "<no rollover>"                                   # local_rollover
 
-
     Examples:
-      | selected options                 | selected activities | unselected activities | rollover   | no rollover |
-      | Include activities and resources | General; Final Exam |                       | Final Exam |             |
-      | Include activities and resources | General             | Final Exam            |            | Final Exam  |
-      |                                  |                     |                       |            | Final Exam  |
+      | selected options                 | selected activities | unselected activities | rollover      | no rollover               |
+      | Include activities and resources | General; Final Exam |                       | Final Exam    |                           |
+      | Include activities and resources | General             | Final Exam            |               | Final Exam                |
+      | Include blocks                   |                     |                       | Why study ABC |                           |
+      |                                  |                     |                       |               | Final Exam; Why study ABC |
