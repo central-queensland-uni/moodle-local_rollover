@@ -47,27 +47,22 @@ class rollover_settings {
      *
      * @return array
      */
-    public static function get_rollover_options() {
-        $options = [];
-        $rawoptions = [
-            'users',
-            'anonymize',
-            'role_assignments',
-            'activities',
-            'blocks',
-            'filters',
-            'comments',
-            'badges',
-            'userscompletion',
-            'logs',
-            'histories',
-            'questionbank',
-            'groups',
+    public static function get_rollover_options_defaults() {
+        return [
+            'users'            => false,
+            'anonymize'        => false,
+            'role_assignments' => false,
+            'activities'       => true,
+            'blocks'           => true,
+            'filters'          => true,
+            'comments'         => false,
+            'badges'           => false,
+            'userscompletion'  => false,
+            'logs'             => false,
+            'histories'        => false,
+            'questionbank'     => true,
+            'groups'           => false,
         ];
-        foreach ($rawoptions as $option) {
-            $options[$option] = str_replace('_', '', $option);
-        }
-        return $options;
     }
 
     /**
@@ -92,12 +87,13 @@ class rollover_settings {
         $options = new admin_settingpage('local_rollover_options',
                                          new lang_string('settings-options', 'local_rollover')
         );
-        $defaults = ['value' => 0, 'locked' => 0];
 
-        foreach (self::get_rollover_options() as $option => $langname) {
+        foreach (self::get_rollover_options_defaults() as $option => $default) {
+            $langname = str_replace('_', '', $option);
             $key = 'local_rollover/option_' . $option;
             $title = new lang_string("general{$langname}", 'backup');
             $description = new lang_string("option_{$langname}", 'local_rollover');
+            $defaults = ['value' => $default, 'locked' => 0];
             $options->add(
                 new admin_setting_configcheckbox_with_lock($key, $title, $description, $defaults)
             );

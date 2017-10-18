@@ -9,6 +9,7 @@ Feature: Configure and perform course rollovers.
 
   Scenario Outline: Perform a course rollover with activities
     Given I am an administrator                                                          # local_rollover
+    And the default rollover settings do not include anything by default                 # local_rollover
     And there is a course with shortname "ABC123-2017-1"                                 # local_rollover
     And the course "ABC123-2017-1" has an assignment "Final Exam"                        # local_rollover
     And there is a course with shortname "ABC123-2017-2"                                 # local_rollover
