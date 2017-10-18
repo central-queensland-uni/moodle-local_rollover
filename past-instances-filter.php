@@ -19,22 +19,12 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @var stdClass $plugin
  */
 
-use local_rollover\test\mock_admintree;
-use local_rollover\test\rollover_testcase;
+require(__DIR__ . '/../../config.php');
+?>
 
-defined('MOODLE_INTERNAL') || die();
+Past instances filter<br />
 
-class local_rollover_settings_test extends rollover_testcase {
-    public function test_it_has_all_settings() {
-        $ADMIN = new mock_admintree();
-        require(__DIR__ . '/../../settings.php');
-
-        $expected = [
-            'local_rollover'         => 'courses',
-            'local_rollover_options' => 'local_rollover',
-        ];
-        self::assertSame($expected, $ADMIN->tree);
-    }
-}
+Regular Expression
