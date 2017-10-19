@@ -24,10 +24,12 @@
 namespace local_rollover\admin;
 
 use admin_category;
+use admin_externalpage;
 use admin_root;
 use admin_setting_configcheckbox_with_lock;
 use admin_settingpage;
 use lang_string;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -78,11 +80,9 @@ class rollover_settings {
         $admin->add('courses', $category);
 
         $this->create_options($admin);
+        $this->create_filter($admin);
     }
 
-    /**
-     * @param admin_root $admin
-     */
     private function create_options($admin) {
         $options = new admin_settingpage('local_rollover_options',
                                          new lang_string('settings-options', 'local_rollover')
@@ -100,5 +100,13 @@ class rollover_settings {
         }
 
         $admin->add('local_rollover', $options);
+    }
+
+    private function create_filter($admin) {
+        $page = new admin_externalpage('local_rollover_filter',
+                                       new lang_string('settings-filter', 'local_rollover'),
+                                       new moodle_url('/local/rollover/past-instances-filter.php')
+        );
+        $admin->add('local_rollover', $page);
     }
 }

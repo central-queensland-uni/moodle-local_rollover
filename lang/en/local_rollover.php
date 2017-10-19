@@ -42,10 +42,29 @@ $string['originalcourse_help'] = 'Provide the shortname for course to be used as
 $string['performrollover'] = 'Perform rollover';
 $string['pluginname'] = 'Course rollover';
 $string['proceed'] = 'Proceed to course';
+$string['regex'] = 'Regular Expression';
+$string['regex_error_too_short'] = 'RegEx too short';
+$string['regex_error_invalid_start'] = 'RegEx must start with /^ (or another delimiter)';
+$string['regex_error_invalid_end'] = 'RegEx must end with $/ (or another delimiter)';
+$string['regex_error_no_capture'] = 'RegEx must have at least one capture group (parenthesis)';
+$string['regex_error_malformed'] = 'Invalid (malformed) RegEx';
+$string['regex_help'] = '
+<b>How to use it?</b>
+<ul>
+    <li>This filter allows course coordinators to perform rollovers regardless from courses regardless of their capabilities.</li>
+    <li>The course coordinator still require editing capabilities for the destination course.</li>
+    <li>You can disable this features by leaving this field blank.</li>
+    <li>The provided <i>Regular Expression</i> will match against all courses shortnames.</li>
+    <li>Any courses that have the same match as in the destination course (capture group) will be selected as a source option for rollover.</li>
+</ul>
+';
 $string['rollover'] = 'Rollover';
 $string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+$string['save'] = 'Save';
 $string['settings'] = 'Rollover settings';
 $string['settings-options'] = 'Options defaults';
+$string['settings-saved'] = 'Settings saved.';
+$string['settings-filter'] = 'Past instances filter';
 $string['step_activities_and_resources'] = 'Rollover: Select activities and resources';
 $string['step_complete'] = 'Rollover successful';
 $string['step_content_options'] = 'Rollover: Select content options';

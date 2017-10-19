@@ -185,11 +185,15 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
-     * @Given /^I am at the "([^"]*)" settings page +\# local_rollover$/
+     * @Given /^I (?:am at|go to) the "([^"]*)" settings page +\# local_rollover$/
      */
     public function i_am_at_the_settings_page($page) {
-        $page = str_replace(' ', '_', strtolower($page));
-        $this->visitPath("/admin/settings.php?section=local_{$page}");
+        if ($page == 'Rollover past instances filter') {
+            $url = '/local/rollover/past-instances-filter.php';
+        } else {
+            $url = '/admin/settings.php?section=local_' . str_replace(' ', '_', strtolower($page));
+        }
+        $this->visitPath($url);
     }
 
     /**
