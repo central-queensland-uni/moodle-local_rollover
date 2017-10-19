@@ -21,41 +21,26 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\test;
-
-use advanced_testcase;
-use external_api;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class rollover_testcase extends advanced_testcase {
-    /** @var generator */
-    private $generator = null;
-
-    /**
-     * @return generator
-     */
-    public function generator() {
-        if (is_null($this->generator)) {
-            $this->generator = new generator();
-        }
-        return $this->generator;
+class local_rollover_webservice_regex_filter_test extends rollover_testcase {
+    public function test_the_webservice_exists() {
+        $services = null;
+        require(__DIR__ . '/../../../db/services.php');
+        self::assertArrayHasKey('local_rollover_regex_filter', $services);
     }
 
-    /**
-     * @param $methodname
-     * @param $args
-     * @return mixed
-     */
-    public function call_webservice_successfully($methodname, $args) {
-        require_once(__DIR__ . '/../../../../lib/externallib.php');
+    public function test_it_returns_the_original_regex() {
+        $this->resetAfterTest();
+        self::setAdminUser();
 
-        $_GET['sesskey'] = sesskey();
-        $response = external_api::call_external_function($methodname,
-                                                         $args, true);
+        $args = ['regex' => '/^a(bc)d$/'];
+        $methodname = 'local_rollover_regex_filter_get_sample_matches_by_regex';
+        $response = $this->call_webservice_successfully($methodname, $args);
 
-        self::assertFalse($response['error'], 'WebService call must not return an error.');
-
-        return $response['data'];
+        self::assertArrayHasKey('regex', $response);
+        self::assertSame($args['regex'], $response['regex']);
     }
 }

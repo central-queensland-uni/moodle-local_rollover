@@ -19,43 +19,30 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @var stdClass $plugin
  */
 
-namespace local_rollover\test;
-
-use advanced_testcase;
-use external_api;
+use local_rollover\webservice\course_regex_filter_webservice;
 
 defined('MOODLE_INTERNAL') || die();
 
-class rollover_testcase extends advanced_testcase {
-    /** @var generator */
-    private $generator = null;
+$services = [
+    'local_rollover_regex_filter' => [
+        'functions' => [
+            'local_rollover_regex_filter_get_sample_matches_by_regex',
+        ],
+        'restrictedusers' => 0,
+        'enabled'   => 1,
+    ],
+];
 
-    /**
-     * @return generator
-     */
-    public function generator() {
-        if (is_null($this->generator)) {
-            $this->generator = new generator();
-        }
-        return $this->generator;
-    }
-
-    /**
-     * @param $methodname
-     * @param $args
-     * @return mixed
-     */
-    public function call_webservice_successfully($methodname, $args) {
-        require_once(__DIR__ . '/../../../../lib/externallib.php');
-
-        $_GET['sesskey'] = sesskey();
-        $response = external_api::call_external_function($methodname,
-                                                         $args, true);
-
-        self::assertFalse($response['error'], 'WebService call must not return an error.');
-
-        return $response['data'];
-    }
-}
+$functions = [
+    'local_rollover_regex_filter_get_sample_matches_by_regex' => [
+        'classname'   => course_regex_filter_webservice::class,
+        'methodname'  => 'get_sample_matches_by_regex',
+        'classpath'   => 'local/rollover/classes/webservice/course_regex_filter_webservice.php',
+        'description' => 'Fetches real examples of matches of course shortname for a given filter regex.',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
+];
