@@ -25,6 +25,7 @@ namespace local_rollover\webservice;
 
 use external_api;
 use external_function_parameters;
+use external_multiple_structure;
 use external_single_structure;
 use external_value;
 
@@ -42,7 +43,20 @@ class course_regex_filter_webservice extends external_api {
     public static function get_sample_matches_by_regex($regex) {
         self::validate_parameters(self::get_sample_matches_by_regex_parameters(), compact('regex'));
 
-        return ['regex' => $regex];
+        $groups = [];
+        if ($regex != '/^$/') {
+            $groups = [
+                [
+                    'match'      => 'ABC-123',
+                    'shortnames' => ['ABC-123'],
+                ],
+            ];
+        }
+
+        return [
+            'regex'  => $regex,
+            'groups' => $groups,
+        ];
     }
 
     public static function get_sample_matches_by_regex_parameters() {
@@ -52,11 +66,16 @@ class course_regex_filter_webservice extends external_api {
     }
 
     public static function get_sample_matches_by_regex_returns() {
-        return new external_single_structure(
-            [
-                'regex' => new external_value(PARAM_TEXT, 'Provided Regular Expression.'),
-            ],
-            'Result for the request.'
-        );
+        $regex = new external_value(PARAM_TEXT, 'Provided Regular Expression.');
+
+        $match = new external_value(PARAM_TEXT, 'Regular Expression captured group match.');
+
+        $shortname = new external_value(PARAM_TEXT, 'Course shortname.');
+        $shortnames = new external_multiple_structure($shortname, 'Course shortnames matched.');
+
+        $group = new external_single_structure(compact('match', 'shortnames'), 'Course shortname match.');
+        $groups = new external_multiple_structure($group, 'Course groups found.');
+
+        return new external_single_structure(compact('regex', 'groups'), 'Result for the request.');
     }
 }

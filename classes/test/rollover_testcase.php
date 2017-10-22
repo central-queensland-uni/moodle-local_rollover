@@ -54,7 +54,9 @@ class rollover_testcase extends advanced_testcase {
         $response = external_api::call_external_function($methodname,
                                                          $args, true);
 
-        self::assertFalse($response['error'], 'WebService call must not return an error.');
+        if ($response['error'] !== false) {
+            self::fail('WebService call must not return an error, got: ' . $response['exception']->message);
+        }
 
         return $response['data'];
     }

@@ -43,4 +43,31 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
         self::assertArrayHasKey('regex', $response);
         self::assertSame($args['regex'], $response['regex']);
     }
+
+    public function test_it_finds_the_courses() {
+        $this->resetAfterTest();
+        self::setAdminUser();
+
+        $shortnames = ['ABC-123'];
+        foreach ($shortnames as $shortname) {
+            $this->generator()->create_course_by_shortname($shortname);
+        }
+
+        $regexes = [
+            'No matches'  => ['/^$/', []],
+            'All matches' => ['/^(.*)$/', ['ABC-123' => ['ABC-123']]],
+        ];
+
+        $methodname = 'local_rollover_regex_filter_get_sample_matches_by_regex';
+
+        foreach ($regexes as $description => $test) {
+            list($regex, $expect) = $test;
+            $response = $this->call_webservice_successfully($methodname, ['regex' => $regex]);
+            $found = [];
+            foreach ($response['groups'] as $group) {
+                $found[$group['match']] = $group['shortnames'];
+            }
+            self::assertSame($expect, $found, $description);
+        }
+    }
 }
