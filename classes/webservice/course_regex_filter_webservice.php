@@ -41,16 +41,24 @@ require_once(__DIR__ . '/../../../../lib/externallib.php');
  */
 class course_regex_filter_webservice extends external_api {
     public static function get_sample_matches_by_regex($regex) {
+        global $DB;
+
         self::validate_parameters(self::get_sample_matches_by_regex_parameters(), compact('regex'));
+        $shortnames = $DB->get_records('course',
+                                       null,
+                                       'shortname ASC',
+                                       'shortname, id');
 
         $groups = [];
-        if ($regex != '/^$/') {
-            $groups = [
-                [
-                    'match'      => 'ABC-123',
-                    'shortnames' => ['ABC-123'],
-                ],
-            ];
+        foreach ($shortnames as $shortname => $value) {
+            if ($value->id == 1) {
+                continue; // Ignore site level course.
+            }
+            if (preg_match($regex, $shortname, $match)) {
+                $match = $match[1]; // We are interested in the first capture group.
+                $groups[$match]['match'] = $match;
+                $groups[$match]['shortnames'][] = $shortname;
+            }
         }
 
         return [

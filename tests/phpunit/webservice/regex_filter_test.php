@@ -48,14 +48,21 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
         $this->resetAfterTest();
         self::setAdminUser();
 
-        $shortnames = ['ABC-123'];
+        $shortnames = ['ABC-123', 'ABC-987', 'ABC-hello', 'DEF-456'];
         foreach ($shortnames as $shortname) {
             $this->generator()->create_course_by_shortname($shortname);
         }
 
+        // We are not using a provider to avoid recreating courses every test.
+        $all = [];
+        foreach ($shortnames as $shortname) {
+            $all[$shortname] = [$shortname];
+        }
         $regexes = [
-            'No matches'  => ['/^$/', []],
-            'All matches' => ['/^(.*)$/', ['ABC-123' => ['ABC-123']]],
+            'No matches'       => ['/^$/', []],
+            'All matches'      => ['/^(.*)$/', $all],
+            'Only ABC-###'     => ['/^(ABC)-\d{3}$/', ['ABC' => ['ABC-123', 'ABC-987']]],
+            'By 3 first chars' => ['/^(.{3})-.*$/', ['ABC' => ['ABC-123', 'ABC-987', 'ABC-hello'], 'DEF' => ['DEF-456']]],
         ];
 
         $methodname = 'local_rollover_regex_filter_get_sample_matches_by_regex';
@@ -69,5 +76,17 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
             }
             self::assertSame($expect, $found, $description);
         }
+    }
+
+    public function test_it_get_samples_only_of_visible_courses() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_get_samples_works_fine_with_large_dataset() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_fails_gracefully_if_get_samples_does_not_have_a_capture_group() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 }
