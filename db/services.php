@@ -22,8 +22,27 @@
  * @var stdClass $plugin
  */
 
+use local_rollover\webservice\course_regex_filter_webservice;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017102000;
-$plugin->requires = 2016052300;
+$services = [
+    'local_rollover_regex_filter' => [
+        'functions' => [
+            'local_rollover_regex_filter_get_sample_matches_by_regex',
+        ],
+        'restrictedusers' => 0,
+        'enabled'   => 1,
+    ],
+];
+
+$functions = [
+    'local_rollover_regex_filter_get_sample_matches_by_regex' => [
+        'classname'   => course_regex_filter_webservice::class,
+        'methodname'  => 'get_sample_matches_by_regex',
+        'classpath'   => 'local/rollover/classes/webservice/course_regex_filter_webservice.php',
+        'description' => 'Fetches real examples of matches of course shortname for a given filter regex.',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
+];

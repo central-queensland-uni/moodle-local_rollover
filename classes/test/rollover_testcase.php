@@ -24,6 +24,7 @@
 namespace local_rollover\test;
 
 use advanced_testcase;
+use external_api;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,5 +40,24 @@ class rollover_testcase extends advanced_testcase {
             $this->generator = new generator();
         }
         return $this->generator;
+    }
+
+    /**
+     * @param $methodname
+     * @param $args
+     * @return mixed
+     */
+    public function call_webservice_successfully($methodname, $args) {
+        require_once(__DIR__ . '/../../../../lib/externallib.php');
+
+        $_GET['sesskey'] = sesskey();
+        $response = external_api::call_external_function($methodname,
+                                                         $args, true);
+
+        if ($response['error'] !== false) {
+            self::fail('WebService call must not return an error, got: ' . $response['exception']->message);
+        }
+
+        return $response['data'];
     }
 }
