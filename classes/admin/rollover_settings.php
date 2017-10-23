@@ -81,6 +81,7 @@ class rollover_settings {
 
         $this->create_options($admin);
         $this->create_filter($admin);
+        $this->create_activities($admin);
     }
 
     private function create_options($admin) {
@@ -106,6 +107,14 @@ class rollover_settings {
         $page = new admin_externalpage('local_rollover_filter',
                                        new lang_string('settings-filter', 'local_rollover'),
                                        new moodle_url('/local/rollover/past-instances-filter.php')
+        );
+        $admin->add('local_rollover', $page);
+    }
+
+    private function create_activities($admin) {
+        $page = new admin_externalpage('local_rollover_activities',
+                                       new lang_string('settings-activities', 'local_rollover'),
+                                       new moodle_url('/local/rollover/activities-rules.php')
         );
         $admin->add('local_rollover', $page);
     }

@@ -40,12 +40,11 @@ class settings_controller {
 
     public function __construct() {
         admin_externalpage_setup('local_rollover_filter');
+        require_login();
     }
 
     public function past_instances_settings() {
         global $OUTPUT, $PAGE;
-
-        require_login();
 
         $form = new form_past_instances_filter();
 
@@ -58,6 +57,14 @@ class settings_controller {
         echo $OUTPUT->heading(get_string('settings-filter', 'local_rollover'));
         $form->display();
         echo '<section id="local_rollover_filter_samples"></section>';
+        echo $OUTPUT->footer();
+    }
+
+    public function activities_rules() {
+        global $OUTPUT;
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('settings-activities-header', 'local_rollover'));
         echo $OUTPUT->footer();
     }
 }
