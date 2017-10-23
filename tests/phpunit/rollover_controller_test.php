@@ -21,6 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\admin\settings_controller;
 use local_rollover\form\form_source_course_selection;
 use local_rollover\rollover_controller;
 use local_rollover\rollover_parameters;
@@ -89,7 +90,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         $controller = new rollover_controller();
         $form = $controller->create_form_source_course_selection();
 
-        $courses = $form->get_user_courses();
+        $courses = $form->get_my_courses();
         foreach ($courses as &$course) {
             $course = (array)$course;
         }
@@ -99,6 +100,41 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
                 'id'        => $modifiable->id,
                 'shortname' => 'can-modify',
                 'fullname'  => $modifiable->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
+    }
+
+    public function test_it_creates_a_form_with_past_instances() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('test_destination');
+        $previous = $this->generator()->create_course_by_shortname('test_a');
+        $this->generator()->create_course_by_shortname('course_b');
+
+        $this->generator()->enrol_editing_teacher('someone', 'test_destination');
+
+        self::setUser($user);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX,
+                   '/^([^_]+)_.*$/',
+                   'local_rollover');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $form = $controller->create_form_source_course_selection();
+
+        $courses = $form->get_past_instances();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $previous->id => [
+                'id'        => $previous->id,
+                'shortname' => $previous->shortname,
+                'fullname'  => $previous->fullname,
             ],
         ];
         self::assertSame($expected, $courses);
@@ -145,6 +181,14 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
     public function test_it_runs_as_admin() {
         // Is it really needed to run as user 2 (admin)?
         // Let's figure out when we the specific capabilities.
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_does_not_get_past_instances_not_active() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_ignores_or_fails_gracefully_if_regex_is_invalid_or_contains_no_group() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 }
