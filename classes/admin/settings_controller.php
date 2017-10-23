@@ -43,11 +43,13 @@ class settings_controller {
     }
 
     public function past_instances_settings() {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
 
         require_login();
 
         $form = new form_past_instances_filter();
+
+        $PAGE->requires->js_call_amd('local_rollover/past-instances-filter-samples', 'initialise');
 
         echo $OUTPUT->header();
         if ($form->is_saved()) {
@@ -55,6 +57,7 @@ class settings_controller {
         }
         echo $OUTPUT->heading(get_string('settings-filter', 'local_rollover'));
         $form->display();
+        echo '<button id="update_samples">samples</button>';
         echo $OUTPUT->footer();
     }
 }
