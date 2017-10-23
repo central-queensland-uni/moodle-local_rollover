@@ -22,26 +22,28 @@
 define(['core/ajax', 'jquery'], function (ajax, $) {
     var TRIGGER_DELAY_MS = 300;
 
+    var trigger, triggered, initialise, updateSamples, samplesReceived;
+
     var triggerTimer = null;
 
-    function initialise() {
+    initialise = function () {
         $('#id_regex').on('input', trigger);
         updateSamples();
-    }
+    };
 
-    function trigger() {
+    trigger = function () {
         if (triggerTimer !== null) {
             clearTimeout(triggerTimer);
         }
         triggerTimer = setTimeout(triggered, TRIGGER_DELAY_MS);
-    }
+    };
 
-    function triggered() {
+    triggered = function () {
         triggerTimer = null;
         updateSamples();
-    }
+    };
 
-    function samplesReceived(response) {
+    samplesReceived = function (response) {
         var $section = $('#local_rollover_filter_samples');
         $section.empty();
         $section.append($('<h2>').append($('<pre>').text(response.regex)));
@@ -58,9 +60,9 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
         });
 
         $section.append($rootUL);
-    }
+    };
 
-    function updateSamples() {
+    updateSamples = function () {
         var args = {regex: document.getElementById('id_regex').value};
         var webservices = [
             {methodname: 'local_rollover_regex_filter_get_sample_matches_by_regex', args: args}
@@ -71,7 +73,7 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
         promise.done(samplesReceived).fail(function (response) {
             window.console.error(response);
         });
-    }
+    };
 
     return {
         initialise: initialise
