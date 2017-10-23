@@ -19,7 +19,7 @@ Feature: Adjust past instances filter
     Then I should see "saved"
 
   Scenario: I can see samples
-    Given I am an administrator
+    Given I am an administrator                                       # local_rollover
     And there is a course with shortname "ABC-123"                    # local_rollover
     And there is a course with shortname "ABC-456"                    # local_rollover
     And there is a course with shortname "ABC-NEW"                    # local_rollover
