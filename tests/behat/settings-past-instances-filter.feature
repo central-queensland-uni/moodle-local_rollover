@@ -17,3 +17,16 @@ Feature: Adjust past instances filter
     And I set the field "Regular Expression" to "/^Reg(Ex)$/"
     And I press "Save"
     Then I should see "saved"
+
+  Scenario: I can see samples
+    Given I am an administrator
+    And there is a course with shortname "ABC-123"                    # local_rollover
+    And there is a course with shortname "ABC-456"                    # local_rollover
+    And there is a course with shortname "ABC-NEW"                    # local_rollover
+    And there is a course with shortname "DEF-789"                    # local_rollover
+    When I go to the "Rollover past instances filter" settings page   # local_rollover
+    And I set the field "Regular Expression" to "/^(.*)-\d{3}$/"
+    Then I should see "ABC-123"
+    And I should see "ABC-456"
+    And I should see "DEF-789"
+    But I should not see "ABC-NEW"
