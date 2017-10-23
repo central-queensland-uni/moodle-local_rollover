@@ -26,6 +26,7 @@
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
 use local_rollover\admin\rollover_settings;
+use local_rollover\admin\settings_controller;
 use local_rollover\rollover_parameters;
 use local_rollover\test\generator;
 
@@ -282,5 +283,12 @@ class behat_local_rollover extends behat_base {
      */
     public function the_course_has_an_html_block($course, $text) {
         $this->generator()->create_html_block($course, $text);
+    }
+
+    /**
+     * @Given /^the past instances RegEx is set to "([^"]*)" +\# local_rollover$/
+     */
+    public function the_past_instances_regex_is_set_to($regex) {
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX, $regex, 'local_rollover');
     }
 }

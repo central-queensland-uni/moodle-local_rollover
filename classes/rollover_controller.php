@@ -25,6 +25,7 @@ namespace local_rollover;
 
 use backup_root_task;
 use context_course;
+use local_rollover\admin\settings_controller;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\form\form_activities_and_resources_selection;
@@ -213,28 +214,10 @@ class rollover_controller {
      * @return form_source_course_selection
      */
     public function create_form_source_course_selection() {
-        global $DB;
+        $mycourses = $this->get_user_courses();
+        $pastinstances = $this->get_past_instances();
 
-        $courses = get_user_capability_course('moodle/course:update');
-        if ($courses === false) {
-            $courses = [];
-        }
-
-        foreach ($courses as &$course) {
-            $course = $course->id;
-        }
-
-        $courses = $DB->get_records_list('course',
-                                         'id',
-                                         $courses,
-                                         'shortname ASC',
-                                         'id,shortname,fullname');
-
-        // Remove site-level and destionation course.
-        unset($courses[1]);
-        unset($courses[$this->destinationcourse->id]);
-
-        return new form_source_course_selection($courses);
+        return new form_source_course_selection($pastinstances, $mycourses);
     }
 
     private function show_header() {
@@ -286,5 +269,76 @@ class rollover_controller {
             }
         }
         return true;
+    }
+
+    private function get_user_courses() {
+        global $DB;
+
+        $courses = get_user_capability_course('moodle/course:update');
+        if ($courses === false) {
+            $courses = [];
+        }
+
+        foreach ($courses as &$course) {
+            $course = $course->id;
+        }
+
+        $courses = $DB->get_records_list('course',
+                                         'id',
+                                         $courses,
+                                         'shortname ASC',
+                                         'id,shortname,fullname');
+
+        // Remove site-level and destionation course.
+        unset($courses[1]);
+        unset($courses[$this->destinationcourse->id]);
+
+        return $courses;
+    }
+
+    private function get_past_instances() {
+        global $DB;
+
+        $regex = get_config('local_rollover', settings_controller::SETTING_PAST_INSTANCES_REGEX);
+        if (empty($regex)) {
+            return [];
+        }
+
+        $group = $this->past_instance_match($regex, $this->destinationcourse->shortname);
+        if (is_null($group)) {
+            return [];
+        }
+
+        $found = [];
+        $courses = $DB->get_records('course', null, 'shortname ASC', 'id, shortname, fullname');
+        foreach ($courses as $course) {
+            $match = $this->past_instance_match($regex, $course->shortname);
+            if ($match === $group) {
+                $found[$course->id] = $course;
+            }
+        }
+
+        // Remove site-level and destionation course.
+        unset($found[$this->destinationcourse->id]);
+
+        return $found;
+    }
+
+    private function past_instance_match($regex, $shortname) {
+        if (!preg_match($regex, $shortname, $matches)) {
+            return null;
+        }
+
+        // We are interested in the first capture group.
+        if (count($matches) < 2) {
+            return null;
+        }
+
+        $match = $matches[1];
+        if (empty($match)) {
+            return null;
+        }
+
+        return $match;
     }
 }

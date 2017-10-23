@@ -39,28 +39,44 @@ require_once($CFG->libdir . '/formslib.php');
  */
 class form_source_course_selection extends moodleform {
     /** @var string[] */
-    private $usercourses;
+    private $mycourses;
 
-    public function get_user_courses() {
-        return $this->usercourses;
+    public function get_my_courses() {
+        return $this->mycourses;
+    }
+
+    /** @var string[] */
+    private $pastinstances;
+
+    public function get_past_instances() {
+        return $this->pastinstances;
     }
 
     /**
-     * @param string[] $usercourses Array of "your courses" to display,
+     * @param string[] $pastinstances Array of "Past instances" to display.
+     * @param string[] $mycourses     Array of "My courses" to display.
      */
-    public function __construct($usercourses = []) {
-        $this->usercourses = $usercourses;
+    public function __construct($pastinstances = [], $mycourses = []) {
+        $this->mycourses = $mycourses;
+        $this->pastinstances = $pastinstances;
         parent::__construct();
     }
 
     private function prepare_options() {
-        $options = [];
-
-        foreach ($this->usercourses as $id => $course) {
-            $options[$id] = "{$course->shortname}: {$course->fullname}";
+        $pastinstances = [];
+        foreach ($this->pastinstances as $id => $course) {
+            $pastinstances[$id] = "{$course->shortname}: {$course->fullname}";
         }
 
-        return $options;
+        $mycourses = [];
+        foreach ($this->mycourses as $id => $course) {
+            $mycourses[$id] = "{$course->shortname}: {$course->fullname}";
+        }
+
+        return [
+            get_string('originalcourse_pastinstances', 'local_rollover') => $pastinstances,
+            get_string('originalcourse_mycourses', 'local_rollover')     => $mycourses,
+        ];
     }
 
     /**
@@ -75,7 +91,7 @@ class form_source_course_selection extends moodleform {
         $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
-        $mform->addElement('select',
+        $mform->addElement('selectgroups',
                            rollover_parameters::PARAM_SOURCE_COURSE_ID,
                            get_string('originalcourse', 'local_rollover'),
                            $this->prepare_options(),
