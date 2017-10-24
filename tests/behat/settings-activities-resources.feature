@@ -33,4 +33,9 @@ Feature: Rules for rolling over activities and resources
     And I press "Add rule"
     Then I should see "Rule #1: Enforce rolling over any 'Quiz' matching: /^Final Exam$/"
 
-    # Scenario: Cancel adding new rule
+  Scenario: I can cancel when adding a new rule.
+    Given I am an administrator                                            # local_rollover
+    And I am at the "Activities & Resources" settings page                 # local_rollover
+    When I follow "Add new rule"
+    And I press "Cancel"
+    Then I should see "No rules"
