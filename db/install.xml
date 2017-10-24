@@ -14,6 +14,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="index_importance_order" UNIQUE="true" FIELDS="rule, moduleid, id" COMMENT="Importance order for the rules."/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

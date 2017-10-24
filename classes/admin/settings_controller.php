@@ -23,6 +23,8 @@
 
 namespace local_rollover\admin;
 
+use html_writer;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\form\form_past_instances_filter;
 
 defined('MOODLE_INTERNAL') || die();
@@ -37,6 +39,26 @@ require(__DIR__ . '/../../../../lib/adminlib.php');
  */
 class settings_controller {
     const SETTING_PAST_INSTANCES_REGEX = 'past_instances_regex';
+
+    public static function create_rule_sentence($number, $rule) {
+        global $DB;
+
+        $rulenumber = html_writer::tag('b',
+                                       get_string('rule-sentence-number', 'local_rollover', $number));
+
+        $data = ['regex' => $rule->regex];
+        if (!is_null($rule->moduleid)) {
+            $name = $DB->get_field('modules', 'name', ['id' => $rule->moduleid], MUST_EXIST);
+            $data['activity'] = get_string('modulename', $name);
+        }
+
+        $lang = "rule-sentence-{$rule->rule}";
+        $lang .= is_null($rule->moduleid) ? '-all' : '-activity';
+        $lang .= empty($rule->regex) ? '-all' : '-regex';
+        $lang = get_string($lang, 'local_rollover', $data);
+
+        return "{$rulenumber} {$lang}";
+    }
 
     public function __construct() {
         admin_externalpage_setup('local_rollover_filter');
@@ -63,8 +85,21 @@ class settings_controller {
     public function activities_rules() {
         global $OUTPUT;
 
+        $db = new activity_rule_db();
+
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('settings-activities-header', 'local_rollover'));
+
+        $rules = $db->get_all();
+        if (count($rules) == 0) {
+            echo 'No rules active.';
+        } else {
+            echo html_writer::start_tag('ul');
+            foreach (array_values($rules) as $index => $rule) {
+                echo html_writer::tag('li', $this->create_rule_sentence($index + 1, $rule));
+            }
+            echo html_writer::end_tag('ul');
+        }
         echo $OUTPUT->footer();
     }
 }

@@ -27,6 +27,7 @@ use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
 use local_rollover\admin\rollover_settings;
 use local_rollover\admin\settings_controller;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\rollover_parameters;
 use local_rollover\test\generator;
 
@@ -191,6 +192,8 @@ class behat_local_rollover extends behat_base {
     public function i_am_at_the_settings_page($page) {
         if ($page == 'Rollover past instances filter') {
             $url = '/local/rollover/past-instances-filter.php';
+        } else if ($page == 'Activities & Resources') {
+            $url = '/local/rollover/activities-rules.php';
         } else {
             $url = '/admin/settings.php?section=local_' . str_replace(' ', '_', strtolower($page));
         }
@@ -290,5 +293,44 @@ class behat_local_rollover extends behat_base {
      */
     public function the_past_instances_regex_is_set_to($regex) {
         set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX, $regex, 'local_rollover');
+    }
+
+    /**
+     * @Given /^the following activity rollover rules exist: +\# local_rollover$/
+     */
+    public function the_following_activity_rollover_rules_exist(TableNode $rules) {
+        global $DB;
+        $dml = new activity_rule_db();
+
+        foreach ($rules->getColumnsHash() as $rule) {
+            $rule = (object)$rule;
+
+            switch ($rule->rule) {
+                case 'forbid':
+                    $rule->rule = activity_rule_db::RULE_FORBID;
+                    break;
+                case 'enforce':
+                    $rule->rule = activity_rule_db::RULE_ENFORCE;
+                    break;
+                case 'not default':
+                    $rule->rule = activity_rule_db::RULE_NOT_DEFAULT;
+                    break;
+                default:
+                    throw new moodle_exception("Invalid rule: {$rule->rule}");
+            }
+
+            $rule->module = strtolower($rule->module);
+            if (empty($rule->module)) {
+                $rule->moduleid = null;
+            } else {
+                if ($rule->module == 'assignment') {
+                    $rule->module = 'assign';
+                }
+                $rule->moduleid = $DB->get_field('modules', 'id', ['name' => $rule->module], MUST_EXIST);
+            }
+            unset($rule->module);
+
+            $dml->create($rule);
+        }
     }
 }

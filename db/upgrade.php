@@ -53,5 +53,19 @@ function xmldb_local_rollover_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017102400, 'local', 'rollover');
     }
 
+    if ($oldversion < 2017102402) {
+        // Define index index_importance_order (unique) to be added to local_rollover_activityrules.
+        $table = new xmldb_table('local_rollover_activityrules');
+        $index = new xmldb_index('index_importance_order', XMLDB_INDEX_UNIQUE, ['rule', 'moduleid', 'id']);
+
+        // Conditionally launch add index index_importance_order.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Rollover savepoint reached.
+        upgrade_plugin_savepoint(true, 2017102402, 'local', 'rollover');
+    }
+
     return true;
 }

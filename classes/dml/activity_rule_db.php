@@ -33,8 +33,18 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class activity_rule {
+class activity_rule_db {
+    /** Database table name. */
     const TABLE = 'local_rollover_activityrules';
+
+    /** Forbidding rules make sure the activity is never rolled over. */
+    const RULE_FORBID = '1_forbid';
+
+    /** Enforcing rules make sure the activity is always rolled over. */
+    const RULE_ENFORCE = '2_enforce';
+
+    /** Not default rules make the activity not rolled over by default, but they can still be selected. */
+    const RULE_NOT_DEFAULT = '3_not_default';
 
     /** @var moodle_database */
     private $db;
@@ -46,5 +56,9 @@ class activity_rule {
 
     public function create($rule) {
         $rule->id = $this->db->insert_record(self::TABLE, $rule);
+    }
+
+    public function get_all() {
+        return $this->db->get_records(self::TABLE, null, 'rule ASC, id ASC');
     }
 }

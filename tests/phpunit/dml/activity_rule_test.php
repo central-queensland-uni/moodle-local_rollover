@@ -21,26 +21,26 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\dml\activity_rule;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_dml_activity_rule_test extends rollover_testcase {
-    /** @var activity_rule */
+    /** @var activity_rule_db */
     private $dml;
 
     protected function setUp() {
         parent::setUp();
         $this->resetAfterTest();
-        $this->dml = new activity_rule();
+        $this->dml = new activity_rule_db();
     }
 
     public function test_it_can_create() {
         $this->resetAfterTest();
 
         $rule = (object)[
-            'rule'     => 'forbid',
+            'rule'     => activity_rule_db::RULE_FORBID,
             'moduleid' => null,
             'regex'    => '',
         ];
@@ -48,5 +48,19 @@ class local_rollover_dml_activity_rule_test extends rollover_testcase {
         $this->dml->create($rule);
 
         self::assertNotEmpty($rule->id);
+    }
+
+    public function test_it_gets_all_in_correct_order() {
+        global $DB;
+        $enforce = $DB->insert_record(activity_rule_db::TABLE,
+                                      (object)['rule' => activity_rule_db::RULE_ENFORCE]);
+        $forbid = $DB->insert_record(activity_rule_db::TABLE,
+                                     (object)['rule' => activity_rule_db::RULE_FORBID]);
+        $notdefault = $DB->insert_record(activity_rule_db::TABLE,
+                                         (object)['rule' => activity_rule_db::RULE_NOT_DEFAULT, 'moduleid' => null, 'regex' => '']);
+
+        $all = $this->dml->get_all();
+        $ids = array_keys($all);
+        self::assertSame([$forbid, $enforce, $notdefault], $ids);
     }
 }
