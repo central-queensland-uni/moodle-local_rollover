@@ -13,7 +13,7 @@ Feature: Rules for rolling over activities and resources
   Scenario: I can view current rules.
     Given I am an administrator                                             # local_rollover
     And the following activity rollover rules exist:                        # local_rollover
-      | rule        | module     | regex             |
+      | rule        | activity   | regex             |
       | enforce     | Assignment |                   |
       | forbid      | Forum      | /^Announcements$/ |
       | not default |            | /^.*TEST.*$/      |
@@ -32,6 +32,21 @@ Feature: Rules for rolling over activities and resources
     And I set the field "Regular Expression" to "/^Final Exam$/"
     And I press "Add rule"
     Then I should see "Rule #1: Enforce rolling over any 'Quiz' matching: /^Final Exam$/"
+
+  Scenario: I can edit an existing rule.
+    Given I am an administrator                                            # local_rollover
+    And the following activity rollover rules exist:                       # local_rollover
+      | rule    | activity   | regex |
+      | enforce | Assignment |       |
+    And I am at the "Activities & Resources" settings page                 # local_rollover
+    When I follow "Change rule"
+    And I set the field "Activity" to "Wiki"
+    And I set the field "Regular Expression" to "/^All time wiki$/"
+    And I press "Update rule"
+    Then I should see "Rule #1"
+    And I should see "Wiki"
+    And I should see "/^All time wiki$/"
+    But I should not see "Rule #2"
 
   Scenario: I can cancel when adding a new rule.
     Given I am an administrator                                            # local_rollover

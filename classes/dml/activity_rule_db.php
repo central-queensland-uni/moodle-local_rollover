@@ -54,11 +54,33 @@ class activity_rule_db {
         $this->db = $DB;
     }
 
-    public function create($rule) {
+    public function read($ruleid) {
+        $rule = $this->db->get_record(self::TABLE, ['id' => $ruleid]);
+
+        if ($rule === false) {
+            return null;
+        }
+
+        return $rule;
+    }
+
+    public function save($rule) {
+        if (isset($rule->id)) {
+            $this->update($rule);
+        } else {
+            $this->create($rule);
+        }
+    }
+
+    public function all() {
+        return $this->db->get_records(self::TABLE, null, 'rule ASC, id ASC');
+    }
+
+    private function create($rule) {
         $rule->id = $this->db->insert_record(self::TABLE, $rule);
     }
 
-    public function get_all() {
-        return $this->db->get_records(self::TABLE, null, 'rule ASC, id ASC');
+    private function update($rule) {
+        $this->db->update_record(self::TABLE, $rule);
     }
 }

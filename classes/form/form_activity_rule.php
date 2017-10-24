@@ -41,6 +41,8 @@ require_once($CFG->libdir . '/formslib.php');
 class form_activity_rule extends moodleform {
     const PARAM_ACTION = 'action';
 
+    const PARAM_RULEID = 'ruleid';
+
     const PARAM_RULE = 'rule';
 
     const PARAM_MODULE = 'module';
@@ -55,6 +57,9 @@ class form_activity_rule extends moodleform {
 
         $mform->addElement('hidden', self::PARAM_ACTION, 'add');
         $mform->setType(self::PARAM_ACTION, PARAM_ALPHANUM);
+
+        $mform->addElement('hidden', self::PARAM_RULEID, '');
+        $mform->setType(self::PARAM_RULEID, PARAM_INT);
 
         $ruleoptions = [
             activity_rule_db::RULE_FORBID      => get_string('rule-forbid', 'local_rollover'),
@@ -81,7 +86,9 @@ class form_activity_rule extends moodleform {
         $mform->setType(self::PARAM_REGEX, PARAM_TEXT);
         $mform->addHelpButton(self::PARAM_REGEX, 'add_rule_field_regex', 'local_rollover');
 
-        $this->add_action_buttons(true, get_string('add_rule', 'local_rollover'));
+        $action = optional_param(self::PARAM_ACTION, 'add', PARAM_ALPHANUM);
+        $submit = ($action == 'add') ? 'add_rule' : 'update_rule';
+        $this->add_action_buttons(true, get_string($submit, 'local_rollover'));
     }
 
     /**

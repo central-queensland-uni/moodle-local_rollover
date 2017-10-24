@@ -37,17 +37,49 @@ class local_rollover_dml_activity_rule_test extends rollover_testcase {
     }
 
     public function test_it_can_create() {
-        $this->resetAfterTest();
-
         $rule = (object)[
             'rule'     => activity_rule_db::RULE_FORBID,
             'moduleid' => null,
             'regex'    => '',
         ];
 
-        $this->dml->create($rule);
+        $this->dml->save($rule);
 
         self::assertNotEmpty($rule->id);
+    }
+
+    public function test_it_can_read() {
+        $actual = $this->dml->read(1);
+        self::assertNull($actual);
+
+        $expected = (object)[
+            'rule'     => activity_rule_db::RULE_FORBID,
+            'moduleid' => null,
+            'regex'    => '',
+        ];
+        $this->dml->save($expected);
+
+        $actual = $this->dml->read($expected->id);
+        self::assertEquals((array)$expected, (array)$actual);
+    }
+
+    public function test_it_can_update() {
+        $expected = (object)[
+            'rule'     => activity_rule_db::RULE_FORBID,
+            'moduleid' => null,
+            'regex'    => '',
+        ];
+        $this->dml->save($expected);
+        $firstid = $expected->id;
+
+        $expected->rule = activity_rule_db::RULE_ENFORCE;
+        $this->dml->save($expected);
+        $secondid = $expected->id;
+
+        self::assertSame($firstid, $secondid);
+
+        $actual = $this->dml->read($expected->id);
+        self::assertEquals((array)$expected, (array)$actual);
     }
 
     public function test_it_gets_all_in_correct_order() {
@@ -59,7 +91,7 @@ class local_rollover_dml_activity_rule_test extends rollover_testcase {
         $notdefault = $DB->insert_record(activity_rule_db::TABLE,
                                          (object)['rule' => activity_rule_db::RULE_NOT_DEFAULT, 'moduleid' => null, 'regex' => '']);
 
-        $all = $this->dml->get_all();
+        $all = $this->dml->all();
         $ids = array_keys($all);
         self::assertSame([$forbid, $enforce, $notdefault], $ids);
     }
