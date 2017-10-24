@@ -80,4 +80,12 @@ class local_rollover_admin_settings_test extends rollover_testcase {
         $actual = strip_tags($actual);
         self::assertSame($expected, $actual);
     }
+
+    public function test_it_validates_add_new_rule_form() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
+
+    public function test_it_checks_sesskey_for_add_new_rule_form() {
+        $this->markTestSkipped('Test/Feature not yet implemented.');
+    }
 }

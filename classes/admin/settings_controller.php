@@ -25,7 +25,9 @@ namespace local_rollover\admin;
 
 use html_writer;
 use local_rollover\dml\activity_rule_db;
+use local_rollover\form\form_activity_rule;
 use local_rollover\form\form_past_instances_filter;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -83,6 +85,18 @@ class settings_controller {
     }
 
     public function activities_rules() {
+        $action = optional_param('action', '', PARAM_ALPHANUM);
+        switch ($action) {
+            case 'add':
+                $this->activities_rules_add();
+                break;
+            default:
+                $this->activities_rules_view();
+                break;
+        }
+    }
+
+    private function activities_rules_view() {
         global $OUTPUT;
 
         $db = new activity_rule_db();
@@ -92,7 +106,7 @@ class settings_controller {
 
         $rules = $db->get_all();
         if (count($rules) == 0) {
-            echo 'No rules active.';
+            echo html_writer::tag('p', get_string('no_rules', 'local_rollover'));
         } else {
             echo html_writer::start_tag('ul');
             foreach (array_values($rules) as $index => $rule) {
@@ -100,6 +114,45 @@ class settings_controller {
             }
             echo html_writer::end_tag('ul');
         }
+
+        echo html_writer::link(new moodle_url('/local/rollover/activities-rules.php', ['action' => 'add']),
+                               get_string('add_new_rule', 'local_rollover'));
+
         echo $OUTPUT->footer();
+    }
+
+    private function activities_rules_add() {
+        global $OUTPUT;
+
+        $form = new form_activity_rule();
+        if ($form->is_cancelled()) {
+            $this->activities_rules_view();
+            return;
+        }
+
+        $data = $form->get_data();
+        if ($data) {
+            $this->activities_rules_save($data);
+            $this->activities_rules_view();
+            return;
+        }
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('settings-activities-add-rule-header', 'local_rollover'));
+
+        $form->display();
+
+        echo $OUTPUT->footer();
+    }
+
+    private function activities_rules_save($data) {
+        $dml = new activity_rule_db();
+        $rule = (object)[
+            'rule'     => $data->{form_activity_rule::PARAM_RULE},
+            'moduleid' => $data->{form_activity_rule::PARAM_MODULE},
+            'regex'    => $data->{form_activity_rule::PARAM_REGEX},
+        ];
+
+        $dml->create($rule);
     }
 }
