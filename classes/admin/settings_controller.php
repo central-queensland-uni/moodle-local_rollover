@@ -26,6 +26,7 @@ namespace local_rollover\admin;
 use html_writer;
 use local_rollover\dml\activity_rule_db;
 use local_rollover\form\form_activity_rule;
+use local_rollover\form\form_activity_rule_delete;
 use local_rollover\form\form_past_instances_filter;
 use moodle_url;
 use stdClass;
@@ -97,6 +98,9 @@ class settings_controller {
             case 'edit':
                 $this->activities_rules_edit();
                 break;
+            case 'delete':
+                $this->activities_rules_delete();
+                break;
             default:
                 $this->activities_rules_view();
                 break;
@@ -117,11 +121,22 @@ class settings_controller {
         } else {
             echo html_writer::start_tag('ul');
             foreach (array_values($rules) as $index => $rule) {
-                $text = $this->create_rule_sentence($index + 1, $rule);
-                $link = new moodle_url('/local/rollover/activities-rules.php',
-                                       [form_activity_rule::PARAM_ACTION => 'edit', form_activity_rule::PARAM_RULEID => $rule->id]);
-                $link = html_writer::link($link, get_string('change_rule', 'local_rollover'));
-                echo html_writer::tag('li', "{$text} {$link}");
+                $rulenumber = $index + 1;
+                $text = $this->create_rule_sentence($rulenumber, $rule);
+                $change = new moodle_url('/local/rollover/activities-rules.php',
+                                         [
+                                             form_activity_rule::PARAM_ACTION => 'edit',
+                                             form_activity_rule::PARAM_RULEID => $rule->id,
+                                         ]);
+                $change = html_writer::link($change, get_string('change_rule', 'local_rollover'));
+                $remove = new moodle_url('/local/rollover/activities-rules.php',
+                                         [
+                                             'rulenumber'                     => $rulenumber,
+                                             form_activity_rule::PARAM_ACTION => 'delete',
+                                             form_activity_rule::PARAM_RULEID => $rule->id,
+                                         ]);
+                $remove = html_writer::link($remove, get_string('remove_rule', 'local_rollover'));
+                echo html_writer::tag('li', "{$text} [ {$change} | {$remove} ]");
             }
             echo html_writer::end_tag('ul');
         }
@@ -186,6 +201,38 @@ class settings_controller {
         echo $OUTPUT->header();
 
         echo $OUTPUT->heading(get_string('settings-activities-add-rule-header', 'local_rollover'));
+
+        $form->display();
+
+        echo $OUTPUT->footer();
+    }
+
+    private function activities_rules_delete() {
+        global $OUTPUT;
+        $dml = new activity_rule_db();
+        $ruleid = required_param(form_activity_rule::PARAM_RULEID, PARAM_INT);
+        $form = new form_activity_rule_delete();
+
+        if ($form->is_cancelled()) {
+            $this->activities_rules_view();
+            return;
+        }
+
+        if ($form->is_submitted()) {
+            $dml->delete($ruleid);
+            $this->activities_rules_view();
+            return;
+        }
+        $rule = $dml->read($ruleid);
+
+        echo $OUTPUT->header();
+
+        echo $OUTPUT->heading(get_string('settings-activities-add-rule-header', 'local_rollover'));
+
+        echo html_writer::tag('b', get_string('delete-rule-confirmation', 'local_rollover'));
+
+        $number = required_param('rulenumber', PARAM_INT);
+        echo html_writer::tag('p', static::create_rule_sentence($number, $rule));
 
         $form->display();
 

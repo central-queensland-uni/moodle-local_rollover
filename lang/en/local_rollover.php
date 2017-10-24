@@ -37,6 +37,7 @@ $string['add_rule_field_regex_help'] = 'Regular Expression to match the name of 
 $string['add_new_rule'] = 'Add new rule';
 $string['add_rule'] = 'Add rule';
 $string['change_rule'] = 'Change rule';
+$string['delete-rule-confirmation'] = 'Are you sure you want to remove the following rule?';
 $string['no_rules'] = 'No rules found.';
 $string['option_activities'] = 'Sets the default for including activities in a rollover.';
 $string['option_badges'] = 'Sets the default for including badges in a rollover.';
@@ -74,6 +75,7 @@ $string['regex_help'] = '
     <li>Any courses that have the same match as in the destination course (capture group) will be selected as a source option for rollover.</li>
 </ul>
 ';
+$string['remove_rule'] = 'Remove rule';
 $string['rollover'] = 'Rollover';
 $string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
 $string['rule-forbid'] = 'Forbid';
