@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/rollover/db" VERSION="20171024" COMMENT="XMLDB file for Moodle local/rollover"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_rollover_activityrules" COMMENT="Rollover rules for activities and resources.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="rule" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Type of rule, when to include in rollovers."/>
+        <FIELD NAME="moduleid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Module to apply this rule or null for all modules. See 'modules' table."/>
+        <FIELD NAME="regex" TYPE="char" LENGTH="200" NOTNULL="true" SEQUENCE="false" COMMENT="Regular Expression to match to the module name. Empty for all."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

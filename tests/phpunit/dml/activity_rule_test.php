@@ -19,11 +19,34 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
+
+use local_rollover\dml\activity_rule;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017102400;
-$plugin->requires = 2016052300;
+class local_rollover_dml_activity_rule_test extends rollover_testcase {
+    /** @var activity_rule */
+    private $dml;
+
+    protected function setUp() {
+        parent::setUp();
+        $this->resetAfterTest();
+        $this->dml = new activity_rule();
+    }
+
+    public function test_it_can_create() {
+        $this->resetAfterTest();
+
+        $rule = (object)[
+            'rule'     => 'forbid',
+            'moduleid' => null,
+            'regex'    => '',
+        ];
+
+        $this->dml->create($rule);
+
+        self::assertNotEmpty($rule->id);
+    }
+}
