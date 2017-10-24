@@ -25,7 +25,10 @@ namespace local_rollover\admin;
 
 use html_writer;
 use local_rollover\dml\activity_rule_db;
+use local_rollover\form\form_activity_rule;
 use local_rollover\form\form_past_instances_filter;
+use moodle_url;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -61,12 +64,13 @@ class settings_controller {
     }
 
     public function __construct() {
-        admin_externalpage_setup('local_rollover_filter');
         require_login();
     }
 
     public function past_instances_settings() {
         global $OUTPUT, $PAGE;
+
+        admin_externalpage_setup('local_rollover_filter');
 
         $form = new form_past_instances_filter();
 
@@ -83,6 +87,23 @@ class settings_controller {
     }
 
     public function activities_rules() {
+        admin_externalpage_setup('local_rollover_activities');
+
+        $action = optional_param(form_activity_rule::PARAM_ACTION, '', PARAM_ALPHANUM);
+        switch ($action) {
+            case 'add':
+                $this->activities_rules_add();
+                break;
+            case 'edit':
+                $this->activities_rules_edit();
+                break;
+            default:
+                $this->activities_rules_view();
+                break;
+        }
+    }
+
+    private function activities_rules_view() {
         global $OUTPUT;
 
         $db = new activity_rule_db();
@@ -90,16 +111,84 @@ class settings_controller {
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('settings-activities-header', 'local_rollover'));
 
-        $rules = $db->get_all();
+        $rules = $db->all();
         if (count($rules) == 0) {
-            echo 'No rules active.';
+            echo html_writer::tag('p', get_string('no_rules', 'local_rollover'));
         } else {
             echo html_writer::start_tag('ul');
             foreach (array_values($rules) as $index => $rule) {
-                echo html_writer::tag('li', $this->create_rule_sentence($index + 1, $rule));
+                $text = $this->create_rule_sentence($index + 1, $rule);
+                $link = new moodle_url('/local/rollover/activities-rules.php',
+                                       [form_activity_rule::PARAM_ACTION => 'edit', form_activity_rule::PARAM_RULEID => $rule->id]);
+                $link = html_writer::link($link, get_string('change_rule', 'local_rollover'));
+                echo html_writer::tag('li', "{$text} {$link}");
             }
             echo html_writer::end_tag('ul');
         }
+
+        echo html_writer::link(new moodle_url('/local/rollover/activities-rules.php', [form_activity_rule::PARAM_ACTION => 'add']),
+                               get_string('add_new_rule', 'local_rollover'));
+
+        echo $OUTPUT->footer();
+    }
+
+    private function activities_rules_add() {
+        $this->activities_rules_add_or_edit(null);
+    }
+
+    private function activities_rules_save($rule, $data) {
+        $dml = new activity_rule_db();
+
+        if (is_null($rule)) {
+            $rule = new stdClass();
+        }
+        $rule->rule = $data->{form_activity_rule::PARAM_RULE};
+        $rule->moduleid = $data->{form_activity_rule::PARAM_MODULE};
+        $rule->regex = $data->{form_activity_rule::PARAM_REGEX};
+
+        $dml->save($rule);
+    }
+
+    private function activities_rules_edit() {
+        $ruleid = required_param(form_activity_rule::PARAM_RULEID, PARAM_INT);
+        $dml = new activity_rule_db();
+        $rule = $dml->read($ruleid);
+        $this->activities_rules_add_or_edit($rule);
+    }
+
+    private function activities_rules_add_or_edit($rule) {
+        global $OUTPUT;
+
+        $form = new form_activity_rule();
+
+        if ($form->is_cancelled()) {
+            $this->activities_rules_view();
+            return;
+        }
+
+        $data = $form->get_data();
+        if ($data) {
+            $this->activities_rules_save($rule, $data);
+            $this->activities_rules_view();
+            return;
+        }
+
+        if (!is_null($rule)) {
+            $form->set_data([
+                                form_activity_rule::PARAM_ACTION => 'edit',
+                                form_activity_rule::PARAM_RULEID => $rule->id,
+                                form_activity_rule::PARAM_RULE   => $rule->rule,
+                                form_activity_rule::PARAM_MODULE => $rule->moduleid,
+                                form_activity_rule::PARAM_REGEX  => $rule->regex,
+                            ]);
+        }
+
+        echo $OUTPUT->header();
+
+        echo $OUTPUT->heading(get_string('settings-activities-add-rule-header', 'local_rollover'));
+
+        $form->display();
+
         echo $OUTPUT->footer();
     }
 }

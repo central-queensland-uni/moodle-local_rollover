@@ -319,18 +319,18 @@ class behat_local_rollover extends behat_base {
                     throw new moodle_exception("Invalid rule: {$rule->rule}");
             }
 
-            $rule->module = strtolower($rule->module);
-            if (empty($rule->module)) {
+            $rule->activity = strtolower($rule->activity);
+            if (empty($rule->activity)) {
                 $rule->moduleid = null;
             } else {
-                if ($rule->module == 'assignment') {
-                    $rule->module = 'assign';
+                if ($rule->activity == 'assignment') {
+                    $rule->activity = 'assign';
                 }
-                $rule->moduleid = $DB->get_field('modules', 'id', ['name' => $rule->module], MUST_EXIST);
+                $rule->moduleid = $DB->get_field('modules', 'id', ['name' => $rule->activity], MUST_EXIST);
             }
-            unset($rule->module);
+            unset($rule->activity);
 
-            $dml->create($rule);
+            $dml->save($rule);
         }
     }
 }

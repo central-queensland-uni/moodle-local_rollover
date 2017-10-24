@@ -24,6 +24,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['add_rule_field_rule'] = 'Rule';
+$string['add_rule_field_rule_help'] = '<ul>
+<li><b>Forbid:</b> Prevents the matching activities from being rolled over.</li>
+<li><b>Enforce:</b> Ensures the matching activities are always rolled over.</li>
+<li><b>Not Default:</b> Do not rollover the matching activities by default, but they can be manually selected to rollover.</li>
+</ul>';
+$string['add_rule_field_module'] = 'Activity';
+$string['add_rule_field_module_help'] = 'Type of activity or resource to match. Leave it blank for all.';
+$string['add_rule_field_regex'] = 'Regular Expression';
+$string['add_rule_field_regex_help'] = 'Regular Expression to match the name of the activity. For safety reasons, the regex must be a full match.';
+$string['add_new_rule'] = 'Add new rule';
+$string['add_rule'] = 'Add rule';
+$string['change_rule'] = 'Change rule';
+$string['no_rules'] = 'No rules found.';
 $string['option_activities'] = 'Sets the default for including activities in a rollover.';
 $string['option_badges'] = 'Sets the default for including badges in a rollover.';
 $string['option_anonymize'] = 'If enabled all information pertaining to users will be anonymised by default.';
@@ -62,6 +76,9 @@ $string['regex_help'] = '
 ';
 $string['rollover'] = 'Rollover';
 $string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+$string['rule-forbid'] = 'Forbid';
+$string['rule-enforce'] = 'Enforce';
+$string['rule-not_default'] = 'Not Default';
 $string['rule-sentence-1_forbid-all-all'] = 'Forbid rolling over all activities.';
 $string['rule-sentence-1_forbid-all-regex'] = 'Forbid rolling over any activity matching: {$a->regex}';
 $string['rule-sentence-1_forbid-activity-all'] = 'Forbid rolling over all \'{$a->activity}\' activities.';
@@ -78,7 +95,8 @@ $string['rule-sentence-number'] = 'Rule #{$a}:';
 $string['save'] = 'Save';
 $string['settings'] = 'Rollover settings';
 $string['settings-activities'] = 'Activities & Resources';
-$string['settings-activities-header'] = 'Activities & Resources Rollover Rules';
+$string['settings-activities-add-rule-header'] = 'Add rule for activities and resources rollover';
+$string['settings-activities-header'] = 'Activities and resources rollover rules';
 $string['settings-options'] = 'Options defaults';
 $string['settings-saved'] = 'Settings saved.';
 $string['settings-filter'] = 'Past instances filter';
@@ -86,3 +104,4 @@ $string['step_activities_and_resources'] = 'Rollover: Select activities and reso
 $string['step_complete'] = 'Rollover successful';
 $string['step_content_options'] = 'Rollover: Select content options';
 $string['step_source_course'] = 'Rollover: Select source course';
+$string['update_rule'] = 'Update rule';
