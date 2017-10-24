@@ -68,7 +68,8 @@ Feature: Rules for rolling over activities and resources
   Scenario: I can cancel when adding a new rule.
     Given I am an administrator                                            # local_rollover
     And the following activity rollover rules exist:                       # local_rollover
-      | rule | activity | /^My Funny Rule$/ |
+      | rule    | activity   | regex             |
+      | enforce | Assignment | /^My Funny Rule$/ |
     And I am at the "Activities & Resources" settings page                 # local_rollover
     When I follow "Remove rule"
     And I press "Cancel"
