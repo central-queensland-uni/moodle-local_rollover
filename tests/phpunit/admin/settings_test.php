@@ -21,6 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\admin\settings_controller;
+use local_rollover\dml\activity_rule;
 use local_rollover\test\mock_admintree;
 use local_rollover\test\rollover_testcase;
 
@@ -38,5 +40,44 @@ class local_rollover_admin_settings_test extends rollover_testcase {
             'local_rollover_activities' => 'local_rollover',
         ];
         self::assertSame($expected, $ADMIN->tree);
+    }
+
+    public function provider_for_test_it_rule_sentences() {
+        $n = 0;
+
+        $rf = activity_rule::RULE_FORBID;
+        $re = activity_rule::RULE_ENFORCE;
+        $rn = activity_rule::RULE_NOT_DEFAULT;
+
+        $a0 = null;
+        $a1 = 1;
+
+        $r0 = '';
+        $r1 = '/^regex$/';
+
+        return [
+            [++$n, $rf, $a0, $r0, "Rule #1: Forbid rolling over all activities."],
+            [++$n, $rf, $a0, $r1, "Rule #2: Forbid rolling over any activity matching: {$r1}"],
+            [++$n, $rf, $a1, $r0, "Rule #3: Forbid rolling over all 'Assignment' activities."],
+            [++$n, $rf, $a1, $r1, "Rule #4: Forbid rolling over any 'Assignment' matching: {$r1}"],
+            [++$n, $re, $a0, $r0, "Rule #5: Enforce rolling over all activities."],
+            [++$n, $re, $a0, $r1, "Rule #6: Enforce rolling over any activity matching: {$r1}"],
+            [++$n, $re, $a1, $r0, "Rule #7: Enforce rolling over all 'Assignment' activities."],
+            [++$n, $re, $a1, $r1, "Rule #8: Enforce rolling over any 'Assignment' matching: {$r1}"],
+            [++$n, $rn, $a0, $r0, "Rule #9: Do not rollover by default any activity."],
+            [++$n, $rn, $a0, $r1, "Rule #10: Do not rollover by default any activity matching: {$r1}"],
+            [++$n, $rn, $a1, $r0, "Rule #11: Do not rollover by default any 'Assignment' activity."],
+            [++$n, $rn, $a1, $r1, "Rule #12: Do not rollover by default any 'Assignment' matching: {$r1}"],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_for_test_it_rule_sentences
+     */
+    public function test_it_rule_sentences($number, $rule, $moduleid, $regex, $expected) {
+        $rule = (object)compact('rule', 'moduleid', 'regex');
+        $actual = settings_controller::create_rule_sentence($number, $rule);
+        $actual = strip_tags($actual);
+        self::assertSame($expected, $actual);
     }
 }
