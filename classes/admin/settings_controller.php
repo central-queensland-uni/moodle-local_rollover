@@ -24,6 +24,7 @@
 namespace local_rollover\admin;
 
 use html_writer;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\form\form_past_instances_filter;
 
 defined('MOODLE_INTERNAL') || die();
@@ -84,8 +85,21 @@ class settings_controller {
     public function activities_rules() {
         global $OUTPUT;
 
+        $db = new activity_rule_db();
+
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('settings-activities-header', 'local_rollover'));
+
+        $rules = $db->get_all();
+        if (count($rules) == 0) {
+            echo 'No rules active.';
+        } else {
+            echo html_writer::start_tag('ul');
+            foreach (array_values($rules) as $index => $rule) {
+                echo html_writer::tag('li', $this->create_rule_sentence($index + 1, $rule));
+            }
+            echo html_writer::end_tag('ul');
+        }
         echo $OUTPUT->footer();
     }
 }

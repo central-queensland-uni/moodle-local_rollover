@@ -22,7 +22,7 @@
  */
 
 use local_rollover\admin\settings_controller;
-use local_rollover\dml\activity_rule;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\test\mock_admintree;
 use local_rollover\test\rollover_testcase;
 
@@ -45,9 +45,9 @@ class local_rollover_admin_settings_test extends rollover_testcase {
     public function provider_for_test_it_rule_sentences() {
         $n = 0;
 
-        $rf = activity_rule::RULE_FORBID;
-        $re = activity_rule::RULE_ENFORCE;
-        $rn = activity_rule::RULE_NOT_DEFAULT;
+        $rf = activity_rule_db::RULE_FORBID;
+        $re = activity_rule_db::RULE_ENFORCE;
+        $rn = activity_rule_db::RULE_NOT_DEFAULT;
 
         $a0 = null;
         $a1 = 1;

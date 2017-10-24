@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class activity_rule {
+class activity_rule_db {
     /** Database table name. */
     const TABLE = 'local_rollover_activityrules';
 
