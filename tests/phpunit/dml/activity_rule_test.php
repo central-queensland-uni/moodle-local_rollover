@@ -82,6 +82,18 @@ class local_rollover_dml_activity_rule_test extends rollover_testcase {
         self::assertEquals((array)$expected, (array)$actual);
     }
 
+    public function test_it_can_delete() {
+        $expected = (object)[
+            'rule'     => activity_rule_db::RULE_FORBID,
+            'moduleid' => null,
+            'regex'    => '',
+        ];
+        $this->dml->save($expected);
+        $this->dml->delete($expected->id);
+
+        $actual = $this->dml->read($expected->id);
+        self::assertNull($actual);
+    }
     public function test_it_gets_all_in_correct_order() {
         global $DB;
         $enforce = $DB->insert_record(activity_rule_db::TABLE,

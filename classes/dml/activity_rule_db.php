@@ -72,6 +72,10 @@ class activity_rule_db {
         }
     }
 
+    public function delete($ruleid) {
+        $this->db->delete_records(self::TABLE, ['id' => $ruleid]);
+    }
+
     public function all() {
         return $this->db->get_records(self::TABLE, null, 'rule ASC, id ASC');
     }

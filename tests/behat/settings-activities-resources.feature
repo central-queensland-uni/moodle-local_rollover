@@ -54,3 +54,22 @@ Feature: Rules for rolling over activities and resources
     When I follow "Add new rule"
     And I press "Cancel"
     Then I should see "No rules"
+
+  Scenario: I can remove an existing rule.
+    Given I am an administrator                                            # local_rollover
+    And the following activity rollover rules exist:                       # local_rollover
+      | rule    | activity   | regex |
+      | enforce | Assignment |       |
+    And I am at the "Activities & Resources" settings page                 # local_rollover
+    When I follow "Remove rule"
+    And I press "Remove rule"
+    Then I should see "No rules"
+
+  Scenario: I can cancel when adding a new rule.
+    Given I am an administrator                                            # local_rollover
+    And the following activity rollover rules exist:                       # local_rollover
+      | rule | activity | /^My Funny Rule$/ |
+    And I am at the "Activities & Resources" settings page                 # local_rollover
+    When I follow "Remove rule"
+    And I press "Cancel"
+    Then I should see "/^My Funny Rule$/"
