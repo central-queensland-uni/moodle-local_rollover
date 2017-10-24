@@ -19,11 +19,32 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
+
+namespace local_rollover\dml;
+
+use moodle_database;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017102400;
-$plugin->requires = 2016052300;
+/**
+ * @package     local_rollover
+ * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
+ * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class activity_rule {
+    const TABLE = 'local_rollover_activityrules';
+
+    /** @var moodle_database */
+    private $db;
+
+    public function __construct() {
+        global $DB;
+        $this->db = $DB;
+    }
+
+    public function create($rule) {
+        $rule->id = $this->db->insert_record(self::TABLE, $rule);
+    }
+}
