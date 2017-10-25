@@ -23,11 +23,13 @@
 
 namespace local_rollover\form;
 
+use backup_activity_generic_setting;
 use backup_root_task;
 use backup_setting;
 use backup_task;
 use base_task;
 use html_writer;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\rollover_parameters;
 use moodleform;
 
@@ -53,8 +55,12 @@ class form_activities_and_resources_selection extends moodleform {
         'course'   => false,
     ];
 
+    /** @var array */
+    private $rules;
+
     public function __construct($tasks) {
         $this->tasks = $tasks;
+        $this->rules = (new activity_rule_db())->all();
         parent::__construct();
     }
 
@@ -86,6 +92,9 @@ class form_activities_and_resources_selection extends moodleform {
                 continue;
             }
             foreach ($task->get_settings() as $setting) {
+                if ($setting instanceof backup_activity_generic_setting) {
+                    $this->apply_activity_rules($setting);
+                }
                 $changeable = $setting->get_ui()->is_changeable();
                 $visible = ($setting->get_visibility() == backup_setting::VISIBLE);
                 if ($changeable && $visible) {
@@ -252,5 +261,13 @@ class form_activities_and_resources_selection extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         return $errors;
+    }
+
+    private function apply_activity_rules($setting) {
+        foreach ($this->rules as $rule) {
+            if ($rule->rule == activity_rule_db::RULE_NOT_DEFAULT) {
+                $setting->set_value(0);
+            }
+        }
     }
 }

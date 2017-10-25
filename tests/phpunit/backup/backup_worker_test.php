@@ -32,7 +32,7 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         self::resetAfterTest(true);
 
         $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
-        $this->generator()->create_assignment('backup-source-course', 'Backup Assignment');
+        $this->generator()->create_activity('backup-source-course', 'assignment', 'Backup Assignment');
 
         $backupworker = backup_worker::create($sourcecourse->id);
         $backupworker->backup();

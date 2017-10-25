@@ -64,11 +64,15 @@ class generator extends testing_data_generator {
         return $this->users[$username];
     }
 
-    public function create_assignment($course, $assignmentname) {
-        return $this->get_plugin_generator('mod_assign')->create_instance(
+    public function create_activity($course, $activity, $name) {
+        if ($activity == 'assignment') {
+            $activity = 'assign';
+        }
+
+        return $this->get_plugin_generator("mod_{$activity}")->create_instance(
             [
                 'course' => $this->courses[$course]->id,
-                'name'   => $assignmentname,
+                'name'   => $name,
             ]
         );
     }

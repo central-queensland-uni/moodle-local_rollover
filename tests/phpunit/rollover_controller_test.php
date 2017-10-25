@@ -147,7 +147,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
-        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+        $this->generator()->create_activity('rollover-from', 'assignment', 'Full Rollover Assignment');
 
         $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
         $controller = new rollover_controller();
@@ -166,7 +166,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
         $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
-        $this->generator()->create_assignment('rollover-from', 'Full Rollover Assignment');
+        $this->generator()->create_activity('rollover-from', 'assignment', 'Full Rollover Assignment');
 
         $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
         $controller = new rollover_controller();

@@ -32,7 +32,7 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         self::resetAfterTest(true);
 
         $source = $this->generator()->create_course_by_shortname('source');
-        $this->generator()->create_assignment('source', 'my test assignment');
+        $this->generator()->create_activity('source', 'assignment', 'my test assignment');
 
         $worker = backup_worker::create($source->id);
         $tasks = $worker->get_backup_tasks();
