@@ -23,8 +23,8 @@
 
 use local_rollover\admin\settings_controller;
 use local_rollover\form\form_source_course_selection;
-use local_rollover\rollover_controller;
-use local_rollover\rollover_parameters;
+use local_rollover\local\rollover\rollover_controller;
+use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();

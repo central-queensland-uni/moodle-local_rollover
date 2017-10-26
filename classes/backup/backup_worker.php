@@ -26,7 +26,7 @@ namespace local_rollover\backup;
 use backup;
 use backup_controller;
 use backup_root_task;
-use local_rollover\rollover_controller;
+use local_rollover\local\rollover\rollover_controller;
 use stored_file;
 
 defined('MOODLE_INTERNAL') || die();

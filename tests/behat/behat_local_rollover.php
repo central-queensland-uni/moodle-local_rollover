@@ -29,7 +29,7 @@ use Behat\Mink\Exception\ExpectationException;
 use local_rollover\admin\rollover_settings;
 use local_rollover\admin\settings_controller;
 use local_rollover\dml\activity_rule_db;
-use local_rollover\rollover_parameters;
+use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\generator;
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');

@@ -23,16 +23,13 @@
 
 namespace local_rollover\form;
 
-use backup_activity_generic_setting;
-use backup_activity_task;
 use backup_root_task;
 use backup_setting;
 use backup_task;
 use base_task;
 use html_writer;
 use local_rollover\backup\activities_and_resources_rules_applier;
-use local_rollover\dml\activity_rule_db;
-use local_rollover\rollover_parameters;
+use local_rollover\local\rollover\rollover_parameters;
 use moodleform;
 
 defined('MOODLE_INTERNAL') || die();

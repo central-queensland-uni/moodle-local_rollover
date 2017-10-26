@@ -23,6 +23,7 @@
 
 namespace local_rollover;
 
+use local_rollover\local\rollover\rollover_parameters;
 use moodle_url;
 use navigation_node;
 use pix_icon;

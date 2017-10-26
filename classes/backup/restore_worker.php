@@ -24,7 +24,7 @@
 namespace local_rollover\backup;
 
 use backup;
-use local_rollover\rollover_controller;
+use local_rollover\local\rollover\rollover_controller;
 use restore_controller;
 
 defined('MOODLE_INTERNAL') || die();
