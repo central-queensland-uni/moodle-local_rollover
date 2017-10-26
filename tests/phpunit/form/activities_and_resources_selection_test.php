@@ -57,6 +57,7 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
     public function provider_for_tests_with_rules() {
         return [
             [activity_rule_db::RULE_FORBID],
+            [activity_rule_db::RULE_ENFORCE],
             [activity_rule_db::RULE_NOT_DEFAULT],
         ];
     }
