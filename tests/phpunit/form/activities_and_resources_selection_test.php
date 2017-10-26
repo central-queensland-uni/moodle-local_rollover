@@ -54,22 +54,22 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         self::assertContains('my test assignment', $html);
     }
 
-    public function test_it_does_not_set_anything_not_default() {
-        $this->assert_apply_rule('assignment', 'Assignment', 1);
+    public function test_it_does_not_set_or_lock_anything_not_default() {
+        $this->assert_apply_rule('assignment', 'Assignment', 1, 0);
     }
 
     public function test_it_sets_all_not_default() {
         $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, null, '');
 
-        $this->assert_apply_rule('assignment', 'Research', 0);
-        $this->assert_apply_rule('forum', 'Discussion', 0);
+        $this->assert_apply_rule('assignment', 'Research', 0, 0);
+        $this->assert_apply_rule('forum', 'Discussion', 0, 0);
     }
 
     public function test_it_sets_all_assignments_not_default() {
         $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, 'assignment', '');
 
-        $this->assert_apply_rule('assignment', 'Research', 0);
-        $this->assert_apply_rule('forum', 'Discussion', 1);
+        $this->assert_apply_rule('assignment', 'Research', 0, 0);
+        $this->assert_apply_rule('forum', 'Discussion', 1, 0);
     }
 
     public function test_it_sets_all_activities_based_on_regex_not_default() {
@@ -77,9 +77,9 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
                                                  null,
                                                  '/^Test .*$/');
 
-        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1);
-        $this->assert_apply_rule('assignment', 'Test Assignment', 0);
-        $this->assert_apply_rule('forum', 'Test Forum', 0);
+        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1, 0);
+        $this->assert_apply_rule('assignment', 'Test Assignment', 0, 0);
+        $this->assert_apply_rule('forum', 'Test Forum', 0, 0);
     }
 
     public function test_it_sets_all_assignments_based_on_regex_not_default() {
@@ -87,9 +87,9 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
                                                  'assignment',
                                                  '/^Test .*$/');
 
-        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1);
-        $this->assert_apply_rule('assignment', 'Test Assignment', 0);
-        $this->assert_apply_rule('forum', 'Test Forum', 1);
+        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1, 0);
+        $this->assert_apply_rule('assignment', 'Test Assignment', 0, 0);
+        $this->assert_apply_rule('forum', 'Test Forum', 1, 0);
     }
 
     private function form_apply_activity_rule($activity) {
@@ -104,9 +104,9 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         return $setting->get_value();
     }
 
-    private function assert_apply_rule($activity, $name, $expected) {
-        $activity = $this->generator()->create_activity('course', $activity, $name);
+    private function assert_apply_rule($activitytype, $name, $expectselected, $expectlocked) {
+        $activity = $this->generator()->create_activity('course', $activitytype, $name);
         $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame($expected, $actual, "Activity '{$activity}' named '{$name}' has invalid value.");
+        self::assertSame($expectselected, $actual, "Activity '{$activitytype}' named '{$name}' has invalid value.");
     }
 }
