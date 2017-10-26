@@ -25,6 +25,7 @@ namespace local_rollover\test;
 
 use block_manager;
 use context_course;
+use local_rollover\dml\activity_rule_db;
 use stdClass;
 use testing_data_generator;
 
@@ -65,6 +66,10 @@ class generator extends testing_data_generator {
     }
 
     public function create_activity($course, $activity, $name) {
+        if (!array_key_exists($course, $this->courses)) {
+            $this->create_course_by_shortname($course);
+        }
+
         if ($activity == 'assignment') {
             $activity = 'assign';
         }
@@ -130,5 +135,28 @@ class generator extends testing_data_generator {
         $DB->update_record('block_instances', $block);
 
         return $block;
+    }
+
+    public function create_activity_rule($rule, $module, $regex) {
+        global $DB;
+
+        $moduleid = null;
+        if (!empty($module)) {
+            if ($module == 'assignment') {
+                $module = 'assign';
+            }
+            $moduleid = $DB->get_field('modules', 'id', ['name' => $module], MUST_EXIST);
+        }
+
+        $dml = new activity_rule_db();
+        $rule = (object)[
+            'rule'     => $rule,
+            'moduleid' => $moduleid,
+            'regex'    => $regex,
+        ];
+
+        $dml->save($rule);
+
+        return $rule;
     }
 }

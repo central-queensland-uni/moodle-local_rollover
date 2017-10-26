@@ -24,6 +24,7 @@
 namespace local_rollover\form;
 
 use backup_activity_generic_setting;
+use backup_activity_task;
 use backup_root_task;
 use backup_setting;
 use backup_task;
@@ -58,9 +59,16 @@ class form_activities_and_resources_selection extends moodleform {
     /** @var array */
     private $rules;
 
+    /** @var array */
+    private $modules;
+
     public function __construct($tasks) {
+        global $DB;
+
         $this->tasks = $tasks;
         $this->rules = (new activity_rule_db())->all();
+        $this->modules = $DB->get_records('modules');
+
         parent::__construct();
     }
 
@@ -92,9 +100,12 @@ class form_activities_and_resources_selection extends moodleform {
                 continue;
             }
             foreach ($task->get_settings() as $setting) {
-                if ($setting instanceof backup_activity_generic_setting) {
-                    $this->apply_activity_rules($setting);
+                $isactivitytask = ($task instanceof backup_activity_task);
+                $isactivitysetting = ($setting instanceof backup_activity_generic_setting);
+                if ($isactivitytask && $isactivitysetting) {
+                    $this->apply_activity_rules($task, $setting);
                 }
+
                 $changeable = $setting->get_ui()->is_changeable();
                 $visible = ($setting->get_visibility() == backup_setting::VISIBLE);
                 if ($changeable && $visible) {
@@ -263,11 +274,37 @@ class form_activities_and_resources_selection extends moodleform {
         return $errors;
     }
 
-    private function apply_activity_rules($setting) {
+    public function apply_activity_rules(backup_activity_task $task, backup_activity_generic_setting $setting) {
+        global $DB;
+
+        $activity = $DB->get_record('course_modules',
+                                    ['id' => $task->get_moduleid()],
+                                    'id, module',
+                                    MUST_EXIST);
+        $activity->name = $task->get_name();
+
         foreach ($this->rules as $rule) {
-            if ($rule->rule == activity_rule_db::RULE_NOT_DEFAULT) {
-                $setting->set_value(0);
+            if ($this->rule_matches_activity($rule, $activity)) {
+                $this->apply_activity_rule($rule, $setting);
             }
+        }
+    }
+
+    private function rule_matches_activity($rule, $activity) {
+        if (!empty($rule->moduleid) && ($rule->moduleid != $activity->module)) {
+            return false;
+        }
+
+        if (!empty($rule->regex) && !preg_match($rule->regex, $activity->name)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function apply_activity_rule($rule, $setting) {
+        if ($rule->rule == activity_rule_db::RULE_NOT_DEFAULT) {
+            $setting->set_value(0);
         }
     }
 }
