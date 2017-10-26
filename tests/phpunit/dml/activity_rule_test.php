@@ -94,6 +94,7 @@ class local_rollover_dml_activity_rule_test extends rollover_testcase {
         $actual = $this->dml->read($expected->id);
         self::assertNull($actual);
     }
+
     public function test_it_gets_all_in_correct_order() {
         global $DB;
         $enforce = $DB->insert_record(activity_rule_db::TABLE,
@@ -106,5 +107,19 @@ class local_rollover_dml_activity_rule_test extends rollover_testcase {
         $all = $this->dml->all();
         $ids = array_keys($all);
         self::assertSame([$forbid, $enforce, $notdefault], $ids);
+    }
+
+    public function test_it_saves_properly_to_all_modules_if_module_is_missing() {
+        $rule = (object)[
+            'rule'     => activity_rule_db::RULE_FORBID,
+            'moduleid' => '',
+            'regex'    => '',
+        ];
+        $this->dml->save($rule);
+
+        self::assertNull($this->dml->read($rule->id)->moduleid);
+
+        $rule->moduleid = 0;
+        self::assertNull($this->dml->read($rule->id)->moduleid);
     }
 }

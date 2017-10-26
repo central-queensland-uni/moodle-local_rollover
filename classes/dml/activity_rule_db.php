@@ -65,6 +65,10 @@ class activity_rule_db {
     }
 
     public function save($rule) {
+        if (empty($rule->moduleid)) {
+            $rule->moduleid = null;
+        }
+
         if (isset($rule->id)) {
             $this->update($rule);
         } else {
