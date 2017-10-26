@@ -22,17 +22,26 @@
  */
 
 use local_rollover\backup\backup_worker;
+use local_rollover\dml\activity_rule_db;
 use local_rollover\form\form_activities_and_resources_selection;
+use local_rollover\test\mock_backup_activity_task;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_form_activities_and_resources_selection_test extends rollover_testcase {
-    public function test_it_creates() {
-        self::resetAfterTest(true);
+global $CFG;
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
 
+class local_rollover_form_activities_and_resources_selection_test extends rollover_testcase {
+    protected function setUp() {
+        parent::setUp();
+        $this->resetAfterTest();
+    }
+
+    public function test_it_creates() {
         $source = $this->generator()->create_course_by_shortname('source');
-        $this->generator()->create_assignment('source', 'my test assignment');
+        $this->generator()->create_activity('source', 'assignment', 'my test assignment');
 
         $worker = backup_worker::create($source->id);
         $tasks = $worker->get_backup_tasks();
@@ -43,5 +52,83 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         $html = ob_get_clean();
 
         self::assertContains('my test assignment', $html);
+    }
+
+    public function test_it_does_not_set_anything_not_default() {
+        $assignment = $this->generator()->create_activity('course', 'assignment', 'Assignment');
+        $actual = $this->form_apply_activity_rule($assignment);
+        self::assertSame(1, $actual);
+    }
+
+    public function test_it_sets_all_not_default() {
+        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, null, '');
+
+        $assignment = $this->generator()->create_activity('course', 'assignment', 'Research');
+        $actual = $this->form_apply_activity_rule($assignment);
+        self::assertSame(0, $actual);
+
+        $forum = $this->generator()->create_activity('course', 'forum', 'Discussion');
+        $actual = $this->form_apply_activity_rule($forum);
+        self::assertSame(0, $actual);
+    }
+
+    public function test_it_sets_all_assignments_not_default() {
+        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, 'assignment', '');
+
+        $assignment = $this->generator()->create_activity('course', 'assignment', 'Research');
+        $actual = $this->form_apply_activity_rule($assignment);
+        self::assertSame(0, $actual);
+
+        $forum = $this->generator()->create_activity('course', 'forum', 'Discussion');
+        $actual = $this->form_apply_activity_rule($forum);
+        self::assertSame(1, $actual);
+    }
+
+    public function test_it_sets_all_activities_based_on_regex_not_default() {
+        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT,
+                                                 null,
+                                                 '/^Test .*$/');
+
+        $activity = $this->generator()->create_activity('course', 'assignment', 'Not Test Assignment');
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame(1, $actual);
+
+        $activity = $this->generator()->create_activity('course', 'assignment', 'Test Assignment');
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame(0, $actual);
+
+        $activity = $this->generator()->create_activity('course', 'forum', 'Test Forum');
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame(0, $actual);
+    }
+
+    public function test_it_sets_all_assignments_based_on_regex_not_default() {
+        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT,
+                                                 'assignment',
+                                                 '/^Test .*$/');
+
+        $activity = $this->generator()->create_activity('course', 'assignment', 'Not Test Assignment');
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame(1, $actual);
+
+        $activity = $this->generator()->create_activity('course', 'assignment', 'Test Assignment');
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame(0, $actual);
+
+        $activity = $this->generator()->create_activity('course', 'forum', 'Test Forum');
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame(1, $actual);
+    }
+
+    private function form_apply_activity_rule($activity) {
+        $form = new form_activities_and_resources_selection([]);
+
+        $task = new mock_backup_activity_task($activity->name, $activity->cmid);
+        $setting = new backup_activity_generic_setting('activity', backup_activity_generic_setting::IS_BOOLEAN);
+
+        $setting->set_value(1);
+        $form->apply_activity_rules($task, $setting);
+
+        return $setting->get_value();
     }
 }

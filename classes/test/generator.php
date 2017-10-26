@@ -25,6 +25,7 @@ namespace local_rollover\test;
 
 use block_manager;
 use context_course;
+use local_rollover\dml\activity_rule_db;
 use stdClass;
 use testing_data_generator;
 
@@ -64,11 +65,19 @@ class generator extends testing_data_generator {
         return $this->users[$username];
     }
 
-    public function create_assignment($course, $assignmentname) {
-        return $this->get_plugin_generator('mod_assign')->create_instance(
+    public function create_activity($course, $activity, $name) {
+        if (!array_key_exists($course, $this->courses)) {
+            $this->create_course_by_shortname($course);
+        }
+
+        if ($activity == 'assignment') {
+            $activity = 'assign';
+        }
+
+        return $this->get_plugin_generator("mod_{$activity}")->create_instance(
             [
                 'course' => $this->courses[$course]->id,
-                'name'   => $assignmentname,
+                'name'   => $name,
             ]
         );
     }
@@ -126,5 +135,28 @@ class generator extends testing_data_generator {
         $DB->update_record('block_instances', $block);
 
         return $block;
+    }
+
+    public function create_activity_rule($rule, $module, $regex) {
+        global $DB;
+
+        $moduleid = null;
+        if (!empty($module)) {
+            if ($module == 'assignment') {
+                $module = 'assign';
+            }
+            $moduleid = $DB->get_field('modules', 'id', ['name' => $module], MUST_EXIST);
+        }
+
+        $dml = new activity_rule_db();
+        $rule = (object)[
+            'rule'     => $rule,
+            'moduleid' => $moduleid,
+            'regex'    => $regex,
+        ];
+
+        $dml->save($rule);
+
+        return $rule;
     }
 }

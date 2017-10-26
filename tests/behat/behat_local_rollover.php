@@ -101,10 +101,10 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
-     * @Given /^the course "([^"]*)" has an assignment "([^"]*)" +\# local_rollover$/
+     * @Given /^the course "([^"]*)" has an? ([a-z]+) "([^"]*)" +\# local_rollover$/
      */
-    public function the_course_has_an_assignment($shortname, $assignment) {
-        $this->generator()->create_assignment($shortname, $assignment);
+    public function the_course_has_an_assignment($shortname, $activity, $name) {
+        $this->generator()->create_activity($shortname, $activity, $name);
     }
 
     /**
@@ -296,7 +296,7 @@ class behat_local_rollover extends behat_base {
     }
 
     /**
-     * @Given /^the following activity rollover rules exist: +\# local_rollover$/
+     * @Given /^the following activity rollover rules? exists?: +\# local_rollover$/
      */
     public function the_following_activity_rollover_rules_exist(TableNode $rules) {
         global $DB;
@@ -331,6 +331,29 @@ class behat_local_rollover extends behat_base {
             unset($rule->activity);
 
             $dml->save($rule);
+        }
+    }
+
+    /**
+     * @Then /^the activities options should be: +\# local_rollover$/
+     */
+    public function the_activities_options_should_be(TableNode $activities) {
+        foreach ($activities->getColumnsHash() as $activity) {
+            $name = $activity['activity'];
+            $selected = ($activity['selected'] == 'yes');
+            $disabled = ($activity['modifiable'] != 'yes');
+
+            $element = $this->find_field($name);
+
+            if ($element->isChecked() != $selected) {
+                throw new ExpectationException('"' . $name . '" should be selected: ' . $activity['selected'],
+                                               $this->getSession());
+            }
+
+            if ($disabled && !$element->getAttribute('disabled')) {
+                throw new ExpectationException('"' . $name . '" should be modifiable: ' . $activity['modifiable'],
+                                               $this->getSession());
+            }
         }
     }
 }
