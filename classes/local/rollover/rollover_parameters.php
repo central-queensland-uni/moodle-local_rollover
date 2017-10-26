@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class rollover_parameters {
+abstract class rollover_parameters {
     /** Available after any submit, it is used without valiation to determine which form to create. */
     const PARAM_CURRENT_STEP = 'rollover_step';
     /** Available at all steps, it detemines the "current course" and will be used at the restore step. */
