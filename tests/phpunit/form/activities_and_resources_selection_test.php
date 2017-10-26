@@ -54,42 +54,61 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         self::assertContains('my test assignment', $html);
     }
 
-    public function test_it_does_not_set_or_lock_anything_not_default() {
-        $this->assert_apply_rule('assignment', 'Assignment', 1, true);
+    public function provider_for_tests_with_rules() {
+        return [
+            [activity_rule_db::RULE_FORBID],
+            [activity_rule_db::RULE_NOT_DEFAULT],
+        ];
     }
 
-    public function test_it_sets_all_not_default() {
-        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, null, '');
-
-        $this->assert_apply_rule('assignment', 'Research', 0, true);
-        $this->assert_apply_rule('forum', 'Discussion', 0, true);
+    public function test_it_does_not_default_or_lock_anything() {
+        $this->assert_apply_rule('assignment', 'Assignment', null);
     }
 
-    public function test_it_sets_all_assignments_not_default() {
-        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, 'assignment', '');
+    /**
+     * @dataProvider provider_for_tests_with_rules
+     */
+    public function test_it_sets_all_not_default($rule) {
+        $this->generator()->create_activity_rule($rule, null, '');
 
-        $this->assert_apply_rule('assignment', 'Research', 0, true);
-        $this->assert_apply_rule('forum', 'Discussion', 1, true);
+        $this->assert_apply_rule('assignment', 'Research', $rule);
+        $this->assert_apply_rule('forum', 'Discussion', $rule);
     }
 
-    public function test_it_sets_all_activities_based_on_regex_not_default() {
-        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT,
+    /**
+     * @dataProvider provider_for_tests_with_rules
+     */
+    public function test_it_sets_all_assignments($rule) {
+        $this->generator()->create_activity_rule($rule, 'assignment', '');
+
+        $this->assert_apply_rule('assignment', 'Research', $rule);
+        $this->assert_apply_rule('forum', 'Discussion', null);
+    }
+
+    /**
+     * @dataProvider provider_for_tests_with_rules
+     */
+    public function test_it_sets_all_activities_based_on_regex($rule) {
+        $this->generator()->create_activity_rule($rule,
                                                  null,
                                                  '/^Test .*$/');
 
-        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1, true);
-        $this->assert_apply_rule('assignment', 'Test Assignment', 0, true);
-        $this->assert_apply_rule('forum', 'Test Forum', 0, true);
+        $this->assert_apply_rule('assignment', 'Not Test Assignment', null);
+        $this->assert_apply_rule('assignment', 'Test Assignment', $rule);
+        $this->assert_apply_rule('forum', 'Test Forum', $rule);
     }
 
-    public function test_it_sets_all_assignments_based_on_regex_not_default() {
-        $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT,
+    /**
+     * @dataProvider provider_for_tests_with_rules
+     */
+    public function test_it_sets_all_assignments_based_on_regex($rule) {
+        $this->generator()->create_activity_rule($rule,
                                                  'assignment',
                                                  '/^Test .*$/');
 
-        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1, true);
-        $this->assert_apply_rule('assignment', 'Test Assignment', 0, true);
-        $this->assert_apply_rule('forum', 'Test Forum', 1, true);
+        $this->assert_apply_rule('assignment', 'Not Test Assignment', null);
+        $this->assert_apply_rule('assignment', 'Test Assignment', $rule);
+        $this->assert_apply_rule('forum', 'Test Forum', null);
     }
 
     private function form_apply_activity_rule($activity) {
@@ -104,10 +123,14 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         return ['value' => $setting->get_value(), 'changeable' => $setting->get_ui()->is_changeable()];
     }
 
-    private function assert_apply_rule($activitytype, $name, $expectselected, $expectchangeable) {
+    private function assert_apply_rule($activitytype, $name, $appliedrule) {
         $activity = $this->generator()->create_activity('course', $activitytype, $name);
         $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame($expectselected, $actual['value'], "Activity '{$activitytype}' named '{$name}' has invalid value.");
+
+        $expectselected = (is_null($appliedrule) || ($appliedrule == activity_rule_db::RULE_ENFORCE));
+        $expectchangeable = (is_null($appliedrule) || ($appliedrule == activity_rule_db::RULE_NOT_DEFAULT));
+
+        self::assertSame($expectselected, (bool)$actual['value'], "Activity '{$activitytype}' named '{$name}' has invalid value.");
         self::assertSame($expectchangeable, $actual['changeable'], "Activity '{$activitytype}' named '{$name}' has invalid value.");
     }
 }

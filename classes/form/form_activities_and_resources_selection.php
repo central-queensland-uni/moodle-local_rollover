@@ -303,8 +303,11 @@ class form_activities_and_resources_selection extends moodleform {
     }
 
     private function apply_activity_rule($rule, $setting) {
-        if ($rule->rule == activity_rule_db::RULE_NOT_DEFAULT) {
+        if (($rule->rule == activity_rule_db::RULE_FORBID) || ($rule->rule == activity_rule_db::RULE_NOT_DEFAULT)) {
             $setting->set_value(0);
+        }
+        if (($rule->rule == activity_rule_db::RULE_FORBID) || ($rule->rule == activity_rule_db::RULE_ENFORCE)) {
+            $setting->get_ui()->set_changeable(false);
         }
     }
 }
