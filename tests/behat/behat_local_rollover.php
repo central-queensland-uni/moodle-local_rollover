@@ -24,6 +24,7 @@
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ExpectationException;
 use local_rollover\admin\rollover_settings;
 use local_rollover\admin\settings_controller;
@@ -337,23 +338,46 @@ class behat_local_rollover extends behat_base {
     /**
      * @Then /^the activities options should be: +\# local_rollover$/
      */
-    public function the_activities_options_should_be(TableNode $activities) {
-        foreach ($activities->getColumnsHash() as $activity) {
+    public function the_activities_options_should_be(TableNode $foundactivities) {
+        foreach ($foundactivities->getColumnsHash() as $activity) {
             $name = $activity['activity'];
-            $selected = ($activity['selected'] == 'yes');
-            $disabled = ($activity['modifiable'] != 'yes');
+            $expectselected = ($activity['selected'] == 'yes');
+            $expectmodifiable = ($activity['modifiable'] == 'yes');
 
-            $element = $this->find_field($name);
+            if ($expectmodifiable) {
+                $ischecked = $this->is_modifiable_activity_selected($name);
+            } else {
+                $ischecked = $this->is_not_modifiable_activity_selected($name);
+            }
 
-            if ($element->isChecked() != $selected) {
+            if ($ischecked != $expectselected) {
                 throw new ExpectationException('"' . $name . '" should be selected: ' . $activity['selected'],
                                                $this->getSession());
             }
+        }
+    }
 
-            if ($disabled && !$element->getAttribute('disabled')) {
-                throw new ExpectationException('"' . $name . '" should be modifiable: ' . $activity['modifiable'],
-                                               $this->getSession());
+    private function is_modifiable_activity_selected($name) {
+        $element = $this->find_field($name);
+        $ischecked = $element->isChecked();
+        return $ischecked;
+    }
+
+    private function is_not_modifiable_activity_selected($name) {
+        /** @var NodeElement[] $foundactivities */
+        $foundactivities = $this->find_all('css', '.grouped_settings.activity_level');
+
+        foreach ($foundactivities as $foundactivity) {
+            $label = $foundactivity->find('css', '.fstaticlabel');
+            $label = trim($label->getText());
+
+            if ($label == $name) {
+                $img = $foundactivity->find('css', 'img.smallicon');
+                $foundselected = strtolower($img->getAttribute('title'));
+                return ($foundselected == 'yes');
             }
         }
+
+        throw new ExpectationException('Static "' . $name . '" not found. Maybe it is modifiable.', $this->getSession());
     }
 }
