@@ -23,14 +23,10 @@
 
 namespace local_rollover\local\rollover;
 
-use backup_root_task;
 use context_course;
-use local_rollover\admin\settings_controller;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
-use local_rollover\form\form_activities_and_resources_selection;
-use local_rollover\form\form_options_selection;
-use local_rollover\form\form_source_course_selection;
+use moodle_exception;
 use moodle_url;
 use moodleform;
 use stdClass;
@@ -70,13 +66,17 @@ class rollover_controller {
     /** @var stdClass */
     private $destinationcourse;
 
+    public function get_destination_course() {
+        return $this->destinationcourse;
+    }
+
     /** @var moodleform */
     private $form;
 
     /** @var backup_worker */
     private $backupworker = null;
 
-    private function get_backup_worker() {
+    public function get_backup_worker() {
         if (is_null($this->backupworker)) {
             $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
             if (is_null($backupid)) {
@@ -115,7 +115,7 @@ class rollover_controller {
     }
 
     private function process() {
-        $this->form = $this->create_form();
+        $this->form = $this->get_step()->create_form();
 
         $data = $this->form->get_data();
         if (empty($data)) {
@@ -123,14 +123,15 @@ class rollover_controller {
             return;
         }
 
-        $this->process_form_data($data);
+        $this->get_step()->process_form_data($data);
+
         $this->currentstep++;
 
         if ($this->process_rollover_completed($data)) {
             return;
         }
 
-        $this->form = $this->create_form();
+        $this->form = $this->get_step()->create_form();
         unset($data->submitbutton);
         $this->form->set_data($data);
     }
@@ -144,40 +145,6 @@ class rollover_controller {
         $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
                                       $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
         $this->form = null;
-        return true;
-    }
-
-    private function process_form_data($data) {
-        $step = $this->get_current_step_name();
-        switch ($step) {
-            case self::STEP_SELECT_SOURCE_COURSE:
-                return $this->process_form_data_step_select_source_course($data);
-            case  self::STEP_SELECT_CONTENT_OPTIONS:
-                return $this->process_form_data_step_select_content_options($data);
-            case self::STEP_SELECT_ACTIVITIES_AND_RESOURCES:
-                $this->process_form_data_select_activities_and_resources($data);
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private function process_form_data_step_select_source_course($data) {
-        $data->rollover_backup_id = $this->get_backup_worker()->get_backup_id();
-        $this->backupworker->save();
-        return true;
-    }
-
-    private function process_form_data_step_select_content_options($data) {
-        $settings = $this->get_backup_worker()->get_backup_root_settings();
-        foreach ($settings as $setting) {
-            $name = $setting->get_ui_name();
-            $value = isset($data->$name) ? $data->$name : 0;
-            if ($value != $setting->get_value()) {
-                $setting->set_value($value);
-            }
-        }
-        $this->backupworker->save();
         return true;
     }
 
@@ -210,16 +177,6 @@ class rollover_controller {
         $this->show_footer();
     }
 
-    /**
-     * @return form_source_course_selection
-     */
-    public function create_form_source_course_selection() {
-        $mycourses = $this->get_user_courses();
-        $pastinstances = $this->get_past_instances();
-
-        return new form_source_course_selection($pastinstances, $mycourses);
-    }
-
     private function show_header() {
         global $OUTPUT;
 
@@ -234,111 +191,22 @@ class rollover_controller {
         echo $OUTPUT->footer();
     }
 
-    private function create_form() {
-        $stepname = $this->get_current_step_name();
-        switch ($stepname) {
-            case self::STEP_SELECT_SOURCE_COURSE:
-                return $this->create_form_source_course_selection();
-            case self::STEP_SELECT_CONTENT_OPTIONS:
-                return new form_options_selection($this->get_backup_worker()->get_backup_root_settings());
-            case self::STEP_SELECT_ACTIVITIES_AND_RESOURCES:
-                return new form_activities_and_resources_selection($this->get_backup_worker()->get_backup_tasks());
-            default:
-                debugging("Invalid step: {$this->currentstep}");
-                return null;
+    public function get_step() {
+        $class = step::class . '_' . $this->get_current_step_name();
+        if (!class_exists($class)) {
+            throw new moodle_exception("Invalid class '{$class}' for step: {$this->currentstep}");
         }
+
+        /** @var step $step */
+        $step = new $class($this);
+        if (!($step instanceof step)) {
+            throw new moodle_exception("Class '{$class}' must extend: " . step::class);
+        }
+
+        return $step;
     }
 
     private function get_current_step_name() {
         return self::get_steps()[$this->currentstep];
-    }
-
-    private function process_form_data_select_activities_and_resources($data) {
-        $tasks = $this->get_backup_worker()->get_backup_tasks();
-        foreach ($tasks as &$task) {
-            if ($task instanceof backup_root_task) {
-                continue;
-            }
-            $settings = $task->get_settings();
-            foreach ($settings as &$setting) {
-                $name = $setting->get_ui_name();
-                $value = isset($data->$name) ? $data->$name : 0;
-                if ($value != $setting->get_value()) {
-                    $setting->set_value($value);
-                }
-            }
-        }
-        return true;
-    }
-
-    private function get_user_courses() {
-        global $DB;
-
-        $courses = get_user_capability_course('moodle/course:update');
-        if ($courses === false) {
-            $courses = [];
-        }
-
-        foreach ($courses as &$course) {
-            $course = $course->id;
-        }
-
-        $courses = $DB->get_records_list('course',
-                                         'id',
-                                         $courses,
-                                         'shortname ASC',
-                                         'id,shortname,fullname');
-
-        // Remove site-level and destionation course.
-        unset($courses[1]);
-        unset($courses[$this->destinationcourse->id]);
-
-        return $courses;
-    }
-
-    private function get_past_instances() {
-        global $DB;
-
-        $regex = get_config('local_rollover', settings_controller::SETTING_PAST_INSTANCES_REGEX);
-        if (empty($regex)) {
-            return [];
-        }
-
-        $group = $this->past_instance_match($regex, $this->destinationcourse->shortname);
-        if (is_null($group)) {
-            return [];
-        }
-
-        $found = [];
-        $courses = $DB->get_records('course', null, 'shortname ASC', 'id, shortname, fullname');
-        foreach ($courses as $course) {
-            $match = $this->past_instance_match($regex, $course->shortname);
-            if ($match === $group) {
-                $found[$course->id] = $course;
-            }
-        }
-
-        // Remove site-level and destionation course.
-        unset($found[$this->destinationcourse->id]);
-
-        return $found;
-    }
-
-    private function past_instance_match($regex, $shortname) {
-        if (!preg_match($regex, $shortname, $matches)) {
-            return null;
-        }
-
-        // We are interested in the first capture group.
-        if (count($matches) < 2) {
-            return null;
-        }
-
-        $match = $matches[1];
-        if (empty($match)) {
-            return null;
-        }
-
-        return $match;
     }
 }
