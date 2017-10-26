@@ -59,9 +59,10 @@ class rollover_settings {
             'filters'          => true,
             'comments'         => false,
             'badges'           => false,
+            'calendarevents'   => false,
             'userscompletion'  => false,
             'logs'             => false,
-            'histories'        => false,
+            'gradehistories'   => false,
             'questionbank'     => true,
             'groups'           => false,
         ];
@@ -92,7 +93,7 @@ class rollover_settings {
         foreach (self::get_rollover_options_defaults() as $option => $default) {
             $langname = str_replace('_', '', $option);
             $key = 'local_rollover/option_' . $option;
-            $title = new lang_string("general{$langname}", 'backup');
+            $title = new lang_string("rootsetting{$langname}", 'backup');
             $description = new lang_string("option_{$langname}", 'local_rollover');
             $defaults = ['value' => $default, 'locked' => 0];
             $options->add(
