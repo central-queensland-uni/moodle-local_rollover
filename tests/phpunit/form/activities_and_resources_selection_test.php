@@ -55,33 +55,21 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
     }
 
     public function test_it_does_not_set_anything_not_default() {
-        $assignment = $this->generator()->create_activity('course', 'assignment', 'Assignment');
-        $actual = $this->form_apply_activity_rule($assignment);
-        self::assertSame(1, $actual);
+        $this->assert_apply_rule('assignment', 'Assignment', 1);
     }
 
     public function test_it_sets_all_not_default() {
         $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, null, '');
 
-        $assignment = $this->generator()->create_activity('course', 'assignment', 'Research');
-        $actual = $this->form_apply_activity_rule($assignment);
-        self::assertSame(0, $actual);
-
-        $forum = $this->generator()->create_activity('course', 'forum', 'Discussion');
-        $actual = $this->form_apply_activity_rule($forum);
-        self::assertSame(0, $actual);
+        $this->assert_apply_rule('assignment', 'Research', 0);
+        $this->assert_apply_rule('forum', 'Discussion', 0);
     }
 
     public function test_it_sets_all_assignments_not_default() {
         $this->generator()->create_activity_rule(activity_rule_db::RULE_NOT_DEFAULT, 'assignment', '');
 
-        $assignment = $this->generator()->create_activity('course', 'assignment', 'Research');
-        $actual = $this->form_apply_activity_rule($assignment);
-        self::assertSame(0, $actual);
-
-        $forum = $this->generator()->create_activity('course', 'forum', 'Discussion');
-        $actual = $this->form_apply_activity_rule($forum);
-        self::assertSame(1, $actual);
+        $this->assert_apply_rule('assignment', 'Research', 0);
+        $this->assert_apply_rule('forum', 'Discussion', 1);
     }
 
     public function test_it_sets_all_activities_based_on_regex_not_default() {
@@ -89,17 +77,9 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
                                                  null,
                                                  '/^Test .*$/');
 
-        $activity = $this->generator()->create_activity('course', 'assignment', 'Not Test Assignment');
-        $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame(1, $actual);
-
-        $activity = $this->generator()->create_activity('course', 'assignment', 'Test Assignment');
-        $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame(0, $actual);
-
-        $activity = $this->generator()->create_activity('course', 'forum', 'Test Forum');
-        $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame(0, $actual);
+        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1);
+        $this->assert_apply_rule('assignment', 'Test Assignment', 0);
+        $this->assert_apply_rule('forum', 'Test Forum', 0);
     }
 
     public function test_it_sets_all_assignments_based_on_regex_not_default() {
@@ -107,17 +87,9 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
                                                  'assignment',
                                                  '/^Test .*$/');
 
-        $activity = $this->generator()->create_activity('course', 'assignment', 'Not Test Assignment');
-        $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame(1, $actual);
-
-        $activity = $this->generator()->create_activity('course', 'assignment', 'Test Assignment');
-        $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame(0, $actual);
-
-        $activity = $this->generator()->create_activity('course', 'forum', 'Test Forum');
-        $actual = $this->form_apply_activity_rule($activity);
-        self::assertSame(1, $actual);
+        $this->assert_apply_rule('assignment', 'Not Test Assignment', 1);
+        $this->assert_apply_rule('assignment', 'Test Assignment', 0);
+        $this->assert_apply_rule('forum', 'Test Forum', 1);
     }
 
     private function form_apply_activity_rule($activity) {
@@ -130,5 +102,11 @@ class local_rollover_form_activities_and_resources_selection_test extends rollov
         $form->apply_activity_rules($task, $setting);
 
         return $setting->get_value();
+    }
+
+    private function assert_apply_rule($activity, $name, $expected) {
+        $activity = $this->generator()->create_activity('course', $activity, $name);
+        $actual = $this->form_apply_activity_rule($activity);
+        self::assertSame($expected, $actual, "Activity '{$activity}' named '{$name}' has invalid value.");
     }
 }
