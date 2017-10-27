@@ -70,9 +70,6 @@ class rollover_controller {
         return $this->destinationcourse;
     }
 
-    /** @var moodleform */
-    private $form;
-
     /** @var backup_worker */
     private $backupworker = null;
 
@@ -104,39 +101,42 @@ class rollover_controller {
         $PAGE->set_heading($this->destinationcourse->fullname);
         $PAGE->add_body_class('path-backup');
 
-        $this->process();
+        $form = $this->process();
 
-        if (!is_null(($this->form))) {
+        if (!is_null(($form))) {
             $this->show_header();
-            $this->form->set_data([rollover_parameters::PARAM_CURRENT_STEP => $this->currentstep]);
-            $this->form->display();
+            $form->set_data([rollover_parameters::PARAM_CURRENT_STEP => $this->currentstep]);
+            $form->display();
             $this->show_footer();
         }
     }
 
     private function process() {
-        $this->form = $this->get_step()->create_form();
+        $form = $this->get_step()->create_form();
 
-        $data = $this->form->get_data();
+        $data = $form->get_data();
         if (empty($data)) {
-            $this->form->set_data([rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
-            return;
+            $form->set_data([rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
+            return $form;
         }
 
         $this->get_step()->process_form_data($data);
 
         $this->currentstep++;
 
-        if ($this->process_rollover_completed($data)) {
-            return;
+        if ($this->complete_rollover($data)) {
+            return null;
         }
 
-        $this->form = $this->get_step()->create_form();
+        $form = $this->get_step()->create_form();
         unset($data->submitbutton);
-        $this->form->set_data($data);
+
+        $form->set_data($data);
+
+        return $form;
     }
 
-    private function process_rollover_completed($data) {
+    private function complete_rollover($data) {
         if ($this->get_current_step_name() != self::STEP_ROLLOVER_COMPLETE) {
             return false;
         }
@@ -144,7 +144,6 @@ class rollover_controller {
         $this->rollover($data);
         $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
                                       $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
-        $this->form = null;
         return true;
     }
 
