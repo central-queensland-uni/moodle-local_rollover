@@ -28,6 +28,9 @@ use external_api;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * @SuppressWarnings(PHPMD.NumberOfChildren) - All our tests inherit from this one, just put them in childcare.
+ */
 class rollover_testcase extends advanced_testcase {
     /** @var generator */
     private $generator = null;
