@@ -71,6 +71,12 @@ class form_options_selection extends moodleform {
             $this->definition_add_setting($setting);
         }
 
+        foreach ($this->settings as $setting) {
+            foreach ($setting->get_my_dependency_properties() as $dependency) {
+                call_user_func_array([$this->_form, 'disabledIf'], $dependency);
+            }
+        }
+
         $this->add_action_buttons(false, get_string('next'));
     }
 
