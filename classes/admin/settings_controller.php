@@ -83,7 +83,7 @@ class settings_controller {
         }
         echo $OUTPUT->heading(get_string('settings-filter', 'local_rollover'));
         $form->display();
-        echo '<section id="local_rollover_filter_samples"></section>';
+        echo $OUTPUT->render_from_template('local_rollover/filter_samples', []);
         echo $OUTPUT->footer();
     }
 
