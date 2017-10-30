@@ -1,4 +1,4 @@
-.local_rollover_filter_regex {
+.local_rollover_samples_regex {
     background-color: lightgray;
     border: 1px solid black;
     border-radius: 10px;
@@ -8,11 +8,11 @@
     padding: 3px 10px;
 }
 
-.local_rollover_filter_samples li {
+.local_rollover_samples_entries li {
     font-weight: bold;
     list-style: none;
 }
 
-.local_rollover_filter_samples li li {
+.local_rollover_samples_entries li li {
     font-weight: normal;
 }

@@ -20,45 +20,40 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax, $) {
-    function PastInstancesFilterSamples() {
-        RegExSamples.call(this, ['regex']);
+    function ActivityRuleSamples() {
+        RegExSamples.call(this, ['module', 'regex']);
     }
 
-    PastInstancesFilterSamples.prototype = Object.create(RegExSamples.prototype);
-    PastInstancesFilterSamples.prototype.constructor = PastInstancesFilterSamples;
+    ActivityRuleSamples.prototype = Object.create(RegExSamples.prototype);
+    ActivityRuleSamples.prototype.constructor = ActivityRuleSamples;
 
-    PastInstancesFilterSamples.prototype.getSamplesElement = function (response) {
+    ActivityRuleSamples.prototype.getSamplesElement = function (response) {
         var $rootUL = $('<ul>');
-        response.groups.forEach(function (group) {
-            var $groupLI = $('<li>').text(group.match);
-            var $groupUL = $('<ul>');
-            $groupLI.append($groupUL);
-            group.shortnames.forEach(function (shortname) {
-                $groupUL.append($('<li>').text(shortname));
-            });
-            $rootUL.append($groupLI);
+        response.activities.forEach(function (activity) {
+            var $li = $('<li>');
+            $li.text(activity);
+            $rootUL.append($li);
         });
 
         return $rootUL;
     };
 
-    PastInstancesFilterSamples.prototype.updateSamples = function () {
-        var args = {regex: document.getElementById('id_regex').value};
-        var webservices = [
-            {methodname: 'local_rollover_regex_filter_get_sample_matches_by_regex', args: args}
-        ];
+    ActivityRuleSamples.prototype.updateSamples = function () {
         $('.local_rollover_samples_loading').show();
-        var promises = ajax.call(webservices);
-
-        var promise = promises[0];
-        promise.done(this.samplesReceived.bind(this)).fail(function (response) {
-            window.console.error(response);
-        });
+        var that = this;
+        setTimeout(function () {
+            that.samplesReceived({
+                activities: [
+                    'Activity 1',
+                    'Activity 2'
+                ]
+            });
+        }, 1000);
     };
 
     return {
         initialise: function () {
-            new PastInstancesFilterSamples();
+            new ActivityRuleSamples();
         }
     };
 });

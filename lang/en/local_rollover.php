@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['activity_rule_examples'] = 'Example of activities matching rule:';
 $string['add_rule_field_rule'] = 'Rule';
 $string['add_rule_field_rule_help'] = '<ul>
 <li><b>Forbid:</b> Prevents the matching activities from being rolled over.</li>

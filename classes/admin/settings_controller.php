@@ -83,7 +83,9 @@ class settings_controller {
         }
         echo $OUTPUT->heading(get_string('settings-filter', 'local_rollover'));
         $form->display();
-        echo $OUTPUT->render_from_template('local_rollover/filter_samples', []);
+        echo $OUTPUT->render_from_template('local_rollover/regex_samples', [
+            'title' => get_string('past_instances_examples', 'local_rollover'),
+        ]);
         echo $OUTPUT->footer();
     }
 
@@ -172,7 +174,9 @@ class settings_controller {
     }
 
     private function activities_rules_add_or_edit($rule) {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
+
+        $PAGE->requires->js_call_amd('local_rollover/activity-rule-samples', 'initialise');
 
         $form = new form_activity_rule();
 
@@ -203,6 +207,9 @@ class settings_controller {
         echo $OUTPUT->heading(get_string('settings-activities-add-rule-header', 'local_rollover'));
 
         $form->display();
+        echo $OUTPUT->render_from_template('local_rollover/regex_samples', [
+            'title' => get_string('activity_rule_examples', 'local_rollover'),
+        ]);
 
         echo $OUTPUT->footer();
     }
