@@ -1,0 +1,18 @@
+.local_rollover_filter_regex {
+    background-color: lightgray;
+    border: 1px solid black;
+    border-radius: 10px;
+    color: black;
+    font-family: monospace;
+    font-size: 80%;
+    padding: 3px 10px;
+}
+
+.local_rollover_filter_samples li {
+    font-weight: bold;
+    list-style: none;
+}
+
+.local_rollover_filter_samples li li {
+    font-weight: normal;
+}

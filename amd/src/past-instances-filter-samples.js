@@ -44,9 +44,12 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
     };
 
     samplesReceived = function (response) {
-        var $section = $('#local_rollover_filter_samples');
-        $section.empty();
-        $section.append($('<h2>').append($('<pre>').text(response.regex)));
+        var $regex = $('.local_rollover_filter_regex');
+        $regex.text(response.regex);
+        $regex.show();
+
+        var $samples = $('.local_rollover_filter_samples');
+        $samples.empty();
 
         var $rootUL = $('<ul>');
         response.groups.forEach(function (group) {
@@ -59,7 +62,10 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
             $rootUL.append($groupLI);
         });
 
-        $section.append($rootUL);
+        $samples.append($rootUL);
+        $samples.show();
+
+        $('.local_rollover_filter_loading').hide();
     };
 
     updateSamples = function () {
@@ -67,6 +73,7 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
         var webservices = [
             {methodname: 'local_rollover_regex_filter_get_sample_matches_by_regex', args: args}
         ];
+        $('.local_rollover_filter_loading').show();
         var promises = ajax.call(webservices);
 
         var promise = promises[0];
