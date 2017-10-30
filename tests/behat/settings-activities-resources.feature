@@ -74,3 +74,16 @@ Feature: Rules for rolling over activities and resources
     When I follow "Remove rule"
     And I press "Cancel"
     Then I should see "/^My Funny Rule$/"
+
+  Scenario: I can see samples of activities where the name ends with "Research"
+    Given I am an administrator                                       # local_rollover
+    And there is a course with shortname "My Course"                  # local_rollover
+    And the course "My Course" has an assignment "First Research"     # local_rollover
+    And the course "My Course" has an assignment "Second Research"    # local_rollover
+    And the course "My Course" has an assignment "Research Ideas"     # local_rollover
+    When I go to the "Activities & Resources" settings page           # local_rollover
+    And I follow "Add new rule"
+    And I set the field "Regular Expression" to "/^.*Research$/"
+    Then I should see "First Research"
+    And I should see "Second Research"
+    But I should not see "Research Ideas"

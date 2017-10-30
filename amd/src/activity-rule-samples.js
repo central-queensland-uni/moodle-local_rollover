@@ -44,8 +44,8 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
         setTimeout(function () {
             that.samplesReceived({
                 activities: [
-                    'Activity 1',
-                    'Activity 2'
+                    'First Research',
+                    'Second Research'
                 ]
             });
         }, 1000);
