@@ -21,8 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\navigation;
-use local_rollover\rollover_parameters;
 use local_rollover\test\mock_navigation;
 use local_rollover\test\rollover_testcase;
 

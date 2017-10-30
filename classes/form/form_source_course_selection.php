@@ -23,7 +23,7 @@
 
 namespace local_rollover\form;
 
-use local_rollover\rollover_parameters;
+use local_rollover\local\rollover\rollover_parameters;
 use moodleform;
 
 defined('MOODLE_INTERNAL') || die();

@@ -24,7 +24,7 @@
 namespace local_rollover\form;
 
 use backup_generic_setting;
-use local_rollover\rollover_parameters;
+use local_rollover\local\rollover\rollover_parameters;
 use moodleform;
 use stdClass;
 

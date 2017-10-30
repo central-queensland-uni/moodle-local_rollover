@@ -22,7 +22,7 @@
  * @var stdClass $plugin
  */
 
-use local_rollover\rollover_controller;
+use local_rollover\local\rollover\rollover_controller;
 
 require(__DIR__ . '/../../config.php');
 

@@ -23,8 +23,8 @@
 
 use local_rollover\admin\settings_controller;
 use local_rollover\form\form_source_course_selection;
-use local_rollover\rollover_controller;
-use local_rollover\rollover_parameters;
+use local_rollover\local\rollover\rollover_controller;
+use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
@@ -88,7 +88,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
         $controller = new rollover_controller();
-        $form = $controller->create_form_source_course_selection();
+        $form = $controller->get_step()->create_form();
 
         $courses = $form->get_my_courses();
         foreach ($courses as &$course) {
@@ -123,7 +123,7 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
 
         $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
         $controller = new rollover_controller();
-        $form = $controller->create_form_source_course_selection();
+        $form = $controller->get_step()->create_form();
 
         $courses = $form->get_past_instances();
         foreach ($courses as &$course) {

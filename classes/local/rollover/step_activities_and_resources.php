@@ -21,7 +21,10 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover;
+namespace local_rollover\local\rollover;
+
+use backup_root_task;
+use local_rollover\form\form_activities_and_resources_selection;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,15 +34,26 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class rollover_parameters {
-    /** Available after any submit, it is used without valiation to determine which form to create. */
-    const PARAM_CURRENT_STEP = 'rollover_step';
-    /** Available at all steps, it detemines the "current course" and will be used at the restore step. */
-    const PARAM_DESTINATION_COURSE_ID = 'rollover_destination_course_id';
-    /** Available only when selecting source course, after that it can be retrieved using the backup id. */
-    const PARAM_SOURCE_COURSE_ID = 'rollover_source_course_id';
-    /** Available after source course is selected. */
-    const PARAM_BACKUP_ID = 'rollover_backup_id';
-    /** Prefix for content options (linked to backup root task ui names). */
-    const PARAM_OPTION_PREFIX = 'setting_root_';
+class step_activities_and_resources extends step {
+    public function create_form() {
+        return new form_activities_and_resources_selection($this->controller->get_backup_worker()->get_backup_tasks());
+    }
+
+    public function process_form_data($data) {
+        $backupworker = $this->controller->get_backup_worker();
+        $tasks = $backupworker->get_backup_tasks();
+        foreach ($tasks as &$task) {
+            if ($task instanceof backup_root_task) {
+                continue;
+            }
+            $settings = $task->get_settings();
+            foreach ($settings as &$setting) {
+                $name = $setting->get_ui_name();
+                $value = isset($data->$name) ? $data->$name : 0;
+                if ($value != $setting->get_value()) {
+                    $setting->set_value($value);
+                }
+            }
+        }
+    }
 }

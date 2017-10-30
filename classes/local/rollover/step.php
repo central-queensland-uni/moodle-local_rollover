@@ -21,32 +21,25 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\backup\backup_worker;
-use local_rollover\form\form_activities_and_resources_selection;
-use local_rollover\test\rollover_testcase;
+namespace local_rollover\local\rollover;
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
-require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
+/**
+ * @package     local_rollover
+ * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
+ * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+abstract class step {
+    /** @var rollover_controller */
+    protected $controller;
 
-class local_rollover_form_activities_and_resources_selection_test extends rollover_testcase {
-    public function test_it_creates() {
-        parent::setUp();
-        $this->resetAfterTest();
-
-        $source = $this->generator()->create_course_by_shortname('source');
-        $this->generator()->create_activity('source', 'assignment', 'my test assignment');
-
-        $worker = backup_worker::create($source->id);
-        $tasks = $worker->get_backup_tasks();
-        $form = new form_activities_and_resources_selection($tasks);
-
-        ob_start();
-        $form->display();
-        $html = ob_get_clean();
-
-        self::assertContains('my test assignment', $html);
+    public function __construct(rollover_controller $controller) {
+        $this->controller = $controller;
     }
+
+    public abstract function create_form();
+
+    public abstract function process_form_data($data);
 }

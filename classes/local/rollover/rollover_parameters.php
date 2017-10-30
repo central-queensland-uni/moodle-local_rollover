@@ -21,17 +21,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\backup;
-
-use backup;
-use local_rollover\local\rollover\rollover_controller;
-use restore_controller;
+namespace local_rollover\local\rollover;
 
 defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
-require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
 /**
  * @package     local_rollover
@@ -39,24 +31,15 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_worker {
-    /** @var int */
-    private $destinationcourseid;
-
-    public function __construct($destinationcourseid) {
-        $this->destinationcourseid = (int)$destinationcourseid;
-    }
-
-    public function restore($backupid) {
-        $restore = new restore_controller($backupid,
-                                          $this->destinationcourseid,
-                                          backup::INTERACTIVE_NO,
-                                          backup::MODE_GENERAL,
-                                          rollover_controller::USERID,
-                                          backup::TARGET_EXISTING_ADDING);
-
-        $restore->execute_precheck();
-        $restore->execute_plan();
-        $restore->destroy();
-    }
+abstract class rollover_parameters {
+    /** Available after any submit, it is used without valiation to determine which form to create. */
+    const PARAM_CURRENT_STEP = 'rollover_step';
+    /** Available at all steps, it detemines the "current course" and will be used at the restore step. */
+    const PARAM_DESTINATION_COURSE_ID = 'rollover_destination_course_id';
+    /** Available only when selecting source course, after that it can be retrieved using the backup id. */
+    const PARAM_SOURCE_COURSE_ID = 'rollover_source_course_id';
+    /** Available after source course is selected. */
+    const PARAM_BACKUP_ID = 'rollover_backup_id';
+    /** Prefix for content options (linked to backup root task ui names). */
+    const PARAM_OPTION_PREFIX = 'setting_root_';
 }
