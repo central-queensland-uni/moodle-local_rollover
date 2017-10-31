@@ -40,15 +40,23 @@ require_once(__DIR__ . '/../../../../lib/externallib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activity_rule_webservice extends external_api {
+    const METHOD_GET_SAMPLES = 'local_rollover_activity_rule_samples';
+
     public static function get_samples($moduleid, $regex) {
         self::validate_parameters(self::get_samples_parameters(), compact('moduleid', 'regex'));
+
+        $modules = self::find_all_modules_names($moduleid, $regex);
+        $matches = [];
+        foreach ($modules as $cmid => $name) {
+            $matches[] = compact('cmid', 'name');
+        }
 
         return [
             'request' => [
                 'moduleid' => $moduleid,
                 'regex'    => $regex,
             ],
-            'matches' => [],
+            'matches' => $matches,
         ];
     }
 
@@ -72,5 +80,45 @@ class activity_rule_webservice extends external_api {
         $matches = new external_multiple_structure($match, 'Course modules (activities) matched.');
 
         return new external_single_structure(compact('request', 'matches'), 'Result for the request.');
+    }
+
+    private static function find_all_modules_names($moduleid, $regex) {
+        global $DB;
+
+        $conditions = ['visible' => 1];
+        if (!empty($moduleid)) {
+            $conditions['id'] = $moduleid;
+        }
+        $modules = $DB->get_records('modules', $conditions, 'name ASC', 'id, name');
+
+        $names = [];
+        foreach ($modules as $module) {
+            $found = self::find_all_names_for_a_module($module, $regex);
+            $names += $found;
+        }
+
+        return $names;
+    }
+
+    private static function find_all_names_for_a_module($module, $regex) {
+        global $DB;
+
+        $names = [];
+        $sql = "
+            SELECT cm.id AS cmid, m.name
+            FROM {course_modules} AS cm
+            INNER JOIN {{$module->name}} AS m ON cm.instance=m.id
+            WHERE cm.module=?
+            ORDER BY m.name ASC
+        ";
+        $instances = $DB->get_records_sql($sql, [$module->id]);
+        foreach ($instances as $instance) {
+            $name = $instance->name;
+            if (empty($regex) || preg_match($regex, $name)) {
+                $names[$instance->cmid] = $name;
+            }
+        }
+
+        return $names;
     }
 }

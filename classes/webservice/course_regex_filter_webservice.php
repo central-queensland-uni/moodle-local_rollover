@@ -40,6 +40,8 @@ require_once(__DIR__ . '/../../../../lib/externallib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_regex_filter_webservice extends external_api {
+    const METHOD_GET_SAMPLE_MATCHES = 'local_rollover_regex_filter_get_sample_matches_by_regex';
+
     public static function get_sample_matches_by_regex($regex) {
         global $DB;
 

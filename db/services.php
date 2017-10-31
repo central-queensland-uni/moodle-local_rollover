@@ -30,20 +30,22 @@ defined('MOODLE_INTERNAL') || die();
 $services = [
     'local_rollover_regex_filter'  => [
         'functions' => [
-            'local_rollover_regex_filter_get_sample_matches_by_regex',
+            course_regex_filter_webservice::METHOD_GET_SAMPLE_MATCHES,
         ],
         'restrictedusers' => 0,
         'enabled'   => 1,
     ],
     'local_rollover_activity_rule' => [
-        'functions'       => [],
+        'functions'       => [
+            activity_rule_webservice::METHOD_GET_SAMPLES,
+        ],
         'restrictedusers' => 0,
         'enabled'         => 1,
     ],
 ];
 
 $functions = [
-    'local_rollover_regex_filter_get_sample_matches_by_regex' => [
+    course_regex_filter_webservice::METHOD_GET_SAMPLE_MATCHES => [
         'classname'   => course_regex_filter_webservice::class,
         'methodname'  => 'get_sample_matches_by_regex',
         'classpath'   => 'local/rollover/classes/webservice/course_regex_filter_webservice.php',
@@ -51,7 +53,7 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
     ],
-    'local_rollover_activity_rule_samples'                    => [
+    activity_rule_webservice::METHOD_GET_SAMPLES              => [
         'classname'   => activity_rule_webservice::class,
         'methodname'  => 'get_samples',
         'classpath'   => 'local/rollover/classes/webservice/activity_rule_webservice.php',
