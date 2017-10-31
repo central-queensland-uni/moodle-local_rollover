@@ -40,6 +40,8 @@ require_once(__DIR__ . '/../../../../lib/externallib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activity_rule_webservice extends external_api {
+    const MAX_SAMPLES = 50;
+
     const METHOD_GET_SAMPLES = 'local_rollover_activity_rule_samples';
 
     public static function get_samples($moduleid, $regex) {
@@ -93,17 +95,18 @@ class activity_rule_webservice extends external_api {
 
         $names = [];
         foreach ($modules as $module) {
-            $found = self::find_all_names_for_a_module($module, $regex);
-            $names += $found;
+            self::add_all_names_for_a_module($names, $module, $regex);
+            if (count($names) >= self::MAX_SAMPLES) {
+                break;
+            }
         }
 
-        return $names;
+        return array_flip($names);
     }
 
-    private static function find_all_names_for_a_module($module, $regex) {
+    private static function add_all_names_for_a_module(&$names, $module, $regex) {
         global $DB;
 
-        $names = [];
         $sql = "
             SELECT cm.id AS cmid, m.name
             FROM {course_modules} AS cm
@@ -114,8 +117,14 @@ class activity_rule_webservice extends external_api {
         $instances = $DB->get_records_sql($sql, [$module->id]);
         foreach ($instances as $instance) {
             $name = $instance->name;
+            if (array_key_exists($name, $names)) {
+                continue;
+            }
             if (empty($regex) || preg_match($regex, $name)) {
-                $names[$instance->cmid] = $name;
+                $names[$name] = $instance->cmid;
+            }
+            if (count($names) >= self::MAX_SAMPLES) {
+                break;
             }
         }
 
