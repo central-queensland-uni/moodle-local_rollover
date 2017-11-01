@@ -29,26 +29,23 @@ defined('MOODLE_INTERNAL') || die();
 class local_rollover_regex_validator_test extends rollover_testcase {
     public function provider_for_test_it_validates_the_regex() {
         return [
-            ['', true, 'Empty RegEx is valid.'],
-            ['/^(.*)$/', true, 'Capture-all RegEx is valid.'],
-            ['.', false, 'RegEx is too short.'],
-            ['/(.*)$/', false, 'RegEx must match beginning.'],
-            ['/^(.*)/', false, 'RegEx must match end.'],
-            ['/^.*$/', false, 'RegEx must have a capture group.'],
-            ['/^a(.*b$/', false, 'Malformed RegEx.'],
+            'Empty RegEx is valid.'            => ['', true],
+            'Capture-all RegEx is valid.'      => ['/^(.*)$/', true],
+            'Ignore case flag is valid.'       => ['/^(.*)$/i', true],
+            'RegEx is too short.'              => ['.', false],
+            'RegEx must match beginning.'      => ['/(.*)$/', false],
+            'RegEx must match end.'            => ['/^(.*)/', false],
+            'RegEx must have a capture group.' => ['/^.*$/', false],
+            'Malformed RegEx.'                 => ['/^a(.*b$/', false],
         ];
     }
 
     /**
      * @dataProvider provider_for_test_it_validates_the_regex
      */
-    public function test_it_validates_the_regex($regex, $acceptable, $reason) {
-        $error = regex_validator::validation($regex);
-
-        if ($acceptable) {
-            self::assertEmpty($error, $reason);
-        } else {
-            self::assertNotEmpty($error, $reason);
-        }
+    public function test_it_validates_the_regex($regex, $acceptable) {
+        $validator = new regex_validator($regex);
+        $error = $validator->get_error();
+        self::assertSame($acceptable, $validator->is_valid(), "{$regex} -> {$error}");
     }
 }

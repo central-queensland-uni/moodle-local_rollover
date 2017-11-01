@@ -31,40 +31,97 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class regex_validator {
-    private function __construct() {
-        // Cannot instantiate.
+class regex_validator {
+    /** @var string */
+    private $regex;
+
+    /** @var string */
+    private $error = null;
+
+    /** @var string */
+    private $delimiter = null;
+
+    /** @var string */
+    private $contents = null;
+
+    /** @var string */
+    private $flags = null;
+
+    public function is_valid() {
+        return is_null($this->error);
     }
 
-    private static function get_regex_error($regex) {
-        if ($regex == '') {
-            return null;
-        }
-        if (strlen($regex) < 2) {
-            return 'too_short';
-        }
-        if ($regex[1] != '^') {
-            return 'invalid_start';
-        }
-        if (substr($regex, -2, 1) != '$') {
-            return 'invalid_end';
-        }
-        if (strpos($regex, '(') === false) {
-            return 'no_capture';
-        }
-        if (@preg_match($regex, null) === false) {
-            return 'malformed';
-        }
-        return null;
+    public function get_error() {
+        return is_null($this->error) ? null : get_string("regex_error_{$this->error}", 'local_rollover');
     }
 
-    public static function validation($regex) {
-        $error = self::get_regex_error($regex);
+    public function __construct($regex) {
+        $this->regex = $regex;
 
-        if (!is_null($error)) {
-            $error = get_string("regex_error_{$error}", 'local_rollover');
+        // Empty regex allowed.
+        if ($regex === '') {
+            return;
         }
 
-        return $error;
+        $this->validate_syntax();
+        $this->validate_length();
+        $this->parse_parts();
+        $this->validate_start_end();
+        $this->validate_capture_group();
+    }
+
+    private function validate_syntax() {
+        if (!is_null($this->error)) {
+            return;
+        }
+
+        if (@preg_match($this->regex, null) === false) {
+            $this->error = 'malformed';
+        }
+    }
+
+    private function validate_length() {
+        if (!is_null($this->error)) {
+            return;
+        }
+
+        if (strlen($this->regex) < 2) {
+            $this->error = 'too_short';
+        }
+    }
+
+    private function parse_parts() {
+        $this->delimiter = $this->regex[0];
+        $flags = strrchr($this->regex, $this->delimiter);
+
+        $this->contents = substr($this->regex, 1, strlen($this->regex) - strlen($flags) - 1);
+        $this->flags = (strlen($flags) == 1) ? '' : substr($flags, 1);
+    }
+
+    private function validate_start_end() {
+        if (!is_null($this->error)) {
+            return;
+        }
+
+        if ($this->contents[0] != '^') {
+            $this->error = 'invalid_start';
+            return;
+        }
+
+        $ending = substr($this->contents, -1);
+        if ($ending != '$') {
+            $this->error = 'invalid_end';
+            return;
+        }
+    }
+
+    private function validate_capture_group() {
+        if (!is_null($this->error)) {
+            return;
+        }
+
+        if (strpos($this->contents, '(') === false) {
+            $this->error = 'no_capture';
+        }
     }
 }
