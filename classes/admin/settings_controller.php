@@ -44,11 +44,8 @@ require(__DIR__ . '/../../../../lib/adminlib.php');
 class settings_controller {
     const SETTING_PAST_INSTANCES_REGEX = 'past_instances_regex';
 
-    public static function create_rule_sentence($number, $rule) {
+    public static function create_rule_sentence($rule) {
         global $DB;
-
-        $rulenumber = html_writer::tag('b',
-                                       get_string('rule-sentence-number', 'local_rollover', $number));
 
         $data = ['regex' => $rule->regex];
         if (!is_null($rule->moduleid)) {
@@ -59,9 +56,7 @@ class settings_controller {
         $lang = "rule-sentence-{$rule->rule}";
         $lang .= is_null($rule->moduleid) ? '-all' : '-activity';
         $lang .= empty($rule->regex) ? '-all' : '-regex';
-        $lang = get_string($lang, 'local_rollover', $data);
-
-        return "{$rulenumber} {$lang}";
+        return get_string($lang, 'local_rollover', $data);
     }
 
     public function __construct() {
@@ -112,39 +107,32 @@ class settings_controller {
     private function activities_rules_view() {
         global $OUTPUT;
 
-        $db = new activity_rule_db();
-
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('settings-activities-header', 'local_rollover'));
-
-        $rules = $db->all();
-        if (count($rules) == 0) {
-            echo html_writer::tag('p', get_string('no_rules', 'local_rollover'));
-        } else {
-            echo html_writer::start_tag('ul');
-            foreach (array_values($rules) as $index => $rule) {
-                $rulenumber = $index + 1;
-                $text = $this->create_rule_sentence($rulenumber, $rule);
-                $change = new moodle_url('/local/rollover/activities-rules.php',
-                                         [
-                                             form_activity_rule::PARAM_ACTION => 'edit',
-                                             form_activity_rule::PARAM_RULEID => $rule->id,
-                                         ]);
-                $change = html_writer::link($change, get_string('change_rule', 'local_rollover'));
-                $remove = new moodle_url('/local/rollover/activities-rules.php',
-                                         [
-                                             'rulenumber'                     => $rulenumber,
-                                             form_activity_rule::PARAM_ACTION => 'delete',
-                                             form_activity_rule::PARAM_RULEID => $rule->id,
-                                         ]);
-                $remove = html_writer::link($remove, get_string('remove_rule', 'local_rollover'));
-                echo html_writer::tag('li', "{$text} [ {$change} | {$remove} ]");
-            }
-            echo html_writer::end_tag('ul');
+        $rules = (new activity_rule_db())->all();
+        $rules = array_values($rules);
+        $digits = strlen(count($rules));
+        foreach ($rules as $index => &$rule) {
+            $rule->number = sprintf("%0{$digits}d", $index + 1);
+            $rule->sentence = $this->create_rule_sentence($rule);
+            $rule->change = new moodle_url('/local/rollover/activities-rules.php', [
+                form_activity_rule::PARAM_ACTION => 'edit',
+                form_activity_rule::PARAM_RULEID => $rule->id,
+            ]);
+            $rule->remove = new moodle_url('/local/rollover/activities-rules.php', [
+                'rulenumber'                     => $rule->number,
+                form_activity_rule::PARAM_ACTION => 'delete',
+                form_activity_rule::PARAM_RULEID => $rule->id,
+            ]);
         }
 
-        echo html_writer::link(new moodle_url('/local/rollover/activities-rules.php', [form_activity_rule::PARAM_ACTION => 'add']),
-                               get_string('add_new_rule', 'local_rollover'));
+        echo $OUTPUT->header();
+
+        $viewbag = [
+            'heading' => get_string('settings-activities-header', 'local_rollover'),
+            'count'   => count($rules),
+            'rules'   => $rules,
+            'create'  => new moodle_url('/local/rollover/activities-rules.php', [form_activity_rule::PARAM_ACTION => 'add']),
+        ];
+        echo $OUTPUT->render_from_template('local_rollover/activity_rules_list', $viewbag);
 
         echo $OUTPUT->footer();
     }
@@ -176,8 +164,6 @@ class settings_controller {
     private function activities_rules_add_or_edit($rule) {
         global $OUTPUT, $PAGE;
 
-        $PAGE->requires->js_call_amd('local_rollover/activity-rule-samples', 'initialise');
-
         $form = new form_activity_rule();
 
         if ($form->is_cancelled()) {
@@ -201,6 +187,8 @@ class settings_controller {
                                 form_activity_rule::PARAM_REGEX  => $rule->regex,
                             ]);
         }
+
+        $PAGE->requires->js_call_amd('local_rollover/activity-rule-samples', 'initialise');
 
         echo $OUTPUT->header();
 
@@ -239,7 +227,9 @@ class settings_controller {
         echo html_writer::tag('b', get_string('delete-rule-confirmation', 'local_rollover'));
 
         $number = required_param('rulenumber', PARAM_INT);
-        echo html_writer::tag('p', static::create_rule_sentence($number, $rule));
+        $number = get_string('rule-sentence-number', 'local_rollover', $number);
+        $number = html_writer::tag('strong', $number);
+        echo html_writer::tag('p', $number . ' ' . static::create_rule_sentence($rule));
 
         $form->display();
 
