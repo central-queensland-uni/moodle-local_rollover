@@ -21,33 +21,34 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\admin\settings_controller;
-use local_rollover\form\form_past_instances_filter;
+use local_rollover\regex_validator;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_admin_past_instances_filter_test extends rollover_testcase {
-    public function test_it_requires_an_admin() {
-        $this->resetAfterTest();
+class local_rollover_regex_validator_test extends rollover_testcase {
+    public function provider_for_test_it_validates_the_regex() {
+        return [
+            ['', true, 'Empty RegEx is valid.'],
+            ['/^(.*)$/', true, 'Capture-all RegEx is valid.'],
+            ['.', false, 'RegEx is too short.'],
+            ['/(.*)$/', false, 'RegEx must match beginning.'],
+            ['/^(.*)/', false, 'RegEx must match end.'],
+            ['/^.*$/', false, 'RegEx must have a capture group.'],
+            ['/^a(.*b$/', false, 'Malformed RegEx.'],
+        ];
+    }
 
-        self::setAdminUser();
-        $controller = new settings_controller();
-        ob_start();
-        $controller->past_instances_settings();
-        $html = ob_end_clean();
-        self::assertNotEmpty($html);
+    /**
+     * @dataProvider provider_for_test_it_validates_the_regex
+     */
+    public function test_it_validates_the_regex($regex, $acceptable, $reason) {
+        $error = regex_validator::validation($regex);
 
-        $user = $this->generator()->create_user();
-        self::setUser($user);
-        $caught = null;
-        try {
-            $controller = new settings_controller();
-            $controller->past_instances_settings();
-        } catch (moodle_exception $exception) {
-            $caught = $exception;
+        if ($acceptable) {
+            self::assertEmpty($error, $reason);
+        } else {
+            self::assertNotEmpty($error, $reason);
         }
-        self::assertNotNull($caught);
-        self::assertSame('Access denied', $caught->getMessage());
     }
 }

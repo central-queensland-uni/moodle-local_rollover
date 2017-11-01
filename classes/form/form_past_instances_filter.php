@@ -24,6 +24,7 @@
 namespace local_rollover\form;
 
 use local_rollover\admin\settings_controller;
+use local_rollover\regex_validator;
 use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
@@ -75,37 +76,15 @@ class form_past_instances_filter extends moodleform {
      * @return string[] of error messages
      */
     public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-
         $regex = $data[self::FIELD_REGEX];
-        $error = $this->get_regex_error($regex);
+
+        $errors = parent::validation($data, $files);
+        $error = regex_validator::validation($regex);
         if (!is_null($error)) {
-            $errors[self::FIELD_REGEX] = get_string("regex_error_{$error}", 'local_rollover');
+            $errors[self::FIELD_REGEX] = $error;
         }
 
         return $errors;
-    }
-
-    private function get_regex_error($regex) {
-        if ($regex == '') {
-            return null;
-        }
-        if (strlen($regex) < 2) {
-            return 'too_short';
-        }
-        if ($regex[1] != '^') {
-            return 'invalid_start';
-        }
-        if (substr($regex, -2, 1) != '$') {
-            return 'invalid_end';
-        }
-        if (strpos($regex, '(') === false) {
-            return 'no_capture';
-        }
-        if (@preg_match($regex, null) === false) {
-            return 'malformed';
-        }
-        return null;
     }
 
     private function process() {
