@@ -56,7 +56,7 @@ class local_rollover_admin_past_instances_filter_test extends rollover_testcase 
             ['', true, 'Empty RegEx is valid.'],
             ['/^(.*)$/', true, 'Capture-all RegEx is valid.'],
             ['.', false, 'RegEx is too short.'],
-            ['/(.*)$/', false, 'RegEx must match beggining.'],
+            ['/(.*)$/', false, 'RegEx must match beginning.'],
             ['/^(.*)/', false, 'RegEx must match end.'],
             ['/^.*$/', false, 'RegEx must have a capture group.'],
             ['/^a(.*b$/', false, 'Malformed RegEx.'],
