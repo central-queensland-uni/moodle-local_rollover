@@ -21,33 +21,34 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\admin\settings_controller;
 use local_rollover\form\form_past_instances_filter;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_admin_past_instances_filter_test extends rollover_testcase {
-    public function test_it_requires_an_admin() {
-        $this->resetAfterTest();
+global $CFG;
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
 
-        self::setAdminUser();
-        $controller = new settings_controller();
+class local_rollover_form_past_instances_filter_test extends rollover_testcase {
+    public function test_it_creates() {
+        $form = new form_past_instances_filter();
+
         ob_start();
-        $controller->past_instances_settings();
-        $html = ob_end_clean();
-        self::assertNotEmpty($html);
+        $form->display();
+        $html = ob_get_clean();
 
-        $user = $this->generator()->create_user();
-        self::setUser($user);
-        $caught = null;
-        try {
-            $controller = new settings_controller();
-            $controller->past_instances_settings();
-        } catch (moodle_exception $exception) {
-            $caught = $exception;
-        }
-        self::assertNotNull($caught);
-        self::assertSame('Access denied', $caught->getMessage());
+        self::assertContains('<form', $html);
+    }
+
+    public function test_it_submits() {
+        self::resetAfterTest(true);
+
+        $regex = '/^(.*)$/';
+        form_past_instances_filter::mock_submit(['regex' => $regex]);
+        $form = new form_past_instances_filter();
+
+        $data = $form->get_data();
+        self::assertSame($regex, $data->regex);
     }
 }
