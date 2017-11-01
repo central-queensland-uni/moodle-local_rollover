@@ -22,26 +22,42 @@
  * @var stdClass $plugin
  */
 
+use local_rollover\webservice\activity_rule_webservice;
 use local_rollover\webservice\course_regex_filter_webservice;
 
 defined('MOODLE_INTERNAL') || die();
 
 $services = [
-    'local_rollover_regex_filter' => [
+    'local_rollover_regex_filter'  => [
         'functions' => [
-            'local_rollover_regex_filter_get_sample_matches_by_regex',
+            course_regex_filter_webservice::METHOD_GET_SAMPLE_MATCHES,
         ],
         'restrictedusers' => 0,
         'enabled'   => 1,
     ],
+    'local_rollover_activity_rule' => [
+        'functions'       => [
+            activity_rule_webservice::METHOD_GET_SAMPLES,
+        ],
+        'restrictedusers' => 0,
+        'enabled'         => 1,
+    ],
 ];
 
 $functions = [
-    'local_rollover_regex_filter_get_sample_matches_by_regex' => [
+    course_regex_filter_webservice::METHOD_GET_SAMPLE_MATCHES => [
         'classname'   => course_regex_filter_webservice::class,
         'methodname'  => 'get_sample_matches_by_regex',
         'classpath'   => 'local/rollover/classes/webservice/course_regex_filter_webservice.php',
         'description' => 'Fetches real examples of matches of course shortname for a given filter regex.',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
+    activity_rule_webservice::METHOD_GET_SAMPLES              => [
+        'classname'   => activity_rule_webservice::class,
+        'methodname'  => 'get_samples',
+        'classpath'   => 'local/rollover/classes/webservice/activity_rule_webservice.php',
+        'description' => 'Fetches real examples of activities that would match a given rule.',
         'type'        => 'read',
         'ajax'        => true,
     ],

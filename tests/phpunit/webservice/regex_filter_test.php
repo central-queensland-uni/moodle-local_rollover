@@ -22,6 +22,7 @@
  */
 
 use local_rollover\test\rollover_testcase;
+use local_rollover\webservice\course_regex_filter_webservice;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,8 +38,7 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
         self::setAdminUser();
 
         $args = ['regex' => '/^a(bc)d$/'];
-        $methodname = 'local_rollover_regex_filter_get_sample_matches_by_regex';
-        $response = $this->call_webservice_successfully($methodname, $args);
+        $response = $this->call_webservice_successfully( course_regex_filter_webservice::METHOD_GET_SAMPLE_MATCHES, $args);
 
         self::assertArrayHasKey('regex', $response);
         self::assertSame($args['regex'], $response['regex']);

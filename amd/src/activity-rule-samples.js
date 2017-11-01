@@ -28,10 +28,11 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
     ActivityRuleSamples.prototype.constructor = ActivityRuleSamples;
 
     ActivityRuleSamples.prototype.getSamplesElement = function (response) {
+        window.console.log(response);
         var $rootUL = $('<ul>');
-        response.activities.forEach(function (activity) {
+        response.matches.forEach(function (match) {
             var $li = $('<li>');
-            $li.text(activity);
+            $li.text(match.name);
             $rootUL.append($li);
         });
 
@@ -39,16 +40,21 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
     };
 
     ActivityRuleSamples.prototype.updateSamples = function () {
+        var moduleid = document.getElementById('id_module').value;
+        var args = {
+            moduleid: (moduleid === '') ? 0 : moduleid,
+            regex: document.getElementById('id_regex').value
+        };
+        var webservices = [
+            {methodname: 'local_rollover_activity_rule_samples', args: args}
+        ];
         $('.local_rollover_samples_loading').show();
-        var that = this;
-        setTimeout(function () {
-            that.samplesReceived({
-                activities: [
-                    'Activity 1',
-                    'Activity 2'
-                ]
-            });
-        }, 1000);
+        var promises = ajax.call(webservices);
+
+        var promise = promises[0];
+        promise.done(this.samplesReceived.bind(this)).fail(function (response) {
+            window.console.error(response);
+        });
     };
 
     return {
