@@ -16,3 +16,26 @@
 .local_rollover_samples_entries li li {
     font-weight: normal;
 }
+
+.local_rollover_activity_rules_list li {
+    padding: 0 5px;
+    border-radius: 5px;
+}
+
+.local_rollover_activity_rules_list li code {
+    font-size: 80%;
+}
+
+.local_rollover_activity_rules_list li:hover {
+    background-color: lightgrey;
+}
+
+.local_rollover_activity_rules_list .actions a {
+    color: #006cc1;
+    text-decoration: none;
+}
+
+.local_rollover_activity_rules_list .actions a:hover {
+    color: #208ce1;
+    text-decoration: none;
+}

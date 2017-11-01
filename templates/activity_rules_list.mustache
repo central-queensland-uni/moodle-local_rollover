@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle Course Rollover Plugin
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+<section class="local_rollover_activity_rules_list">
+    <h2>{{heading}}</h2>
+    {{#count}}
+        <ul>
+            {{#rules}}
+                <li>
+                    <strong>{{#str}}rule-sentence-number, local_rollover, {{number}}{{/str}}</strong>
+                    {{sentence}}
+                    {{#regex}}
+                        <code>{{regex}}</code>
+                    {{/regex}}
+                    <span class="actions">
+                        <a href="{{{change}}}" title="{{#str}}change_rule, local_rollover{{/str}}">
+                            {{#pix}} t/edit, core, {{#str}}change_rule, local_rollover{{/str}} {{/pix}}
+                        </a>
+                        <a href="{{{remove}}}" title="{{#str}}remove_rule, local_rollover{{/str}}">
+                            {{#pix}} t/delete, core, {{#str}}remove_rule, local_rollover{{/str}} {{/pix}}
+                        </a>
+                    </span>
+                </li>
+            {{/rules}}
+        </ul>
+    {{/count}}
+
+    {{^count}}
+        <p>{{#str}}no_rules, local_rollover{{/str}}</p>
+    {{/count}}
+
+    <button onclick="location.href=this.dataset.url;" data-url="{{{create}}}">
+        {{#str}}add_new_rule, local_rollover{{/str}}
+    </button>
+</section>
