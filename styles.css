@@ -18,8 +18,8 @@
 }
 
 .local_rollover_activity_rules_list li {
-    padding: 0 5px;
     border-radius: 5px;
+    padding: 0 5px;
 }
 
 .local_rollover_activity_rules_list li code {
