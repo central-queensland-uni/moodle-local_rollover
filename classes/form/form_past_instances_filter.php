@@ -76,12 +76,12 @@ class form_past_instances_filter extends moodleform {
      * @return string[] of error messages
      */
     public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
         $regex = $data[self::FIELD_REGEX];
 
-        $errors = parent::validation($data, $files);
-        $error = regex_validator::validation($regex);
-        if (!is_null($error)) {
-            $errors[self::FIELD_REGEX] = $error;
+        $validator = new regex_validator($regex);
+        if (!$validator->is_valid()) {
+            $errors[self::FIELD_REGEX] = $validator->get_error();
         }
 
         return $errors;
