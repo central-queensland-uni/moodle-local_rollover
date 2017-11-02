@@ -44,8 +44,15 @@ class local_rollover_regex_validator_test extends rollover_testcase {
      * @dataProvider provider_for_test_it_validates_the_regex
      */
     public function test_it_validates_the_regex($regex, $acceptable) {
-        $validator = new regex_validator($regex);
+        $validator = new regex_validator($regex, [regex_validator::OPTION_REQUIRE_CAPTURE_GROUP]);
+
         $error = $validator->get_error();
         self::assertSame($acceptable, $validator->is_valid(), "{$regex} -> {$error}");
+    }
+
+    public function test_it_validates_without_capture_group() {
+        $validator = new regex_validator('/^abc$/');
+        self::assertSame(true, $validator->is_valid());
+        self::assertNull($validator->get_error());
     }
 }

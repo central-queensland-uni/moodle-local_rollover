@@ -59,7 +59,7 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
             $all[$shortname] = [$shortname];
         }
         $regexes = [
-            'No matches'       => ['/^$/', []],
+            'No matches'       => ['/^()$/', []],
             'All matches'      => ['/^(.*)$/', $all],
             'Only ABC-###'     => ['/^(ABC)-\d{3}$/', ['ABC' => ['ABC-123', 'ABC-987']]],
             'By 3 first chars' => ['/^(.{3})-.*$/', ['ABC' => ['ABC-123', 'ABC-987', 'ABC-hello'], 'DEF' => ['DEF-456']]],
@@ -74,8 +74,19 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
             foreach ($response['groups'] as $group) {
                 $found[$group['match']] = $group['shortnames'];
             }
+            self::assertSame('', $response['regexerror'], $description);
             self::assertSame($expect, $found, $description);
         }
+    }
+
+    public function test_it_gets_an_error() {
+        $this->resetAfterTest();
+        self::setAdminUser();
+
+        $methodname = 'local_rollover_regex_filter_get_sample_matches_by_regex';
+        $response = $this->call_webservice_successfully($methodname, ['regex' => '/invalidregex']);
+        self::assertContains('malformed', $response['regexerror']);
+        self::assertSame([], $response['groups']);
     }
 
     public function test_it_get_samples_only_of_visible_courses() {

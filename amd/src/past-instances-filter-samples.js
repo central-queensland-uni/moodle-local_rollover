@@ -28,6 +28,10 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
     PastInstancesFilterSamples.prototype.constructor = PastInstancesFilterSamples;
 
     PastInstancesFilterSamples.prototype.getSamplesElement = function (response) {
+        if (response.groups.length === 0) {
+            return null;
+        }
+
         var $rootUL = $('<ul>');
         response.groups.forEach(function (group) {
             var $groupLI = $('<li>').text(group.match);
@@ -47,7 +51,7 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
         var webservices = [
             {methodname: 'local_rollover_regex_filter_get_sample_matches_by_regex', args: args}
         ];
-        $('.local_rollover_samples_loading').show();
+        $('.local_rollover_samples_spinner').show();
         var promises = ajax.call(webservices);
 
         var promise = promises[0];

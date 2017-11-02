@@ -40,6 +40,7 @@ $string['add_rule'] = 'Add rule';
 $string['change_rule'] = 'Change rule';
 $string['delete-rule-confirmation'] = 'Are you sure you want to remove the following rule?';
 $string['no_rules'] = 'No rules found.';
+$string['no_matches'] = 'No matches.';
 $string['option_activities'] = 'Sets the default for including activities in a rollover.';
 $string['option_badges'] = 'Sets the default for including badges in a rollover.';
 $string['option_anonymize'] = 'If enabled all information pertaining to users will be anonymised by default.';

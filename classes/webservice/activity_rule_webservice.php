@@ -28,6 +28,7 @@ use external_function_parameters;
 use external_multiple_structure;
 use external_single_structure;
 use external_value;
+use local_rollover\regex_validator;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -47,18 +48,27 @@ class activity_rule_webservice extends external_api {
     public static function get_samples($moduleid, $regex) {
         self::validate_parameters(self::get_samples_parameters(), compact('moduleid', 'regex'));
 
-        $modules = self::find_all_modules_names($moduleid, $regex);
-        $matches = [];
-        foreach ($modules as $cmid => $name) {
-            $matches[] = compact('cmid', 'name');
+        $validator = new regex_validator($regex);
+
+        if ($validator->is_valid()) {
+            $regexerror = '';
+            $modules = self::find_all_modules_names($moduleid, $regex);
+            $matches = [];
+            foreach ($modules as $cmid => $name) {
+                $matches[] = compact('cmid', 'name');
+            }
+        } else {
+            $regexerror = $validator->get_error();
+            $matches = [];
         }
 
         return [
-            'request' => [
+            'request'    => [
                 'moduleid' => $moduleid,
                 'regex'    => $regex,
             ],
-            'matches' => $matches,
+            'regexerror' => $regexerror,
+            'matches'    => $matches,
         ];
     }
 
@@ -72,6 +82,8 @@ class activity_rule_webservice extends external_api {
     }
 
     public static function get_samples_returns() {
+        $regexerror = new external_value(PARAM_TEXT, 'RegEx error message or empty for no error.');
+
         $moduleid = new external_value(PARAM_INT, 'Requested module id.');
         $regex = new external_value(PARAM_TEXT, 'Requested regex.');
         $request = new external_single_structure(compact('moduleid', 'regex'), 'Request parameters.');
@@ -81,7 +93,8 @@ class activity_rule_webservice extends external_api {
         $match = new external_single_structure(compact('cmid', 'name'), 'Course module (activity) match.');
         $matches = new external_multiple_structure($match, 'Course modules (activities) matched.');
 
-        return new external_single_structure(compact('request', 'matches'), 'Result for the request.');
+        return new external_single_structure(compact('regexerror', 'request', 'matches'),
+                                             'Result for the request.');
     }
 
     private static function find_all_modules_names($moduleid, $regex) {

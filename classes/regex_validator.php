@@ -32,6 +32,8 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class regex_validator {
+    const OPTION_REQUIRE_CAPTURE_GROUP = 'require_capture_group';
+
     /** @var string */
     private $regex;
 
@@ -47,6 +49,9 @@ class regex_validator {
     /** @var string */
     private $flags = null;
 
+    /** @var string[] */
+    private $options = [];
+
     public function is_valid() {
         return is_null($this->error);
     }
@@ -55,8 +60,9 @@ class regex_validator {
         return is_null($this->error) ? null : get_string("regex_error_{$this->error}", 'local_rollover');
     }
 
-    public function __construct($regex) {
+    public function __construct($regex, $options = []) {
         $this->regex = $regex;
+        $this->options = $options;
 
         // Empty regex allowed.
         if ($regex === '') {
@@ -117,6 +123,10 @@ class regex_validator {
 
     private function validate_capture_group() {
         if (!is_null($this->error)) {
+            return;
+        }
+
+        if (!in_array(self::OPTION_REQUIRE_CAPTURE_GROUP, $this->options)) {
             return;
         }
 
