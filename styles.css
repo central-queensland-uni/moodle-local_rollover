@@ -17,6 +17,11 @@
     font-weight: normal;
 }
 
+.local_rollover_samples_error {
+    padding-left: 20px;
+    color: #800;
+}
+
 .local_rollover_activity_rules_list li {
     border-radius: 5px;
     padding: 0 5px;

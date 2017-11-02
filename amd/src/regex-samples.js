@@ -45,15 +45,32 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
     };
 
     RegExSamples.prototype.samplesReceived = function (response) {
+        $('.local_rollover_samples_spinner').hide();
+
+        var $error = $('.local_rollover_samples_error');
+        $error.find('span').text('');
+        $error.hide();
+
+        var $nomatches = $('.local_rollover_samples_no_matches');
+        $nomatches.hide();
+
         var $samples = $('.local_rollover_samples_entries');
-
         $samples.empty();
+        $samples.hide();
+
+        if (response.regexerror !== '') {
+            $error.find('span').text(response.regexerror);
+            $error.show();
+            return;
+        }
+
         var $element = this.getSamplesElement(response);
-        $samples.append($element);
-
-        $samples.show();
-
-        $('.local_rollover_samples_loading').hide();
+        if ($element === null) {
+            $nomatches.show();
+        } else {
+            $samples.append($element);
+            $samples.show();
+        }
     };
 
     return RegExSamples;

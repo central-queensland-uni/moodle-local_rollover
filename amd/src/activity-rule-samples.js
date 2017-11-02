@@ -28,7 +28,10 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
     ActivityRuleSamples.prototype.constructor = ActivityRuleSamples;
 
     ActivityRuleSamples.prototype.getSamplesElement = function (response) {
-        window.console.log(response);
+        if (response.matches.length === 0) {
+            return null;
+        }
+
         var $rootUL = $('<ul>');
         response.matches.forEach(function (match) {
             var $li = $('<li>');
@@ -48,7 +51,7 @@ define(['./regex-samples', 'core/ajax', 'jquery'], function (RegExSamples, ajax,
         var webservices = [
             {methodname: 'local_rollover_activity_rule_samples', args: args}
         ];
-        $('.local_rollover_samples_loading').show();
+        $('.local_rollover_samples_spinner').show();
         var promises = ajax.call(webservices);
 
         var promise = promises[0];

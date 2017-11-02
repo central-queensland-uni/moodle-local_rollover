@@ -79,7 +79,7 @@ class form_past_instances_filter extends moodleform {
         $errors = parent::validation($data, $files);
         $regex = $data[self::FIELD_REGEX];
 
-        $validator = new regex_validator($regex);
+        $validator = new regex_validator($regex, [regex_validator::OPTION_REQUIRE_CAPTURE_GROUP]);
         if (!$validator->is_valid()) {
             $errors[self::FIELD_REGEX] = $validator->get_error();
         }

@@ -87,3 +87,11 @@ Feature: Rules for rolling over activities and resources
     Then I should see "First Research"
     And I should see "Second Research"
     But I should not see "Research Ideas"
+
+  Scenario: I see an error message if the RegEx is not valid
+    Given I am an administrator                                       # local_rollover
+    When I go to the "Activities & Resources" settings page           # local_rollover
+    And I press "Add new rule"
+    And I set the field "Regular Expression" to "/^(.*)"
+    Then I should see "Error"
+    And I should see "malformed"

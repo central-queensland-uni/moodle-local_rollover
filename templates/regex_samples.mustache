@@ -19,7 +19,17 @@
         {{title}}
         <span class="local_rollover_samples_regex" style="display: none;"></span>
         &nbsp;
-        <i class="local_rollover_samples_loading fa fa-refresh fa-spin" style="display: none;"></i>
+        <i class="local_rollover_samples_spinner fa fa-refresh fa-spin" style="display: none;"></i>
     </h3>
+
+    <p class="local_rollover_samples_error" style="display: none;">
+        <strong>{{#str}} error {{/str}}: </strong>
+        <span></span>
+    </p>
+
+    <p class="local_rollover_samples_no_matches" style="display: none;">
+        {{#str}} no_matches, local_rollover {{/str}}
+    </p>
+
     <article class="local_rollover_samples_entries" style="display: none;"></article>
 </section>

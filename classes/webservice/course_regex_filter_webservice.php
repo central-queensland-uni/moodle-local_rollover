@@ -28,6 +28,7 @@ use external_function_parameters;
 use external_multiple_structure;
 use external_single_structure;
 use external_value;
+use local_rollover\regex_validator;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -43,9 +44,23 @@ class course_regex_filter_webservice extends external_api {
     const METHOD_GET_SAMPLE_MATCHES = 'local_rollover_regex_filter_get_sample_matches_by_regex';
 
     public static function get_sample_matches_by_regex($regex) {
+        self::validate_parameters(self::get_sample_matches_by_regex_parameters(), compact('regex'));
+        $validator = new regex_validator($regex, [regex_validator::OPTION_REQUIRE_CAPTURE_GROUP]);
+
+        if ($validator->is_valid()) {
+            $regexerror = '';
+            $groups = self::create_sample_matches_by_regex($regex);
+        } else {
+            $regexerror = $validator->get_error();
+            $groups = [];
+        }
+
+        return compact('regexerror', 'regex', 'groups');
+    }
+
+    private static function create_sample_matches_by_regex($regex) {
         global $DB;
 
-        self::validate_parameters(self::get_sample_matches_by_regex_parameters(), compact('regex'));
         $shortnames = $DB->get_records('course',
                                        null,
                                        'shortname ASC',
@@ -63,10 +78,7 @@ class course_regex_filter_webservice extends external_api {
             }
         }
 
-        return [
-            'regex'  => $regex,
-            'groups' => $groups,
-        ];
+        return $groups;
     }
 
     public static function get_sample_matches_by_regex_parameters() {
@@ -76,6 +88,7 @@ class course_regex_filter_webservice extends external_api {
     }
 
     public static function get_sample_matches_by_regex_returns() {
+        $regexerror = new external_value(PARAM_TEXT, 'RegEx error message or empty for no error.');
         $regex = new external_value(PARAM_TEXT, 'Provided Regular Expression.');
 
         $match = new external_value(PARAM_TEXT, 'Regular Expression captured group match.');
@@ -86,6 +99,7 @@ class course_regex_filter_webservice extends external_api {
         $group = new external_single_structure(compact('match', 'shortnames'), 'Course shortname match.');
         $groups = new external_multiple_structure($group, 'Course groups found.');
 
-        return new external_single_structure(compact('regex', 'groups'), 'Result for the request.');
+        return new external_single_structure(compact('regexerror', 'regex', 'groups'),
+                                             'Result for the request.');
     }
 }
