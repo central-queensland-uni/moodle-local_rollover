@@ -25,6 +25,7 @@ namespace local_rollover\form;
 
 use core_collator;
 use local_rollover\dml\activity_rule_db;
+use local_rollover\regex_validator;
 use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
@@ -100,6 +101,13 @@ class form_activity_rule extends moodleform {
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+
+        $regex = $data[self::PARAM_REGEX];
+        $validator = new regex_validator($regex);
+        if (!$validator->is_valid()) {
+            $errors[self::PARAM_REGEX] = $validator->get_error();
+        }
+
         return $errors;
     }
 

@@ -46,6 +46,10 @@ class activity_rule_db {
     /** Not default rules make the activity not rolled over by default, but they can still be selected. */
     const RULE_NOT_DEFAULT = '3_not_default';
 
+    public static function get_types() {
+        return [self::RULE_FORBID, self::RULE_ENFORCE, self::RULE_NOT_DEFAULT];
+    }
+
     /** @var moodle_database */
     private $db;
 
