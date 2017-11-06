@@ -171,8 +171,4 @@ class local_rollover_webservice_activity_tule_test extends rollover_testcase {
 
         self::assertArrayNotHasKey($assignment->cmid, $actual);
     }
-
-    public function test_it_get_samples_works_fine_with_large_dataset() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
 }
