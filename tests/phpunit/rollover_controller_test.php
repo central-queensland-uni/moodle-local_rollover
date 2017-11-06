@@ -136,12 +136,6 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         self::assertSame($expected, $courses);
     }
 
-    public function test_it_runs_as_admin() {
-        // Is it really needed to run as user 2 (admin)?
-        // Let's figure out when we the specific capabilities.
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
     public function test_it_does_not_get_past_instances_not_active() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
