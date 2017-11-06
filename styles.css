@@ -18,8 +18,8 @@
 }
 
 .local_rollover_samples_error {
-    padding-left: 20px;
     color: #800;
+    padding-left: 20px;
 }
 
 .local_rollover_activity_rules_list li {
