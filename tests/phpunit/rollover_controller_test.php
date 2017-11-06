@@ -67,10 +67,6 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         self::assertContains('Rollover: Select content options', $html);
     }
 
-    public function test_it_requires_capability_to_rollover() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
     public function test_it_creates_a_form_with_the_user_courses() {
         $this->resetAfterTest();
 
