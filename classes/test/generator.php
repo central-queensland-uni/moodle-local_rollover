@@ -50,8 +50,9 @@ class generator extends testing_data_generator {
         return $this->courses[$shortname]->id;
     }
 
-    public function create_course_by_shortname($shortname) {
-        $this->courses[$shortname] = $this->create_course(['shortname' => $shortname]);
+    public function create_course_by_shortname($shortname, $options = []) {
+        $data = array_merge($options, ['shortname' => $shortname]);
+        $this->courses[$shortname] = $this->create_course($data);
         return $this->courses[$shortname];
     }
 
