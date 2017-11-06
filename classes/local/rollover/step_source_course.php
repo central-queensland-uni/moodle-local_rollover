@@ -25,6 +25,7 @@ namespace local_rollover\local\rollover;
 
 use local_rollover\admin\settings_controller;
 use local_rollover\form\form_source_course_selection;
+use local_rollover\regex_validator;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -96,6 +97,13 @@ class step_source_course extends step {
     }
 
     private function past_instance_match($regex, $shortname) {
+        $validator = new regex_validator($regex);
+        if (!$validator->is_valid()) {
+            $error = $validator->get_error();
+            debugging("Invalid regex ({$error}): {$regex}");
+            return null;
+        }
+
         if (!preg_match($regex, $shortname, $matches)) {
             return null;
         }

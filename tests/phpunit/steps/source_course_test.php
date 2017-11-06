@@ -107,6 +107,35 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         self::assertSame([], $actual);
     }
 
+    public function test_it_ignores_or_fails_gracefully_if_regex_is_invalid() {
+        $this->resetAfterTest();
+
+        $destination = $this->generator()->create_course(['shortname' => 'ABC123']);
+        $this->generator()->create_course(['shortname' => 'ABC456']);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX, '/^abc', 'local_rollover');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $step = new step_source_course($controller);
+        $actual = $step->get_past_instances();
+        $this->assertDebuggingCalled();
+        self::assertSame([], $actual);
+    }
+
+    public function test_it_ignores_or_fails_gracefully_if_regex_contains_no_group() {
+        $this->resetAfterTest();
+
+        $destination = $this->generator()->create_course(['shortname' => 'ABC123']);
+        $this->generator()->create_course(['shortname' => 'ABC456']);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX, '/^\(ABC\).*$/', 'local_rollover');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $step = new step_source_course($controller);
+        $actual = $step->get_past_instances();
+        self::assertSame([], $actual);
+    }
+
     public function test_it_works_if_validation_fails() {
         $this->markTestSkipped('Test/Feature not yet implemented.');
     }
