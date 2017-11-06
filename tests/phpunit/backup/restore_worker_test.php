@@ -44,10 +44,6 @@ class local_rollover_backup_restore_worker_test extends rollover_testcase {
         self::assertSame('Rollover Assignment', $cm->name);
     }
 
-    public function test_it_cleans_temp_files() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
     private function extract_fixture_backup_data() {
         global $CFG;
 
