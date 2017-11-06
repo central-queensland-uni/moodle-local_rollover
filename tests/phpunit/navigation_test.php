@@ -39,8 +39,4 @@ class local_rollover_navigation_test extends rollover_testcase {
         self::assertSame($name, 'Rollover');
         self::assertEquals(1, $url->param(rollover_parameters::PARAM_DESTINATION_COURSE_ID));
     }
-
-    public function test_it_only_shows_options_user_has_capability() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
 }
