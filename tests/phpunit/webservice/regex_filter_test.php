@@ -88,16 +88,4 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
         self::assertContains('malformed', $response['regexerror']);
         self::assertSame([], $response['groups']);
     }
-
-    public function test_it_get_samples_only_of_visible_courses() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
-    public function test_it_get_samples_works_fine_with_large_dataset() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
-    public function test_it_fails_gracefully_if_get_samples_does_not_have_a_capture_group() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
 }
