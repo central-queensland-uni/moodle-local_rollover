@@ -63,12 +63,4 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
         self::assertSame('1', $actual, 'It is the first step.');
     }
-
-    public function test_it_includes_backup_root_setting_options() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
-    public function test_it_works_if_validation_fails() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
 }

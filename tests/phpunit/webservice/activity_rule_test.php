@@ -55,7 +55,6 @@ class local_rollover_webservice_activity_tule_test extends rollover_testcase {
     }
 
     public function test_it_finds_all_activities() {
-
         $assignment = $this->generator()->create_activity('Some Course', 'assignment', 'Assignment 1');
         $book = $this->generator()->create_activity('Some Course', 'book', 'Important Book');
 
@@ -154,10 +153,22 @@ class local_rollover_webservice_activity_tule_test extends rollover_testcase {
     }
 
     public function test_it_get_samples_only_of_visible_courses() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
+        $this->generator()->create_course_by_shortname('invisible', ['visible' => 0]);
+        $assignment = $this->generator()->create_activity('invisible', 'assignment', 'Assignment 1');
 
-    public function test_it_get_samples_works_fine_with_large_dataset() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
+        $response = $this->call_webservice_successfully(
+            activity_rule_webservice::METHOD_GET_SAMPLES,
+            [
+                'moduleid' => 0,
+                'regex'    => '',
+            ]
+        );
+        $matches = $response['matches'];
+        $actual = [];
+        foreach ($matches as $match) {
+            $actual[$match['cmid']] = $match['name'];
+        }
+
+        self::assertArrayNotHasKey($assignment->cmid, $actual);
     }
 }

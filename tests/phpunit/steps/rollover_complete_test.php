@@ -53,8 +53,4 @@ class local_rollover_steps_rollover_complete_test extends rollover_testcase {
 
         self::assertContains('Rollover successful', $html);
     }
-
-    public function test_it_works_if_validation_fails() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
 }

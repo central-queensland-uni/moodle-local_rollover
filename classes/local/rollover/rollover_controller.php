@@ -28,7 +28,6 @@ use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use moodle_exception;
 use moodle_url;
-use moodleform;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -124,7 +123,7 @@ class rollover_controller {
 
         $this->currentstep++;
 
-        if ($this->complete_rollover($data)) {
+        if ($this->complete_rollover()) {
             return null;
         }
 
@@ -136,22 +135,22 @@ class rollover_controller {
         return $form;
     }
 
-    private function complete_rollover($data) {
+    private function complete_rollover() {
         if ($this->get_current_step_name() != self::STEP_ROLLOVER_COMPLETE) {
             return false;
         }
 
-        $this->rollover($data);
+        $this->rollover();
         $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
-                                      $data->{rollover_parameters::PARAM_DESTINATION_COURSE_ID});
+                                      $this->destinationcourse->id);
         return true;
     }
 
-    public function rollover($parameters) {
+    public function rollover() {
         $backupworker = $this->get_backup_worker();
         $backupworker->backup();
 
-        $destination = $parameters->{rollover_parameters::PARAM_DESTINATION_COURSE_ID};
+        $destination = $this->destinationcourse->id;
         $restoreworker = new restore_worker($destination);
         $restoreworker->restore($backupworker->get_backup_id());
     }

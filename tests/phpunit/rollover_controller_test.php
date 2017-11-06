@@ -67,10 +67,6 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
         self::assertContains('Rollover: Select content options', $html);
     }
 
-    public function test_it_requires_capability_to_rollover() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
     public function test_it_creates_a_form_with_the_user_courses() {
         $this->resetAfterTest();
 
@@ -138,57 +134,5 @@ class local_rollover_rollover_controller_test extends rollover_testcase {
             ],
         ];
         self::assertSame($expected, $courses);
-    }
-
-    public function test_it_respects_the_include_role_assignments_option() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-
-        self::resetAfterTest(true);
-
-        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
-        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
-        $this->generator()->create_activity('rollover-from', 'assignment', 'Full Rollover Assignment');
-
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
-        $controller = new rollover_controller();
-        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['activities' => 1]);
-
-        course_modinfo::clear_instance_cache($destinationcourse);
-        $info = get_fast_modinfo($destinationcourse);
-        $cm = array_values($info->get_cms())[0];
-        self::assertSame('Full Rollover Assignment', $cm->name);
-    }
-
-    public function test_it_respects_the_not_include_role_assignments_option() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-
-        self::resetAfterTest(true);
-
-        $sourcecourse = $this->generator()->create_course_by_shortname('rollover-from');
-        $destinationcourse = $this->generator()->create_course_by_shortname('rollover-into');
-        $this->generator()->create_activity('rollover-from', 'assignment', 'Full Rollover Assignment');
-
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $sourcecourse->id;
-        $controller = new rollover_controller();
-        $controller->rollover($sourcecourse->id, $destinationcourse->id, ['options' => ['activities' => 0]]);
-
-        course_modinfo::clear_instance_cache($destinationcourse);
-        $info = get_fast_modinfo($destinationcourse);
-        $cms = $info->get_cms();
-        self::assertCount(0, $cms);
-    }
-
-    public function test_it_runs_as_admin() {
-        // Is it really needed to run as user 2 (admin)?
-        // Let's figure out when we the specific capabilities.
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
-    public function test_it_does_not_get_past_instances_not_active() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
-    public function test_it_ignores_or_fails_gracefully_if_regex_is_invalid_or_contains_no_group() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
     }
 }

@@ -124,7 +124,8 @@ class activity_rule_webservice extends external_api {
             SELECT cm.id AS cmid, m.name
             FROM {course_modules} AS cm
             INNER JOIN {{$module->name}} AS m ON cm.instance=m.id
-            WHERE cm.module=?
+            INNER JOIN {course} AS course ON course.id=cm.course
+            WHERE course.visible=1 AND cm.module=?
             ORDER BY m.name ASC
         ";
         $instances = $DB->get_records_sql($sql, [$module->id]);

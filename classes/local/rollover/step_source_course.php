@@ -25,6 +25,7 @@ namespace local_rollover\local\rollover;
 
 use local_rollover\admin\settings_controller;
 use local_rollover\form\form_source_course_selection;
+use local_rollover\regex_validator;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -67,7 +68,7 @@ class step_source_course extends step {
         return $courses;
     }
 
-    private function get_past_instances() {
+    public function get_past_instances() {
         global $DB;
 
         $regex = get_config('local_rollover', settings_controller::SETTING_PAST_INSTANCES_REGEX);
@@ -81,7 +82,7 @@ class step_source_course extends step {
         }
 
         $found = [];
-        $courses = $DB->get_records('course', null, 'shortname ASC', 'id, shortname, fullname');
+        $courses = $DB->get_records('course', ['visible' => 1], 'shortname ASC', 'id, shortname, fullname');
         foreach ($courses as $course) {
             $match = $this->past_instance_match($regex, $course->shortname);
             if ($match === $group) {
@@ -96,6 +97,13 @@ class step_source_course extends step {
     }
 
     private function past_instance_match($regex, $shortname) {
+        $validator = new regex_validator($regex);
+        if (!$validator->is_valid()) {
+            $error = $validator->get_error();
+            debugging("Invalid regex ({$error}): {$regex}");
+            return null;
+        }
+
         if (!preg_match($regex, $shortname, $matches)) {
             return null;
         }
