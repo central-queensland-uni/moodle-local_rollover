@@ -45,10 +45,6 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         self::assertContains('<title>Backup Assignment</title>', $xml);
     }
 
-    public function test_it_includes_the_log_in_the_backup() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
-
     public function test_it_creates_given_a_source_course_id() {
         self::resetAfterTest(true);
         $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
