@@ -67,7 +67,7 @@ class step_source_course extends step {
         return $courses;
     }
 
-    private function get_past_instances() {
+    public function get_past_instances() {
         global $DB;
 
         $regex = get_config('local_rollover', settings_controller::SETTING_PAST_INSTANCES_REGEX);
@@ -81,7 +81,7 @@ class step_source_course extends step {
         }
 
         $found = [];
-        $courses = $DB->get_records('course', null, 'shortname ASC', 'id, shortname, fullname');
+        $courses = $DB->get_records('course', ['visible' => 1], 'shortname ASC', 'id, shortname, fullname');
         foreach ($courses as $course) {
             $match = $this->past_instance_match($regex, $course->shortname);
             if ($match === $group) {

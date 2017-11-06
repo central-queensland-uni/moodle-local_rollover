@@ -21,9 +21,11 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rollover\admin\settings_controller;
 use local_rollover\form\form_source_course_selection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
+use local_rollover\local\rollover\step_source_course;
 use local_rollover\test\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -72,6 +74,37 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $selector = 'select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"] option[value="' . $option2 . '"]';
         $actual = $crawler->filter($selector)->text();
         self::assertContains('short-b', $actual, 'Shortname for course 2 not found.');
+    }
+
+    public function test_it_gets_past_instances() {
+        $this->resetAfterTest();
+
+        $destination = $this->generator()->create_course(['shortname' => 'ABC123']);
+        $source = $this->generator()->create_course(['shortname' => 'ABC456']);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX, '/^(ABC).*$/', 'local_rollover');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $step = new step_source_course($controller);
+        $actual = $step->get_past_instances();
+        self::assertCount(1, $actual);
+
+        $actual = reset($actual);
+        self::assertSame($source->id, $actual->id);
+    }
+
+    public function test_it_does_not_get_past_instances_not_active() {
+        $this->resetAfterTest();
+
+        $destination = $this->generator()->create_course(['shortname' => 'ABC123']);
+        $this->generator()->create_course(['shortname' => 'ABC456', 'visible' => 0]);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX, '/^(ABC).*$/', 'local_rollover');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $step = new step_source_course($controller);
+        $actual = $step->get_past_instances();
+        self::assertSame([], $actual);
     }
 
     public function test_it_works_if_validation_fails() {
