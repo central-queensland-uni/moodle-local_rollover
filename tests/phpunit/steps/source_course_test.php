@@ -135,8 +135,4 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $actual = $step->get_past_instances();
         self::assertSame([], $actual);
     }
-
-    public function test_it_works_if_validation_fails() {
-        $this->markTestSkipped('Test/Feature not yet implemented.');
-    }
 }
