@@ -100,6 +100,7 @@ $string['rule-sentence-3_not_default-all-regex'] = 'Do not rollover by default a
 $string['rule-sentence-3_not_default-activity-all'] = 'Do not rollover by default any \'{$a->activity}\' activity.';
 $string['rule-sentence-3_not_default-activity-regex'] = 'Do not rollover by default any \'{$a->activity}\' matching:';
 $string['rule-sentence-number'] = 'Rule #{$a}:';
+$string['rule_precedence_disclaimer'] = 'The rollover system will use the first rule that matches, following the precedence order: forbid, enforce and not default.';
 $string['rules_match_summary_0'] = 'no activities found';
 $string['rules_match_summary_1'] = 'only 1 activity found';
 $string['rules_match_summary_plural'] = '{$a} activities found';
