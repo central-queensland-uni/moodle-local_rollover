@@ -44,6 +44,32 @@ class local_rollover_webservice_regex_filter_test extends rollover_testcase {
         self::assertSame($args['regex'], $response['regex']);
     }
 
+    public function test_it_returns_a_summary() {
+        $this->resetAfterTest();
+        self::setAdminUser();
+
+        $this->generator()->create_course_by_shortname('ABC-123');
+        $this->generator()->create_course_by_shortname('DEF-987');
+
+        $methodname = 'local_rollover_regex_filter_get_sample_matches_by_regex';
+        $regex = '/^(.{3})-\d{3}$/';
+        $response = $this->call_webservice_successfully($methodname, ['regex' => $regex]);
+
+        self::assertArrayHasKey('summary', $response);
+        self::assertSame('2 groups found', $response['summary']);
+    }
+
+    public function test_summaries() {
+        $actual = course_regex_filter_webservice::get_summary(0);
+        self::assertContains('no ', $actual);
+
+        $actual = course_regex_filter_webservice::get_summary(1);
+        self::assertContains('only ', $actual);
+
+        $actual = course_regex_filter_webservice::get_summary(20);
+        self::assertContains('20', $actual);
+    }
+
     public function test_it_finds_the_courses() {
         $this->resetAfterTest();
         self::setAdminUser();

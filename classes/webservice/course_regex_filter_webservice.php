@@ -55,7 +55,9 @@ class course_regex_filter_webservice extends external_api {
             $groups = [];
         }
 
-        return compact('regexerror', 'regex', 'groups');
+        $summary = self::get_summary(count($groups));
+
+        return compact('regexerror', 'summary', 'regex', 'groups');
     }
 
     private static function create_sample_matches_by_regex($regex) {
@@ -90,6 +92,7 @@ class course_regex_filter_webservice extends external_api {
     public static function get_sample_matches_by_regex_returns() {
         $regexerror = new external_value(PARAM_TEXT, 'RegEx error message or empty for no error.');
         $regex = new external_value(PARAM_TEXT, 'Provided Regular Expression.');
+        $summary = new external_value(PARAM_TEXT, 'Summary of results found.');
 
         $match = new external_value(PARAM_TEXT, 'Regular Expression captured group match.');
 
@@ -99,7 +102,21 @@ class course_regex_filter_webservice extends external_api {
         $group = new external_single_structure(compact('match', 'shortnames'), 'Course shortname match.');
         $groups = new external_multiple_structure($group, 'Course groups found.');
 
-        return new external_single_structure(compact('regexerror', 'regex', 'groups'),
-                                             'Result for the request.');
+        return new external_single_structure(
+            compact('regexerror', 'regex', 'summary', 'groups'),
+            'Result for the request.'
+        );
+    }
+
+    public static function get_summary($groupcount) {
+        if ($groupcount == 0) {
+            return get_string('past_instances_summary_0', 'local_rollover');
+        }
+
+        if ($groupcount == 1) {
+            return get_string('past_instances_summary_1', 'local_rollover');
+        }
+
+        return get_string('past_instances_summary_more', 'local_rollover', $groupcount);
     }
 }

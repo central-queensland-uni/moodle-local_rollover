@@ -63,6 +63,7 @@ class activity_rule_webservice extends external_api {
         }
 
         return [
+            'summary'    => self::get_summary(count($matches)),
             'request'    => [
                 'moduleid' => $moduleid,
                 'regex'    => $regex,
@@ -83,6 +84,7 @@ class activity_rule_webservice extends external_api {
 
     public static function get_samples_returns() {
         $regexerror = new external_value(PARAM_TEXT, 'RegEx error message or empty for no error.');
+        $summary = new external_value(PARAM_TEXT, 'Summary of results found.');
 
         $moduleid = new external_value(PARAM_INT, 'Requested module id.');
         $regex = new external_value(PARAM_TEXT, 'Requested regex.');
@@ -93,8 +95,10 @@ class activity_rule_webservice extends external_api {
         $match = new external_single_structure(compact('cmid', 'name'), 'Course module (activity) match.');
         $matches = new external_multiple_structure($match, 'Course modules (activities) matched.');
 
-        return new external_single_structure(compact('regexerror', 'request', 'matches'),
-                                             'Result for the request.');
+        return new external_single_structure(
+            compact('regexerror', 'summary', 'request', 'matches'),
+            'Result for the request.'
+        );
     }
 
     private static function find_all_modules_names($moduleid, $regex) {
@@ -143,5 +147,21 @@ class activity_rule_webservice extends external_api {
         }
 
         return $names;
+    }
+
+    public static function get_summary($count) {
+        if ($count == 0) {
+            return get_string('rules_match_summary_0', 'local_rollover');
+        }
+
+        if ($count == 1) {
+            return get_string('rules_match_summary_1', 'local_rollover');
+        }
+
+        if ($count < self::MAX_SAMPLES) {
+            return get_string('rules_match_summary_plural', 'local_rollover', $count);
+        }
+
+        return get_string('rules_match_summary_more', 'local_rollover', self::MAX_SAMPLES);
     }
 }

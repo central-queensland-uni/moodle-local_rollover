@@ -37,6 +37,7 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
             clearTimeout(this.triggerTimer);
         }
         this.triggerTimer = setTimeout(this.triggered.bind(this), this.triggerDelayMS);
+        $('.local_rollover_samples_spinner').show();
     };
 
     RegExSamples.prototype.triggered = function () {
@@ -63,6 +64,9 @@ define(['core/ajax', 'jquery'], function (ajax, $) {
             $error.show();
             return;
         }
+
+        var $count = $('.local_rollover_samples_count');
+        $count.text(' (' + response.summary + ')');
 
         var $element = this.getSamplesElement(response);
         if ($element === null) {
