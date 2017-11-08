@@ -54,6 +54,36 @@ class local_rollover_webservice_activity_tule_test extends rollover_testcase {
         self::assertSame($args['regex'], $request['regex']);
     }
 
+    public function test_it_returns_a_summary() {
+        $this->generator()->create_activity('Some Course', 'assignment', 'Some Assignment');
+        $this->generator()->create_activity('Some Course', 'book', 'Some Book');
+
+        $response = $this->call_webservice_successfully(
+            activity_rule_webservice::METHOD_GET_SAMPLES,
+            [
+                'moduleid' => 0,
+                'regex'    => '/^Some .*$/',
+            ]
+        );
+
+        self::assertArrayHasKey('summary', $response);
+        self::assertSame('2 activities found', $response['summary']);
+    }
+
+    public function test_summaries() {
+        $actual = activity_rule_webservice::get_summary(0);
+        self::assertContains('no ', $actual);
+
+        $actual = activity_rule_webservice::get_summary(1);
+        self::assertContains('only ', $actual);
+
+        $actual = activity_rule_webservice::get_summary(10);
+        self::assertContains('10', $actual);
+
+        $actual = activity_rule_webservice::get_summary(100);
+        self::assertContains('or more', $actual);
+    }
+
     public function test_it_finds_all_activities() {
         $assignment = $this->generator()->create_activity('Some Course', 'assignment', 'Assignment 1');
         $book = $this->generator()->create_activity('Some Course', 'book', 'Important Book');
@@ -75,7 +105,6 @@ class local_rollover_webservice_activity_tule_test extends rollover_testcase {
         self::assertSame($assignment->name, $actual[$assignment->cmid]);
         self::assertSame($book->name, $actual[$book->cmid]);
     }
-
     public function test_it_finds_only_assignment_activities() {
         global $DB;
 
