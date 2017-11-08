@@ -111,6 +111,7 @@ $string['settings-activities'] = 'Activities & Resources';
 $string['settings-activities-add-rule-header'] = 'Add rule for activities and resources rollover';
 $string['settings-activities-header'] = 'Activities and resources rollover rules';
 $string['settings-options'] = 'Options defaults';
+$string['settings-protection'] = 'Rollover protection';
 $string['settings-saved'] = 'Settings saved.';
 $string['settings-filter'] = 'Past instances filter';
 $string['step_activities_and_resources'] = 'Rollover: Select activities and resources';
