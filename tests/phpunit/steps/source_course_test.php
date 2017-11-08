@@ -32,6 +32,92 @@ use Symfony\Component\DomCrawler\Crawler;
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_steps_source_course_test extends rollover_testcase {
+    public function test_it_shows_source_selection() {
+        global $COURSE;
+
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+        $COURSE = $this->generator()->create_course();
+        $_GET = [rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1];
+
+        $controller = new rollover_controller();
+
+        ob_start();
+        $controller->index();
+        $html = ob_get_clean();
+
+        self::assertContains('Rollover: Select source course', $html);
+    }
+
+    public function test_it_creates_a_form_with_the_user_courses() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('destination');
+        $modifiable = $this->generator()->create_course_by_shortname('can-modify');
+        $this->generator()->create_course_by_shortname('cannot-modify');
+
+        $this->generator()->enrol_editing_teacher('someone', 'destination');
+        $this->generator()->enrol_editing_teacher('someone', 'can-modify');
+        $this->generator()->enrol_nonediting_teacher('someone', 'cannot-modify');
+
+        self::setUser($user);
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $form = $controller->get_step()->create_form();
+
+        $courses = $form->get_my_courses();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $modifiable->id => [
+                'id'        => $modifiable->id,
+                'shortname' => 'can-modify',
+                'fullname'  => $modifiable->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
+    }
+
+    public function test_it_creates_a_form_with_past_instances() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('test_destination');
+        $previous = $this->generator()->create_course_by_shortname('test_a');
+        $this->generator()->create_course_by_shortname('course_b');
+
+        $this->generator()->enrol_editing_teacher('someone', 'test_destination');
+
+        self::setUser($user);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX,
+                   '/^([^_]+)_.*$/',
+                   'local_rollover');
+
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $controller = new rollover_controller();
+        $form = $controller->get_step()->create_form();
+
+        $courses = $form->get_past_instances();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $previous->id => [
+                'id'        => $previous->id,
+                'shortname' => $previous->shortname,
+                'fullname'  => $previous->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
+    }
+
     public function test_it_is_used_when_not_submitted() {
         $this->resetAfterTest(true);
         self::setAdminUser();

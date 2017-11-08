@@ -31,6 +31,26 @@ use Symfony\Component\DomCrawler\Crawler;
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_steps_content_options_test extends rollover_testcase {
+    public function test_it_shows_options_selection() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+        $source = $this->generator()->create_course_by_shortname('source');
+        $destination = $this->generator()->create_course_by_shortname('destination');
+
+        form_source_course_selection::mock_submit([
+                                                      rollover_parameters::PARAM_SOURCE_COURSE_ID      => $source->id,
+                                                      rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+                                                  ]);
+
+        $controller = new rollover_controller();
+
+        ob_start();
+        $controller->index();
+        $html = ob_get_clean();
+
+        self::assertContains('Rollover: Select content options', $html);
+    }
+
     public function test_it_is_used_after_source_course_submitted() {
         $this->resetAfterTest(true);
         self::setAdminUser();
