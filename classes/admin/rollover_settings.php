@@ -50,10 +50,16 @@ class rollover_settings {
 
     const PROTECTION_HAS_STARTED = 'started';
 
-    const DEFAULT_PROTECTION_LEVEL = 'warn';
+    const LEVEL_STOP = 'stop';
+
+    const LEVEL_WARN = 'warn';
+
+    const LEVEL_IGNORE = 'ignore';
+
+    const DEFAULT_PROTECTION_LEVEL = self::LEVEL_WARN;
 
     public static function get_rollover_protection_options() {
-        return ['stop', self::DEFAULT_PROTECTION_LEVEL, 'ignore'];
+        return [self::LEVEL_STOP, self::DEFAULT_PROTECTION_LEVEL, self::LEVEL_IGNORE];
     }
 
     public static function get_rollover_protection_items() {
@@ -67,6 +73,20 @@ class rollover_settings {
 
     public static function get_protection_setting_key($protection) {
         return "protection_{$protection}";
+    }
+
+    public static function get_protection_config($protection) {
+        $key = self::get_protection_setting_key($protection);
+        $value = get_config('local_rollover', $key);
+        if ($value === false) {
+            $value = self::DEFAULT_PROTECTION_LEVEL;
+        }
+        return $value;
+    }
+
+    public static function set_protection_config($protection, $value) {
+        $key = self::get_protection_setting_key($protection);
+        set_config($key, $value, 'local_rollover');
     }
 
     /**

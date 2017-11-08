@@ -23,7 +23,9 @@
 
 namespace local_rollover\local\rollover;
 
+use local_rollover\admin\rollover_settings;
 use local_rollover\form\form_precheck;
+use moodle_exception;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -35,7 +37,44 @@ defined('MOODLE_INTERNAL') || die();
  */
 class step_precheck extends step {
     public function skipped() {
-        return ($this->controller->get_destination_course()->shortname != 'precheck_test');
+        $protections = rollover_settings::get_rollover_protection_items();
+
+        // If any protection is not skipped, do not skip.
+        foreach ($protections as $protection) {
+            $method = "check_skipped_{$protection}";
+            if (!method_exists($this, $method)) {
+                throw new moodle_exception("Missing protection check method: {$method}");
+            }
+            if (!$this->$method()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function check_skipped_empty() {
+        $level = rollover_settings::get_protection_config(rollover_settings::PROTECTION_NOT_EMPTY);
+        if ($level == rollover_settings::LEVEL_IGNORE) {
+            return true;
+        }
+
+        $course = $this->controller->get_destination_course();
+        $info = get_fast_modinfo($course, -1);
+        $instances = $info->get_instances();
+        return (count($instances) == 0);
+    }
+
+    public function check_skipped_hidden() {
+        return true;
+    }
+
+    public function check_skipped_user() {
+        return true;
+    }
+
+    public function check_skipped_started() {
+        return true;
     }
 
     public function create_form() {
