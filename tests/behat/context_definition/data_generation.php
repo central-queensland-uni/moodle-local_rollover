@@ -28,6 +28,7 @@ use Behat\Gherkin\Node\TableNode;
 use local_rollover\admin\rollover_settings;
 use local_rollover\admin\settings_controller;
 use local_rollover\dml\activity_rule_db;
+use local_rollover\local\protection;
 use local_rollover\test\generator;
 
 require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
@@ -163,20 +164,20 @@ trait local_rollover_behat_context_definition_for_data_generation {
         $rows = $table->getColumnsHash();
         foreach ($rows as $row) {
             $option = $this->get_option_for_text($row['Protection']);
-            rollover_settings::set_protection_config($option, $row['Option']);
+            protection::set_config($option, $row['Option']);
         }
     }
 
     private function get_option_for_text($text) {
         switch ($text) {
             case 'If rollover destination is not empty':
-                return rollover_settings::PROTECTION_NOT_EMPTY;
+                return protection::PROTECT_NOT_EMPTY;
             case 'If rollover destination is not hidden':
-                return rollover_settings::PROTECTION_NOT_HIDDEN;
+                return protection::PROTECT_NOT_HIDDEN;
             case 'If rollover destination contains user data':
-                return rollover_settings::PROTECTION_HAS_USER_DATA;
+                return protection::PROTECT_HAS_USER_DATA;
             case 'If rollover destination has already started':
-                return rollover_settings::PROTECTION_HAS_STARTED;
+                return protection::PROTECT_HAS_STARTED;
             default:
                 throw new moodle_exception("Invalid text: {$text}");
         }

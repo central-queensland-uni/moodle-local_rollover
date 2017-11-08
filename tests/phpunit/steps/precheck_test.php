@@ -21,10 +21,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\admin\rollover_settings;
+use local_rollover\local\protection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
-use local_rollover\local\rollover\step_precheck;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,8 +33,8 @@ class local_rollover_steps_precheck_test extends rollover_testcase {
         $this->resetAfterTest(true);
         self::setAdminUser();
 
-        rollover_settings::set_protection_config(rollover_settings::PROTECTION_NOT_EMPTY,
-                                                 rollover_settings::LEVEL_WARN);
+        protection::set_config(protection::PROTECT_NOT_EMPTY,
+                               protection::ACTION_WARN);
 
         $destinationcourse = $this->generator()->create_course_by_shortname('precheck_test');
         $this->generator()->create_activity('precheck_test', 'assignment', 'An assignment');
@@ -48,50 +47,5 @@ class local_rollover_steps_precheck_test extends rollover_testcase {
         $html = ob_get_clean();
 
         self::assertContains('Rollover: Pre-check', $html);
-    }
-
-    public function provider_for_protection_level() {
-        return [
-            [rollover_settings::LEVEL_IGNORE],
-            [rollover_settings::LEVEL_WARN],
-        ];
-    }
-
-    /**
-     * @dataProvider provider_for_protection_level
-     */
-    public function test_it_always_skips_check_if_destination_course_empty($level) {
-        $this->resetAfterTest(true);
-        self::setAdminUser();
-        rollover_settings::set_protection_config(rollover_settings::PROTECTION_NOT_EMPTY, $level);
-
-        $destinationcourse = $this->generator()->create_course_by_shortname('precheck_test');
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
-
-        $controller = new rollover_controller();
-        $precheck = new step_precheck($controller);
-
-        $actual = $precheck->check_skipped_empty();
-        self::assertTrue($actual, "Level: {$level}");
-    }
-
-    /**
-     * @dataProvider provider_for_protection_level
-     */
-    public function test_it_checks_if_destination_course_empty($level) {
-        $this->resetAfterTest(true);
-        self::setAdminUser();
-        rollover_settings::set_protection_config(rollover_settings::PROTECTION_NOT_EMPTY, $level);
-
-        $destinationcourse = $this->generator()->create_course_by_shortname('precheck_test');
-        $this->generator()->create_activity('precheck_test', 'assignment', 'An assignment');
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
-
-        $controller = new rollover_controller();
-        $precheck = new step_precheck($controller);
-
-        $expected = ($level == rollover_settings::LEVEL_IGNORE) ? true : false;
-        $actual = $precheck->check_skipped_empty();
-        self::assertSame($expected, $actual, "Level: {$level}");
     }
 }

@@ -30,6 +30,7 @@ use admin_setting_configcheckbox_with_lock;
 use admin_setting_configselect;
 use admin_settingpage;
 use lang_string;
+use local_rollover\local\protection;
 use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
@@ -42,52 +43,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 class rollover_settings {
-    const PROTECTION_NOT_EMPTY = 'empty';
-
-    const PROTECTION_NOT_HIDDEN = 'hidden';
-
-    const PROTECTION_HAS_USER_DATA = 'user';
-
-    const PROTECTION_HAS_STARTED = 'started';
-
-    const LEVEL_STOP = 'stop';
-
-    const LEVEL_WARN = 'warn';
-
-    const LEVEL_IGNORE = 'ignore';
-
-    const DEFAULT_PROTECTION_LEVEL = self::LEVEL_WARN;
-
-    public static function get_rollover_protection_options() {
-        return [self::LEVEL_STOP, self::DEFAULT_PROTECTION_LEVEL, self::LEVEL_IGNORE];
-    }
-
-    public static function get_rollover_protection_items() {
-        return [
-            self::PROTECTION_NOT_EMPTY,
-            self::PROTECTION_NOT_HIDDEN,
-            self::PROTECTION_HAS_USER_DATA,
-            self::PROTECTION_HAS_STARTED,
-        ];
-    }
-
-    public static function get_protection_setting_key($protection) {
-        return "protection_{$protection}";
-    }
-
-    public static function get_protection_config($protection) {
-        $key = self::get_protection_setting_key($protection);
-        $value = get_config('local_rollover', $key);
-        if ($value === false) {
-            $value = self::DEFAULT_PROTECTION_LEVEL;
-        }
-        return $value;
-    }
-
-    public static function set_protection_config($protection, $value) {
-        $key = self::get_protection_setting_key($protection);
-        set_config($key, $value, 'local_rollover');
-    }
+    const DEFAULT_PROTECTION_LEVEL = protection::ACTION_WARN;
 
     /**
      * Returns an array where the key is the option name (used in settings)
@@ -174,14 +130,14 @@ class rollover_settings {
         );
 
         $options = [];
-        foreach (self::get_rollover_protection_options() as $option) {
+        foreach (protection::get_actions() as $option) {
             $options[$option] = new lang_string("settings-protection-option-{$option}", 'local_rollover');
         }
 
-        foreach (self::get_rollover_protection_items() as $protection) {
+        foreach (protection::get_protections() as $protection) {
             $title = new lang_string("settings-protection-{$protection}", 'local_rollover');
             $description = new lang_string("settings-protection-{$protection}-description", 'local_rollover');
-            $key = 'local_rollover/' . self::get_protection_setting_key($protection);
+            $key = 'local_rollover/' . protection::get_config_key($protection);
             $protectionsetting->add(
                 new admin_setting_configselect($key, $title, $description, self::DEFAULT_PROTECTION_LEVEL, $options)
             );
