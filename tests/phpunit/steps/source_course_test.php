@@ -38,7 +38,12 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $this->resetAfterTest(true);
         self::setAdminUser();
         $COURSE = $this->generator()->create_course();
-        $_GET = [rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1];
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
 
         $controller = new rollover_controller();
 
@@ -64,7 +69,12 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
 
         self::setUser($user);
 
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
+
         $controller = new rollover_controller();
         $form = $controller->get_step()->create_form();
 
@@ -99,7 +109,11 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
                    '/^([^_]+)_.*$/',
                    'local_rollover');
 
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destination->id;
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
         $controller = new rollover_controller();
         $form = $controller->get_step()->create_form();
 
@@ -125,7 +139,12 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('into');
         $option1 = $this->generator()->create_course(['shortname' => 'short-a', 'fullname' => 'Course A'])->id;
         $option2 = $this->generator()->create_course(['shortname' => 'short-b', 'fullname' => 'Course B'])->id;
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
 
         $controller = new rollover_controller();
 
@@ -138,14 +157,6 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $formname = str_replace('\\', '_', form_source_course_selection::class);
         $actual = $crawler->filter("input[name='_qf__{$formname}']")->count();
         self::assertSame(1, $actual, 'Wrong form used.');
-
-        $selector1 = 'input[name="' . rollover_parameters::PARAM_DESTINATION_COURSE_ID . '"]';
-        $actual = $crawler->filter($selector1)->getNode(0)->getAttribute('value');
-        self::assertSame((string)$destinationcourse->id, $actual, 'Must provide destination course id.');
-
-        $selector = 'input[name="' . rollover_parameters::PARAM_CURRENT_STEP . '"]';
-        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
-        self::assertSame('0', $actual, 'It is the first step.');
 
         $actual = $crawler->filter('select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"]')->count();
         self::assertSame(1, $actual, 'Missing source course field.');
@@ -160,6 +171,26 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $selector = 'select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"] option[value="' . $option2 . '"]';
         $actual = $crawler->filter($selector)->text();
         self::assertContains('short-b', $actual, 'Shortname for course 2 not found.');
+    }
+
+    public function test_it_is_used_directly_if_no_warnings() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+
+        $destinationcourse = $this->generator()->create_course_by_shortname('into');
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
+
+        $controller = new rollover_controller();
+
+        ob_start();
+        $controller->index();
+        $html = ob_get_clean();
+
+        $crawler = new Crawler($html);
+
+        $formname = str_replace('\\', '_', form_source_course_selection::class);
+        $actual = $crawler->filter("input[name='_qf__{$formname}']")->count();
+        self::assertSame(1, $actual, 'Wrong form used.');
     }
 
     public function test_it_gets_past_instances() {

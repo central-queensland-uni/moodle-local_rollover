@@ -37,9 +37,11 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $source = $this->generator()->create_course_by_shortname('source');
         $destination = $this->generator()->create_course_by_shortname('destination');
 
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
         form_source_course_selection::mock_submit([
                                                       rollover_parameters::PARAM_SOURCE_COURSE_ID      => $source->id,
                                                       rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+                                                      rollover_parameters::PARAM_CURRENT_STEP          => $step,
                                                   ]);
 
         $controller = new rollover_controller();
@@ -58,8 +60,9 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('destination');
         $sourcecourse = $this->generator()->create_course_by_shortname('from');
 
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
         form_source_course_selection::mock_submit([
-                                                      rollover_parameters::PARAM_CURRENT_STEP          => 0,
+                                                      rollover_parameters::PARAM_CURRENT_STEP          => $step,
                                                       rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
                                                       rollover_parameters::PARAM_SOURCE_COURSE_ID      => $sourcecourse->id,
                                                   ]);
@@ -74,13 +77,5 @@ class local_rollover_steps_content_options_test extends rollover_testcase {
         $formname = str_replace('\\', '_', form_options_selection::class);
         $actual = $crawler->filter("input[name='_qf__{$formname}']")->count();
         self::assertSame(1, $actual, 'Wrong form used.');
-
-        $selector = 'input[name="' . rollover_parameters::PARAM_DESTINATION_COURSE_ID . '"]';
-        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
-        self::assertSame((string)$destinationcourse->id, $actual, 'Must provide destination course id.');
-
-        $selector = 'input[name="' . rollover_parameters::PARAM_CURRENT_STEP . '"]';
-        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
-        self::assertSame('1', $actual, 'It is the first step.');
     }
 }

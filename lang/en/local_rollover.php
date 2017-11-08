@@ -128,5 +128,6 @@ $string['settings-filter'] = 'Past instances filter';
 $string['step_activities_and_resources'] = 'Rollover: Select activities and resources';
 $string['step_complete'] = 'Rollover successful';
 $string['step_content_options'] = 'Rollover: Select content options';
+$string['step_precheck'] = 'Rollover: Pre-check';
 $string['step_source_course'] = 'Rollover: Select source course';
 $string['update_rule'] = 'Update rule';

@@ -23,6 +23,8 @@
 
 namespace local_rollover\local\rollover;
 
+use local_rollover\form\form_precheck;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -31,22 +33,15 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class step {
-    /** @var rollover_controller */
-    protected $controller;
-
-    public function __construct(rollover_controller $controller) {
-        $this->controller = $controller;
-    }
-
-    /**
-     * @return bool True if this step be skipped.
-     */
+class step_precheck extends step {
     public function skipped() {
-        return false;
+        return ($this->controller->get_destination_course()->shortname != 'precheck_test');
     }
 
-    public abstract function create_form();
+    public function create_form() {
+        return new form_precheck();
+    }
 
-    public abstract function process_form_data($data);
+    public function process_form_data($data) {
+    }
 }

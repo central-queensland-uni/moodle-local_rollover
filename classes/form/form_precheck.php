@@ -21,9 +21,15 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\local\rollover;
+namespace local_rollover\form;
+
+use local_rollover\local\rollover\rollover_parameters;
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * @package     local_rollover
@@ -31,22 +37,31 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class step {
-    /** @var rollover_controller */
-    protected $controller;
+class form_precheck extends moodleform {
+    /**
+     * Form definition.
+     */
+    public function definition() {
+        $mform = $this->_form;
 
-    public function __construct(rollover_controller $controller) {
-        $this->controller = $controller;
+        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
+        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
+
+        $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
+        $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
+
+        $this->add_action_buttons(false, get_string('continue'));
     }
 
     /**
-     * @return bool True if this step be skipped.
+     * Validate the parts of the request form for this module
+     *
+     * @param mixed[]  $data  An array of form data
+     * @param string[] $files An array of form files
+     * @return string[] of error messages
      */
-    public function skipped() {
-        return false;
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        return $errors;
     }
-
-    public abstract function create_form();
-
-    public abstract function process_form_data($data);
 }
