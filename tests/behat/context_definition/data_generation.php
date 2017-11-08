@@ -70,14 +70,19 @@ trait local_rollover_behat_context_definition_for_data_generation {
      * @Given /^I (can|cannot) modify the following courses: +\# local_rollover$/
      */
     public function iCanModifyTheFollowingCourses($canornot, TableNode $courses) {
-        $can = ($canornot == 'can');
         $courses = $courses->getColumn(0);
-
         foreach ($courses as $course) {
-            $this->generator()->create_course_by_shortname($course);
-            if ($can) {
-                $this->generator()->enrol_editing_teacher($this->myusername, $course);
-            }
+            $this->iCanModifyTheTheCourse($canornot, $course);
+        }
+    }
+
+    /**
+     * @Given /^I (can|cannot) modify the the course "([^"]*)" +\# local_rollover$/
+     */
+    public function iCanModifyTheTheCourse($canornot, $course) {
+        $this->generator()->create_course_by_shortname($course);
+        if ($canornot == 'can') {
+            $this->generator()->enrol_editing_teacher($this->myusername, $course);
         }
     }
 
@@ -149,5 +154,38 @@ trait local_rollover_behat_context_definition_for_data_generation {
 
             $dml->save($rule);
         }
+    }
+
+    /**
+     * @Given /^the rollover protection is configured as follows: +\# local_rollover$/
+     */
+    public function theRolloverProtectionIsConfiguredAsFollows(TableNode $table) {
+        $rows = $table->getColumnsHash();
+        foreach ($rows as $row) {
+            $option = $this->get_option_for_text($row['Protection']);
+            $option = rollover_settings::get_protection_setting_key($option);
+            set_config($option, $row['Option'], 'local_rollover');
+        }
+    }
+
+    private function get_option_for_text($text) {
+        switch ($text) {
+            case 'If rollover destination is not empty':
+                return rollover_settings::PROTECTION_NOT_EMPTY;
+            case 'If rollover destination is not hidden':
+                return rollover_settings::PROTECTION_NOT_HIDDEN;
+            case 'If rollover destination contains user data':
+                return rollover_settings::PROTECTION_HAS_USER_DATA;
+            case 'If rollover destination has already started':
+                return rollover_settings::PROTECTION_HAS_STARTED;
+            default:
+                throw new moodle_exception("Invalid text: {$text}");
+        }
+    }
+
+    /**
+     * @Given /^the "([^"]*)" course is not empty, is visible, has user data and has already started +\# local_rollover$/
+     */
+    public function theCourseIsNotEmptyIsVisibleHasUserDataAndHasAlreadyStarted($course) {
     }
 }

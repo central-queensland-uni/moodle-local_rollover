@@ -42,12 +42,29 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 class rollover_settings {
+    const PROTECTION_NOT_EMPTY = 'empty';
+
+    const PROTECTION_NOT_HIDDEN = 'hidden';
+
+    const PROTECTION_HAS_USER_DATA = 'user';
+
+    const PROTECTION_HAS_STARTED = 'started';
+
     private static function get_rollover_protection_options() {
         return ['stop', 'warn', 'ignore'];
     }
 
     private static function get_rollover_protection_items() {
-        return ['empty', 'hidden', 'user', 'started'];
+        return [
+            self::PROTECTION_NOT_EMPTY,
+            self::PROTECTION_NOT_HIDDEN,
+            self::PROTECTION_HAS_USER_DATA,
+            self::PROTECTION_HAS_STARTED,
+        ];
+    }
+
+    public static function get_protection_setting_key($protection) {
+        return "protection_{$protection}";
     }
 
     /**
@@ -142,7 +159,7 @@ class rollover_settings {
         foreach (self::get_rollover_protection_items() as $protection) {
             $title = new lang_string("settings-protection-{$protection}", 'local_rollover');
             $description = new lang_string("settings-protection-{$protection}-description", 'local_rollover');
-            $key = 'local_rollover/protection_' . $protection;
+            $key = 'local_rollover/' . self::get_protection_setting_key($protection);
             $protectionsetting->add(
                 new admin_setting_configselect($key, $title, $description, 'warn', $options)
             );
