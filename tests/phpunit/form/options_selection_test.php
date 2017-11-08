@@ -22,7 +22,7 @@
  */
 
 use local_rollover\backup\backup_worker;
-use local_rollover\form\form_options_selection;
+use local_rollover\form\steps\form_options_selection;
 use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 use Symfony\Component\DomCrawler\Crawler;

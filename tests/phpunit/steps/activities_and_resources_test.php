@@ -21,8 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\form\form_activities_and_resources_selection;
-use local_rollover\form\form_options_selection;
+use local_rollover\form\steps\form_activities_and_resources_selection;
+use local_rollover\form\steps\form_options_selection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;

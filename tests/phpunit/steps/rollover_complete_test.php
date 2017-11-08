@@ -22,7 +22,7 @@
  */
 
 use local_rollover\backup\backup_worker;
-use local_rollover\form\form_activities_and_resources_selection;
+use local_rollover\form\steps\form_activities_and_resources_selection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;

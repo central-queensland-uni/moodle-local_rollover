@@ -21,7 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\form;
+namespace local_rollover\form\steps;
 
 use backup_root_task;
 use backup_setting;

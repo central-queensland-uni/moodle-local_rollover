@@ -24,7 +24,7 @@
 namespace local_rollover\local\rollover;
 
 use backup_root_task;
-use local_rollover\form\form_activities_and_resources_selection;
+use local_rollover\form\steps\form_activities_and_resources_selection;
 
 defined('MOODLE_INTERNAL') || die();
 
