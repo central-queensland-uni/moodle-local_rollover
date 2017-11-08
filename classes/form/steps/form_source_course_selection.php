@@ -24,12 +24,8 @@
 namespace local_rollover\form\steps;
 
 use local_rollover\local\rollover\rollover_parameters;
-use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->libdir . '/formslib.php');
 
 /**
  * @package     local_rollover
@@ -37,7 +33,7 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_source_course_selection extends moodleform {
+class form_source_course_selection extends form_step_base {
     /** @var string[] */
     private $mycourses;
 
@@ -80,16 +76,10 @@ class form_source_course_selection extends moodleform {
     }
 
     /**
-     * Form definition.
+     * Step-specific form definition.
      */
-    public function definition() {
+    public function step_definition() {
         $mform = $this->_form;
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
-        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
-        $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
         $mform->addElement('selectgroups',
                            rollover_parameters::PARAM_SOURCE_COURSE_ID,

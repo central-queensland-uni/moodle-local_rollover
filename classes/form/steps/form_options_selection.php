@@ -24,14 +24,9 @@
 namespace local_rollover\form\steps;
 
 use backup_generic_setting;
-use local_rollover\local\rollover\rollover_parameters;
-use moodleform;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->libdir . '/formslib.php');
 
 /**
  * @package     local_rollover
@@ -39,7 +34,7 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_options_selection extends moodleform {
+class form_options_selection extends form_step_base {
     /** @var stdClass */
     private $config;
 
@@ -53,20 +48,9 @@ class form_options_selection extends moodleform {
     }
 
     /**
-     * Form definition.
+     * Step-specific form definition.
      */
-    public function definition() {
-        $mform = $this->_form;
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
-        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
-        $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_BACKUP_ID);
-        $mform->setType(rollover_parameters::PARAM_BACKUP_ID, PARAM_ALPHANUM);
-
+    public function step_definition() {
         foreach ($this->settings as $setting) {
             $this->definition_add_setting($setting);
         }
