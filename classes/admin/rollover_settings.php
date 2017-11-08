@@ -82,6 +82,7 @@ class rollover_settings {
         $this->create_options($admin);
         $this->create_filter($admin);
         $this->create_activities($admin);
+        $this->create_protection($admin);
     }
 
     private function create_options($admin) {
@@ -117,5 +118,13 @@ class rollover_settings {
                                        new moodle_url('/local/rollover/activities-rules.php')
         );
         $admin->add('local_rollover', $page);
+    }
+
+    private function create_protection($admin) {
+        $protection = new admin_settingpage('local_rollover_protection',
+                                            new lang_string('settings-protection', 'local_rollover')
+        );
+
+        $admin->add('local_rollover', $protection);
     }
 }

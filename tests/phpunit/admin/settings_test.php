@@ -38,6 +38,7 @@ class local_rollover_admin_settings_test extends rollover_testcase {
             'local_rollover_options'    => 'local_rollover',
             'local_rollover_filter'     => 'local_rollover',
             'local_rollover_activities' => 'local_rollover',
+            'local_rollover_protection' => 'local_rollover',
         ];
         self::assertSame($expected, $ADMIN->tree);
     }
