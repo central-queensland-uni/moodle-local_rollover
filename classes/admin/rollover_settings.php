@@ -27,6 +27,7 @@ use admin_category;
 use admin_externalpage;
 use admin_root;
 use admin_setting_configcheckbox_with_lock;
+use admin_setting_configselect;
 use admin_settingpage;
 use lang_string;
 use moodle_url;
@@ -41,6 +42,14 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 class rollover_settings {
+    private static function get_rollover_protection_options() {
+        return ['stop', 'warn', 'ignore'];
+    }
+
+    private static function get_rollover_protection_items() {
+        return ['empty', 'hidden', 'user', 'started'];
+    }
+
     /**
      * Returns an array where the key is the option name (used in settings)
      * and the value is the language name (used in language strings).
@@ -121,10 +130,24 @@ class rollover_settings {
     }
 
     private function create_protection($admin) {
-        $protection = new admin_settingpage('local_rollover_protection',
-                                            new lang_string('settings-protection', 'local_rollover')
+        $protectionsetting = new admin_settingpage('local_rollover_protection',
+                                                   new lang_string('settings-protection', 'local_rollover')
         );
 
-        $admin->add('local_rollover', $protection);
+        $options = [];
+        foreach (self::get_rollover_protection_options() as $option) {
+            $options[$option] = new lang_string("settings-protection-option-{$option}", 'local_rollover');
+        }
+
+        foreach (self::get_rollover_protection_items() as $protection) {
+            $title = new lang_string("settings-protection-{$protection}", 'local_rollover');
+            $description = new lang_string("settings-protection-{$protection}-description", 'local_rollover');
+            $key = 'local_rollover/protection_' . $protection;
+            $protectionsetting->add(
+                new admin_setting_configselect($key, $title, $description, 'warn', $options)
+            );
+        }
+
+        $admin->add('local_rollover', $protectionsetting);
     }
 }
