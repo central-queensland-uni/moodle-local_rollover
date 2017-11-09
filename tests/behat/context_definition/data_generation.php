@@ -47,10 +47,14 @@ trait local_rollover_behat_context_definition_for_data_generation {
      * @return generator
      */
     public function generator() {
-        if (is_null($this->generator)) {
-            $this->generator = new generator();
-        }
         return $this->generator;
+    }
+
+    /**
+     * @BeforeScenario
+     */
+    public function create_generator() {
+        $this->generator = new generator();
     }
 
     /**
