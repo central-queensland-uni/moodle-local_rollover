@@ -8,7 +8,7 @@ Feature: Rollover protection
   Scenario: I don't see any warnings or errors
     Given I am a teacher                                                                          # local_rollover
     And the rollover protection is configured as follows:                                         # local_rollover
-      | Protection                                  | Option |
+      | Protection                                  | Action |
       | If rollover destination is not empty        | ignore |
       | If rollover destination is not hidden       | ignore |
       | If rollover destination contains user data  | ignore |
