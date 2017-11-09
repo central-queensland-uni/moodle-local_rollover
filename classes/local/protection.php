@@ -145,7 +145,16 @@ class protection {
     }
 
     public function check_hidden() {
-        return self::ACTION_IGNORE;
+        $action = self::get_config(self::PROTECT_NOT_HIDDEN);
+        if ($action == self::ACTION_IGNORE) {
+            return self::ACTION_IGNORE;
+        }
+
+        if (!$this->course->visible) {
+            return self::ACTION_IGNORE;
+        }
+
+        return $action;
     }
 
     public function check_user() {

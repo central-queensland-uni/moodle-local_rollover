@@ -33,7 +33,7 @@ Feature: Rollover protection
     When I go to the rollover page for the course "destination"                                   # local_rollover
     Then I should see "<See>"
     And I should see "The destination course already contains activities."
-#    And I should see "Destination course is visible"
+    And I should see "The destination course is already visible."
 #    And I should see "Destination course has user data"
 #    And I should see "Destination course has already started"
     But I should not see "<Not see>"

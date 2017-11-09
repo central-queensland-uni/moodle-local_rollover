@@ -69,4 +69,29 @@ class local_rollover_protection_test extends rollover_testcase {
         $actual = $protector->check_empty();
         self::assertSame($action, $actual);
     }
+
+    /**
+     * @dataProvider provider_for_protection_actions
+     */
+    public function test_it_always_skips_check_if_destination_course_hidden($action) {
+        protection::set_config(protection::PROTECT_NOT_HIDDEN, $action);
+        $this->course->visible = '0';
+
+        $protector = new protection($this->course);
+        $actual = $protector->check_hidden();
+
+        self::assertSame($protector::ACTION_IGNORE, $actual, "Action: {$action}");
+    }
+
+    /**
+     * @dataProvider provider_for_protection_actions
+     */
+    public function test_it_checks_if_destination_course_hidden($action) {
+        protection::set_config(protection::PROTECT_NOT_HIDDEN, $action);
+
+        $protector = new protection($this->course);
+
+        $actual = $protector->check_hidden();
+        self::assertSame($action, $actual);
+    }
 }
