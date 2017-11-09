@@ -58,6 +58,7 @@ $string['originalcourse'] = 'Original course';
 $string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
 $string['originalcourse_mycourses'] = 'My courses:';
 $string['originalcourse_pastinstances'] = 'Past instances:';
+$string['originalcourse_search'] = 'Search';
 $string['past_instances_examples'] = 'Examples of past instances';
 $string['past_instances_summary_0'] = 'no groups found';
 $string['past_instances_summary_1'] = 'only 1 group found';
