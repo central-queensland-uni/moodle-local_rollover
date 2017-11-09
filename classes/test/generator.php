@@ -26,6 +26,7 @@ namespace local_rollover\test;
 use block_manager;
 use context_course;
 use local_rollover\dml\activity_rule_db;
+use local_rollover\local\protection;
 use stdClass;
 use testing_data_generator;
 
@@ -159,5 +160,12 @@ class generator extends testing_data_generator {
         $dml->save($rule);
 
         return $rule;
+    }
+
+    public function disable_protection() {
+        protection::set_config(protection::PROTECT_HAS_STARTED, protection::ACTION_IGNORE);
+        protection::set_config(protection::PROTECT_NOT_HIDDEN, protection::ACTION_IGNORE);
+        protection::set_config(protection::PROTECT_HAS_USER_DATA, protection::ACTION_IGNORE);
+        protection::set_config(protection::PROTECT_NOT_EMPTY, protection::ACTION_IGNORE);
     }
 }

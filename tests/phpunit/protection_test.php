@@ -94,4 +94,30 @@ class local_rollover_protection_test extends rollover_testcase {
         $actual = $protector->check_hidden();
         self::assertSame($action, $actual);
     }
+
+    /**
+     * @dataProvider provider_for_protection_actions
+     */
+    public function test_it_always_skips_check_if_destination_course_has_not_started($action) {
+        protection::set_config(protection::PROTECT_HAS_STARTED, $action);
+        $this->course->startdate = time() + DAYSECS; // Starts tomorrow.
+
+        $protector = new protection($this->course);
+        $actual = $protector->check_started();
+
+        self::assertSame($protector::ACTION_IGNORE, $actual, "Action: {$action}");
+    }
+
+    /**
+     * @dataProvider provider_for_protection_actions
+     */
+    public function test_it_checks_if_destination_course_already_started($action) {
+        protection::set_config(protection::PROTECT_HAS_STARTED, $action);
+        $this->course->startdate = time() - DAYSECS; // Started yesterday.
+
+        $protector = new protection($this->course);
+
+        $actual = $protector->check_started();
+        self::assertSame($action, $actual);
+    }
 }

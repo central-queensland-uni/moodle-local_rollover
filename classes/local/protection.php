@@ -162,6 +162,15 @@ class protection {
     }
 
     public function check_started() {
-        return self::ACTION_IGNORE;
+        $action = self::get_config(self::PROTECT_HAS_STARTED);
+        if ($action == self::ACTION_IGNORE) {
+            return self::ACTION_IGNORE;
+        }
+
+        if ($this->course->startdate > time()) {
+            return self::ACTION_IGNORE;
+        }
+
+        return $action;
     }
 }

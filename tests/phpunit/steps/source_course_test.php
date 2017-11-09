@@ -177,6 +177,8 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $this->resetAfterTest(true);
         self::setAdminUser();
 
+        $this->generator()->disable_protection();
+
         $destinationcourse = $this->generator()->create_course_by_shortname('into');
         $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
 
