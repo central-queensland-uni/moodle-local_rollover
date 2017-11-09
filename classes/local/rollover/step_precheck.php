@@ -23,8 +23,8 @@
 
 namespace local_rollover\local\rollover;
 
-use backup_root_task;
-use local_rollover\form\steps\form_activities_and_resources_selection;
+use local_rollover\form\form_precheck;
+use local_rollover\local\protection;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,26 +34,17 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class step_activities_and_resources extends step {
+class step_precheck extends step {
+    public function skipped() {
+        $protector = new protection($this->controller->get_destination_course());
+        return $protector->all_ignored();
+    }
+
     public function create_form() {
-        return new form_activities_and_resources_selection($this->controller->get_backup_worker()->get_backup_tasks());
+        $protector = new protection($this->controller->get_destination_course());
+        return new form_precheck($protector->get_warnings(), $protector->get_errors());
     }
 
     public function process_form_data($data) {
-        $backupworker = $this->controller->get_backup_worker();
-        $tasks = $backupworker->get_backup_tasks();
-        foreach ($tasks as &$task) {
-            if ($task instanceof backup_root_task) {
-                continue;
-            }
-            $settings = $task->get_settings();
-            foreach ($settings as &$setting) {
-                $name = $setting->get_ui_name();
-                $value = isset($data->$name) ? $data->$name : 0;
-                if ($value != $setting->get_value()) {
-                    $setting->set_value($value);
-                }
-            }
-        }
     }
 }

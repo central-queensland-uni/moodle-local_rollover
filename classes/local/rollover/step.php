@@ -39,6 +39,13 @@ abstract class step {
         $this->controller = $controller;
     }
 
+    /**
+     * @return bool True if this step be skipped.
+     */
+    public function skipped() {
+        return false;
+    }
+
     public abstract function create_form();
 
     public abstract function process_form_data($data);

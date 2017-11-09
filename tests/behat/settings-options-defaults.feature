@@ -4,9 +4,12 @@ Feature: Adjust rollover settings
   As a site administrator
   I want to define defaults and settings for rollovers
 
+  Background:
+    Given all rollover protections are disabled                                               # local_rollover
+
 
   Scenario: I can navigate to the settings
-    Given I am an administrator                                             # local_rollover
+    Given I am an administrator                                                               # local_rollover
     When I navigate to "Courses > Rollover settings > Options defaults" in site administration
     Then I should see "Include activities and resources"
     And I should see "Include blocks"

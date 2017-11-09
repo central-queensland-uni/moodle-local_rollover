@@ -24,7 +24,7 @@
 namespace local_rollover\local\rollover;
 
 use local_rollover\admin\settings_controller;
-use local_rollover\form\form_source_course_selection;
+use local_rollover\form\steps\form_source_course_selection;
 use local_rollover\regex_validator;
 
 defined('MOODLE_INTERNAL') || die();

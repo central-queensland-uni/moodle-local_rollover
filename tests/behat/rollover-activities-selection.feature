@@ -4,6 +4,9 @@ Feature: Select source course for rollovers
   As a course coordinator
   I want an easy way to select which activities and resources to rollover
 
+  Background:
+    Given all rollover protections are disabled     # local_rollover
+
   Scenario: No activities should be selected to rollover by default
     Given I am a teacher                                                                                # local_rollover
     And I can modify the following courses:                                                             # local_rollover

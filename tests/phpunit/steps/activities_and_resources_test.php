@@ -21,8 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\form\form_activities_and_resources_selection;
-use local_rollover\form\form_options_selection;
+use local_rollover\form\steps\form_activities_and_resources_selection;
+use local_rollover\form\steps\form_options_selection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
@@ -31,8 +31,6 @@ use Symfony\Component\DomCrawler\Crawler;
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_steps_activities_and_resources_test extends rollover_testcase {
-    const ACTITIVIES_STEP_EXPECTATION = '2';
-
     public function test_it_is_used_after_options_selection_submitted() {
         $this->resetAfterTest(true);
         self::setAdminUser();
@@ -40,9 +38,10 @@ class local_rollover_steps_activities_and_resources_test extends rollover_testca
         $destinationcourse = $this->generator()->create_course_by_shortname('destination');
         $sourcecourse = $this->generator()->create_course_by_shortname('from');
 
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_ACTIVITIES_AND_RESOURCES);
         form_options_selection::mock_submit(
             [
-                rollover_parameters::PARAM_CURRENT_STEP          => 1,
+                rollover_parameters::PARAM_CURRENT_STEP          => $step,
                 rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
                 rollover_parameters::PARAM_SOURCE_COURSE_ID      => $sourcecourse->id,
                 'setting_root_activities'                        => 1,
@@ -59,9 +58,5 @@ class local_rollover_steps_activities_and_resources_test extends rollover_testca
         $formname = str_replace('\\', '_', form_activities_and_resources_selection::class);
         $actual = $crawler->filter("input[name='_qf__{$formname}']")->count();
         self::assertSame(1, $actual, 'Wrong form used.');
-
-        $selector = 'input[name="' . rollover_parameters::PARAM_CURRENT_STEP . '"]';
-        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
-        self::assertSame(self::ACTITIVIES_STEP_EXPECTATION, $actual);
     }
 }

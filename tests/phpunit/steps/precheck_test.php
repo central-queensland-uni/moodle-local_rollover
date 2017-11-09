@@ -21,32 +21,31 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_rollover\backup\backup_worker;
-use local_rollover\form\steps\form_activities_and_resources_selection;
+use local_rollover\local\protection;
+use local_rollover\local\rollover\rollover_controller;
+use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
-require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
+class local_rollover_steps_precheck_test extends rollover_testcase {
+    public function test_it_is_used_at_first() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
 
-class local_rollover_form_activities_and_resources_selection_test extends rollover_testcase {
-    public function test_it_creates() {
-        parent::setUp();
-        $this->resetAfterTest();
+        protection::set_config(protection::PROTECT_NOT_EMPTY,
+                               protection::ACTION_WARN);
 
-        $source = $this->generator()->create_course_by_shortname('source');
-        $this->generator()->create_activity('source', 'assignment', 'my test assignment');
+        $destinationcourse = $this->generator()->create_course_by_shortname('precheck_test');
+        $this->generator()->create_activity('precheck_test', 'assignment', 'An assignment');
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
 
-        $worker = backup_worker::create($source->id);
-        $tasks = $worker->get_backup_tasks();
-        $form = new form_activities_and_resources_selection($tasks);
+        $controller = new rollover_controller();
 
         ob_start();
-        $form->display();
+        $controller->index();
         $html = ob_get_clean();
 
-        self::assertContains('my test assignment', $html);
+        self::assertContains('Rollover: Pre-check', $html);
     }
 }

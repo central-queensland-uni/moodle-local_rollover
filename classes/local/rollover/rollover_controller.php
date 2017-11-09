@@ -41,6 +41,8 @@ defined('MOODLE_INTERNAL') || die();
 class rollover_controller {
     /** Run backup/restore as admin (bypass normal capability check for courses). */
     const USERID = 2;
+
+    const STEP_PRECHECK = 'precheck';
     const STEP_SELECT_SOURCE_COURSE = 'source_course';
     const STEP_SELECT_CONTENT_OPTIONS = 'content_options';
     const STEP_SELECT_ACTIVITIES_AND_RESOURCES = 'activities_and_resources';
@@ -48,6 +50,7 @@ class rollover_controller {
 
     public static function get_steps() {
         return [
+            self::STEP_PRECHECK,
             self::STEP_SELECT_SOURCE_COURSE,
             self::STEP_SELECT_CONTENT_OPTIONS,
             self::STEP_SELECT_ACTIVITIES_AND_RESOURCES,
@@ -75,7 +78,7 @@ class rollover_controller {
     public function get_backup_worker() {
         if (is_null($this->backupworker)) {
             $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
-            if (is_null($backupid)) {
+            if (empty($backupid)) {
                 $sourceid = required_param(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
                 $this->backupworker = backup_worker::create($sourceid);
             } else {
@@ -199,6 +202,11 @@ class rollover_controller {
         $step = new $class($this);
         if (!($step instanceof step)) {
             throw new moodle_exception("Class '{$class}' must extend: " . step::class);
+        }
+
+        if ($step->skipped()) {
+            $this->currentstep++;
+            return $this->get_step();
         }
 
         return $step;

@@ -28,6 +28,7 @@ use Behat\Gherkin\Node\TableNode;
 use local_rollover\admin\rollover_settings;
 use local_rollover\admin\settings_controller;
 use local_rollover\dml\activity_rule_db;
+use local_rollover\local\protection;
 use local_rollover\test\generator;
 
 require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
@@ -46,10 +47,14 @@ trait local_rollover_behat_context_definition_for_data_generation {
      * @return generator
      */
     public function generator() {
-        if (is_null($this->generator)) {
-            $this->generator = new generator();
-        }
         return $this->generator;
+    }
+
+    /**
+     * @BeforeScenario
+     */
+    public function create_generator() {
+        $this->generator = new generator();
     }
 
     /**
@@ -70,14 +75,19 @@ trait local_rollover_behat_context_definition_for_data_generation {
      * @Given /^I (can|cannot) modify the following courses: +\# local_rollover$/
      */
     public function iCanModifyTheFollowingCourses($canornot, TableNode $courses) {
-        $can = ($canornot == 'can');
         $courses = $courses->getColumn(0);
-
         foreach ($courses as $course) {
-            $this->generator()->create_course_by_shortname($course);
-            if ($can) {
-                $this->generator()->enrol_editing_teacher($this->myusername, $course);
-            }
+            $this->iCanModifyTheTheCourse($canornot, $course);
+        }
+    }
+
+    /**
+     * @Given /^I (can|cannot) modify the the course "([^"]*)" +\# local_rollover$/
+     */
+    public function iCanModifyTheTheCourse($canornot, $course) {
+        $this->generator()->create_course_by_shortname($course);
+        if ($canornot == 'can') {
+            $this->generator()->enrol_editing_teacher($this->myusername, $course);
         }
     }
 
@@ -149,5 +159,46 @@ trait local_rollover_behat_context_definition_for_data_generation {
 
             $dml->save($rule);
         }
+    }
+
+    /**
+     * @Given /^the rollover protection is configured as follows: +\# local_rollover$/
+     */
+    public function theRolloverProtectionIsConfiguredAsFollows(TableNode $table) {
+        $rows = $table->getColumnsHash();
+        foreach ($rows as $row) {
+            $option = $this->get_option_for_text($row['Protection']);
+            protection::set_config($option, $row['Action']);
+        }
+    }
+
+    private function get_option_for_text($text) {
+        switch ($text) {
+            case 'If rollover destination is not empty':
+                return protection::PROTECT_NOT_EMPTY;
+            case 'If rollover destination is not hidden':
+                return protection::PROTECT_NOT_HIDDEN;
+            case 'If rollover destination contains students':
+                return protection::PROTECT_HAS_STUDENTS;
+            case 'If rollover destination has already started':
+                return protection::PROTECT_HAS_STARTED;
+            default:
+                throw new moodle_exception("Invalid text: {$text}");
+        }
+    }
+
+    /**
+     * @Given /^the "([^"]*)" course is not empty, is visible, has a student and has already started +\# local_rollover$/
+     */
+    public function theCourseIsNotEmptyIsVisibleHasAStudentAndHasAlreadyStarted($course) {
+        $this->generator()->create_activity($course, 'assignment', 'An activity');
+        $this->generator()->enrol_student('student', $course);
+    }
+
+    /**
+     * @Given /^all rollover protections are disabled +\# local_rollover$/
+     */
+    public function allRolloverProtectionsAreDisabled() {
+        $this->generator()->disable_protection();
     }
 }

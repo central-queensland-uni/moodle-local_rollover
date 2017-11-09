@@ -21,12 +21,15 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\local\rollover;
+namespace local_rollover\form\steps;
 
-use backup_root_task;
-use local_rollover\form\steps\form_activities_and_resources_selection;
+use local_rollover\local\rollover\rollover_parameters;
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * @package     local_rollover
@@ -34,26 +37,27 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class step_activities_and_resources extends step {
-    public function create_form() {
-        return new form_activities_and_resources_selection($this->controller->get_backup_worker()->get_backup_tasks());
-    }
+abstract class form_step_base extends moodleform {
+    /**
+     * Step-specific form definition.
+     */
+    public abstract function step_definition();
 
-    public function process_form_data($data) {
-        $backupworker = $this->controller->get_backup_worker();
-        $tasks = $backupworker->get_backup_tasks();
-        foreach ($tasks as &$task) {
-            if ($task instanceof backup_root_task) {
-                continue;
-            }
-            $settings = $task->get_settings();
-            foreach ($settings as &$setting) {
-                $name = $setting->get_ui_name();
-                $value = isset($data->$name) ? $data->$name : 0;
-                if ($value != $setting->get_value()) {
-                    $setting->set_value($value);
-                }
-            }
-        }
+    /**
+     * Form definition.
+     */
+    public function definition() {
+        $mform = $this->_form;
+
+        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
+        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
+
+        $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
+        $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
+
+        $mform->addElement('hidden', rollover_parameters::PARAM_BACKUP_ID);
+        $mform->setType(rollover_parameters::PARAM_BACKUP_ID, PARAM_ALPHANUM);
+
+        $this->step_definition();
     }
 }

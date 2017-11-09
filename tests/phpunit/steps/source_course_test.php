@@ -22,7 +22,7 @@
  */
 
 use local_rollover\admin\settings_controller;
-use local_rollover\form\form_source_course_selection;
+use local_rollover\form\steps\form_source_course_selection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
 use local_rollover\local\rollover\step_source_course;
@@ -32,6 +32,106 @@ use Symfony\Component\DomCrawler\Crawler;
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_steps_source_course_test extends rollover_testcase {
+    public function test_it_shows_source_selection() {
+        global $COURSE;
+
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+        $COURSE = $this->generator()->create_course();
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => 1,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
+
+        $controller = new rollover_controller();
+
+        ob_start();
+        $controller->index();
+        $html = ob_get_clean();
+
+        self::assertContains('Rollover: Select source course', $html);
+    }
+
+    public function test_it_creates_a_form_with_the_user_courses() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('destination');
+        $modifiable = $this->generator()->create_course_by_shortname('can-modify');
+        $this->generator()->create_course_by_shortname('cannot-modify');
+
+        $this->generator()->enrol_editing_teacher('someone', 'destination');
+        $this->generator()->enrol_editing_teacher('someone', 'can-modify');
+        $this->generator()->enrol_nonediting_teacher('someone', 'cannot-modify');
+
+        self::setUser($user);
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
+
+        $controller = new rollover_controller();
+        $form = $controller->get_step()->create_form();
+
+        $courses = $form->get_my_courses();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $modifiable->id => [
+                'id'        => $modifiable->id,
+                'shortname' => 'can-modify',
+                'fullname'  => $modifiable->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
+    }
+
+    public function test_it_creates_a_form_with_past_instances() {
+        $this->resetAfterTest();
+
+        $user = $this->generator()->create_user_by_username('someone');
+
+        $destination = $this->generator()->create_course_by_shortname('test_destination');
+        $previous = $this->generator()->create_course_by_shortname('test_a');
+        $this->generator()->create_course_by_shortname('course_b');
+
+        $this->generator()->enrol_editing_teacher('someone', 'test_destination');
+
+        self::setUser($user);
+        set_config(settings_controller::SETTING_PAST_INSTANCES_REGEX,
+                   '/^([^_]+)_.*$/',
+                   'local_rollover');
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
+        $controller = new rollover_controller();
+        $form = $controller->get_step()->create_form();
+
+        $courses = $form->get_past_instances();
+        foreach ($courses as &$course) {
+            $course = (array)$course;
+        }
+
+        $expected = [
+            $previous->id => [
+                'id'        => $previous->id,
+                'shortname' => $previous->shortname,
+                'fullname'  => $previous->fullname,
+            ],
+        ];
+        self::assertSame($expected, $courses);
+    }
+
     public function test_it_is_used_when_not_submitted() {
         $this->resetAfterTest(true);
         self::setAdminUser();
@@ -39,7 +139,12 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $destinationcourse = $this->generator()->create_course_by_shortname('into');
         $option1 = $this->generator()->create_course(['shortname' => 'short-a', 'fullname' => 'Course A'])->id;
         $option2 = $this->generator()->create_course(['shortname' => 'short-b', 'fullname' => 'Course B'])->id;
-        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        $_GET = [
+            rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
+            rollover_parameters::PARAM_CURRENT_STEP          => $step,
+        ];
 
         $controller = new rollover_controller();
 
@@ -52,14 +157,6 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $formname = str_replace('\\', '_', form_source_course_selection::class);
         $actual = $crawler->filter("input[name='_qf__{$formname}']")->count();
         self::assertSame(1, $actual, 'Wrong form used.');
-
-        $selector1 = 'input[name="' . rollover_parameters::PARAM_DESTINATION_COURSE_ID . '"]';
-        $actual = $crawler->filter($selector1)->getNode(0)->getAttribute('value');
-        self::assertSame((string)$destinationcourse->id, $actual, 'Must provide destination course id.');
-
-        $selector = 'input[name="' . rollover_parameters::PARAM_CURRENT_STEP . '"]';
-        $actual = $crawler->filter($selector)->getNode(0)->getAttribute('value');
-        self::assertSame('0', $actual, 'It is the first step.');
 
         $actual = $crawler->filter('select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"]')->count();
         self::assertSame(1, $actual, 'Missing source course field.');
@@ -74,6 +171,28 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $selector = 'select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"] option[value="' . $option2 . '"]';
         $actual = $crawler->filter($selector)->text();
         self::assertContains('short-b', $actual, 'Shortname for course 2 not found.');
+    }
+
+    public function test_it_is_used_directly_if_no_warnings() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+
+        $this->generator()->disable_protection();
+
+        $destinationcourse = $this->generator()->create_course_by_shortname('into');
+        $_GET[rollover_parameters::PARAM_DESTINATION_COURSE_ID] = $destinationcourse->id;
+
+        $controller = new rollover_controller();
+
+        ob_start();
+        $controller->index();
+        $html = ob_get_clean();
+
+        $crawler = new Crawler($html);
+
+        $formname = str_replace('\\', '_', form_source_course_selection::class);
+        $actual = $crawler->filter("input[name='_qf__{$formname}']")->count();
+        self::assertSame(1, $actual, 'Wrong form used.');
     }
 
     public function test_it_gets_past_instances() {

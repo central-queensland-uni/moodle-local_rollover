@@ -23,7 +23,7 @@
 
 namespace local_rollover\local\rollover;
 
-use local_rollover\form\form_options_selection;
+use local_rollover\form\steps\form_options_selection;
 
 defined('MOODLE_INTERNAL') || die();
 

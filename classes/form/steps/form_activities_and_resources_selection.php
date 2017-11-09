@@ -21,7 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\form;
+namespace local_rollover\form\steps;
 
 use backup_root_task;
 use backup_setting;
@@ -29,13 +29,8 @@ use backup_task;
 use base_task;
 use html_writer;
 use local_rollover\backup\activities_and_resources_rules_applier;
-use local_rollover\local\rollover\rollover_parameters;
-use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->libdir . '/formslib.php');
 
 /**
  * @package     local_rollover
@@ -43,7 +38,7 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_activities_and_resources_selection extends moodleform {
+class form_activities_and_resources_selection extends form_step_base {
     /** @var backup_task[] */
     private $tasks;
 
@@ -67,19 +62,10 @@ class form_activities_and_resources_selection extends moodleform {
     }
 
     /**
-     * Form definition.
+     * Step-specific form definition.
      */
-    public function definition() {
+    public function step_definition() {
         $mform = $this->_form;
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
-        $mform->setType(rollover_parameters::PARAM_CURRENT_STEP, PARAM_INT);
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
-        $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
-
-        $mform->addElement('hidden', rollover_parameters::PARAM_BACKUP_ID);
-        $mform->setType(rollover_parameters::PARAM_BACKUP_ID, PARAM_ALPHANUM);
 
         $mform->addElement('header', 'coursesettings', get_string('includeactivities', 'backup'));
 

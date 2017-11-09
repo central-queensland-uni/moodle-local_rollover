@@ -23,6 +23,7 @@
 
 namespace local_rollover\form;
 
+use html_writer;
 use local_rollover\local\rollover\rollover_parameters;
 use moodleform;
 
@@ -37,46 +38,17 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_source_course_selection extends moodleform {
+class form_precheck extends moodleform {
     /** @var string[] */
-    private $mycourses;
-
-    public function get_my_courses() {
-        return $this->mycourses;
-    }
+    private $warnings;
 
     /** @var string[] */
-    private $pastinstances;
+    private $errors;
 
-    public function get_past_instances() {
-        return $this->pastinstances;
-    }
-
-    /**
-     * @param string[] $pastinstances Array of "Past instances" to display.
-     * @param string[] $mycourses     Array of "My courses" to display.
-     */
-    public function __construct($pastinstances = [], $mycourses = []) {
-        $this->mycourses = $mycourses;
-        $this->pastinstances = $pastinstances;
+    public function __construct($warnings, $errors) {
+        $this->warnings = $warnings;
+        $this->errors = $errors;
         parent::__construct();
-    }
-
-    private function prepare_options() {
-        $pastinstances = [];
-        foreach ($this->pastinstances as $id => $course) {
-            $pastinstances[$id] = "{$course->shortname}: {$course->fullname}";
-        }
-
-        $mycourses = [];
-        foreach ($this->mycourses as $id => $course) {
-            $mycourses[$id] = "{$course->shortname}: {$course->fullname}";
-        }
-
-        return [
-            get_string('originalcourse_pastinstances', 'local_rollover') => $pastinstances,
-            get_string('originalcourse_mycourses', 'local_rollover')     => $mycourses,
-        ];
     }
 
     /**
@@ -91,15 +63,23 @@ class form_source_course_selection extends moodleform {
         $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
-        $mform->addElement('selectgroups',
-                           rollover_parameters::PARAM_SOURCE_COURSE_ID,
-                           get_string('originalcourse', 'local_rollover'),
-                           $this->prepare_options(),
-                           ['id' => 'local_rollover-your_units', 'size' => 10]);
-        $mform->setType(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
-        $mform->addHelpButton(rollover_parameters::PARAM_SOURCE_COURSE_ID, 'originalcourse', 'local_rollover');
+        foreach ($this->warnings as $warning) {
+            $mform->addElement('static',
+                               "precheck_{$warning}",
+                               html_writer::tag('strong', get_string('warning')),
+                               get_string("precheck_{$warning}", 'local_rollover'));
+        }
 
-        $this->add_action_buttons(false, get_string('next'));
+        foreach ($this->errors as $errors) {
+            $mform->addElement('static',
+                               "precheck_{$errors}",
+                               html_writer::tag('strong', get_string('error')),
+                               get_string("precheck_{$errors}", 'local_rollover'));
+        }
+
+        if (count($this->errors) == 0) {
+            $this->add_action_buttons(false, get_string('continue'));
+        }
     }
 
     /**
