@@ -1,3 +1,7 @@
+#local_rollover-your_units {
+    max-width: 100%;
+}
+
 .local_rollover_samples_entries li {
     font-weight: bold;
     list-style: none;

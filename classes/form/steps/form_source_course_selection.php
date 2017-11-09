@@ -53,6 +53,9 @@ class form_source_course_selection extends form_step_base {
      * @param string[] $mycourses     Array of "My courses" to display.
      */
     public function __construct($pastinstances = [], $mycourses = []) {
+        global $PAGE;
+        $PAGE->requires->js_amd_inline('require(["local_rollover/source-course-search"]);');
+
         $this->mycourses = $mycourses;
         $this->pastinstances = $pastinstances;
         parent::__construct();
@@ -88,6 +91,11 @@ class form_source_course_selection extends form_step_base {
                            ['id' => 'local_rollover-your_units', 'size' => 10]);
         $mform->setType(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
         $mform->addHelpButton(rollover_parameters::PARAM_SOURCE_COURSE_ID, 'originalcourse', 'local_rollover');
+
+        $mform->addElement('text',
+                           'search',
+                           get_string('originalcourse_search', 'local_rollover'));
+        $mform->setType('search', PARAM_TEXT);
 
         $this->add_action_buttons(false, get_string('next'));
     }
