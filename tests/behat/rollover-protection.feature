@@ -14,7 +14,7 @@ Feature: Rollover protection
       | If rollover destination contains students   | ignore |
       | If rollover destination has already started | ignore |
     And I can modify the the course "destination"                                                 # local_rollover
-    And the "destination" course is not empty, is visible, has user data and has already started  # local_rollover
+    And the "destination" course is not empty, is visible, has a student and has already started  # local_rollover
     When I go to the rollover page for the course "destination"                                   # local_rollover
     Then I should not see "Warning"
     And I should not see "Error"
