@@ -27,9 +27,12 @@ use admin_category;
 use admin_externalpage;
 use admin_root;
 use admin_setting_configcheckbox_with_lock;
+use admin_setting_configduration;
 use admin_setting_configselect;
+use admin_setting_configtext;
 use admin_settingpage;
 use lang_string;
+use local_rollover\local\backup_history;
 use local_rollover\local\protection;
 use moodle_url;
 
@@ -87,6 +90,7 @@ class rollover_settings {
         $this->create_filter($admin);
         $this->create_activities($admin);
         $this->create_protection($admin);
+        $this->create_backup_history($admin);
     }
 
     private function create_options($admin) {
@@ -144,5 +148,27 @@ class rollover_settings {
         }
 
         $admin->add('local_rollover', $protectionsetting);
+    }
+
+    private function create_backup_history($admin) {
+        $backupsettings = new admin_settingpage('local_rollover_backup_history',
+                                                new lang_string('settings-backup-history', 'local_rollover')
+        );
+
+        $backupsettings->add(new admin_setting_configtext(
+                                 'local_rollover/backup_location',
+                                 new lang_string('settings-backup-location', 'local_rollover'),
+                                 new lang_string('settings-backup-location-description', 'local_rollover'),
+                                 backup_history::get_default_location()
+                             ));
+
+        $backupsettings->add(new admin_setting_configduration(
+                                 'local_rollover/backup_duration',
+                                 new lang_string('settings-backup-duration', 'local_rollover'),
+                                 new lang_string('settings-backup-duration-description', 'local_rollover'),
+                                 backup_history::get_default_duration()
+                             ));
+
+        $admin->add('local_rollover', $backupsettings);
     }
 }
