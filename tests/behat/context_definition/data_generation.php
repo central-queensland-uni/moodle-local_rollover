@@ -174,8 +174,8 @@ trait local_rollover_behat_context_definition_for_data_generation {
                 return protection::PROTECT_NOT_EMPTY;
             case 'If rollover destination is not hidden':
                 return protection::PROTECT_NOT_HIDDEN;
-            case 'If rollover destination contains user data':
-                return protection::PROTECT_HAS_USER_DATA;
+            case 'If rollover destination contains students':
+                return protection::PROTECT_HAS_STUDENTS;
             case 'If rollover destination has already started':
                 return protection::PROTECT_HAS_STARTED;
             default:
@@ -184,10 +184,11 @@ trait local_rollover_behat_context_definition_for_data_generation {
     }
 
     /**
-     * @Given /^the "([^"]*)" course is not empty, is visible, has user data and has already started +\# local_rollover$/
+     * @Given /^the "([^"]*)" course is not empty, is visible, has a student and has already started +\# local_rollover$/
      */
-    public function theCourseIsNotEmptyIsVisibleHasUserDataAndHasAlreadyStarted($course) {
+    public function theCourseIsNotEmptyIsVisibleHasAStudentAndHasAlreadyStarted($course) {
         $this->generator()->create_activity($course, 'assignment', 'An activity');
+        $this->generator()->enrol_student('student', $course);
     }
 
     /**

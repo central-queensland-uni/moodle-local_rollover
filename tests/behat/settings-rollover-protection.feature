@@ -10,5 +10,5 @@ Feature: Enable rollover protection
     Then I should see "Rollover protection"
     And I should see "If rollover destination is not empty"
     And I should see "If rollover destination is not hidden"
-    And I should see "If rollover destination contains user data"
+    And I should see "If rollover destination contains students"
     And I should see "If rollover destination has already started"

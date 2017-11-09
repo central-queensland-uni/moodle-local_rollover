@@ -23,6 +23,7 @@
 
 namespace local_rollover\local;
 
+use context_course;
 use local_rollover\admin\rollover_settings;
 use moodle_exception;
 use stdClass;
@@ -40,7 +41,7 @@ class protection {
 
     const PROTECT_NOT_HIDDEN = 'hidden';
 
-    const PROTECT_HAS_USER_DATA = 'user';
+    const PROTECT_HAS_STUDENTS = 'students';
 
     const PROTECT_HAS_STARTED = 'started';
 
@@ -58,7 +59,7 @@ class protection {
         return [
             self::PROTECT_NOT_EMPTY,
             self::PROTECT_NOT_HIDDEN,
-            self::PROTECT_HAS_USER_DATA,
+            self::PROTECT_HAS_STUDENTS,
             self::PROTECT_HAS_STARTED,
         ];
     }
@@ -157,7 +158,24 @@ class protection {
         return $action;
     }
 
-    public function check_user() {
+    public function check_students() {
+        $action = self::get_config(self::PROTECT_HAS_STUDENTS);
+        if ($action == self::ACTION_IGNORE) {
+            return self::ACTION_IGNORE;
+        }
+
+        $coursecontext = context_course::instance($this->course->id);
+        $users = get_enrolled_users($coursecontext);
+        foreach ($users as $user) {
+            $roles = get_user_roles($coursecontext, $user->id);
+            foreach ($roles as $role) {
+                if ($role->shortname == 'student') {
+                    return $action;
+                }
+            }
+        }
+
+        // No students found.
         return self::ACTION_IGNORE;
     }
 

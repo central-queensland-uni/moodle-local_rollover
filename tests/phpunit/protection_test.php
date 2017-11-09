@@ -98,6 +98,32 @@ class local_rollover_protection_test extends rollover_testcase {
     /**
      * @dataProvider provider_for_protection_actions
      */
+    public function test_it_always_skips_check_if_destination_course_has_no_students($action) {
+        protection::set_config(protection::PROTECT_HAS_STUDENTS, $action);
+        $this->generator()->enrol_nonediting_teacher('tutor', $this->course->shortname);
+
+        $protector = new protection($this->course);
+        $actual = $protector->check_students();
+
+        self::assertSame($protector::ACTION_IGNORE, $actual, "Action: {$action}");
+    }
+
+    /**
+     * @dataProvider provider_for_protection_actions
+     */
+    public function test_it_checks_if_destination_course_has_students($action) {
+        protection::set_config(protection::PROTECT_HAS_STUDENTS, $action);
+        $this->generator()->enrol_student('john', $this->course->shortname);
+
+        $protector = new protection($this->course);
+
+        $actual = $protector->check_students();
+        self::assertSame($action, $actual);
+    }
+
+    /**
+     * @dataProvider provider_for_protection_actions
+     */
     public function test_it_always_skips_check_if_destination_course_has_not_started($action) {
         protection::set_config(protection::PROTECT_HAS_STARTED, $action);
         $this->course->startdate = time() + DAYSECS; // Starts tomorrow.

@@ -165,7 +165,7 @@ class generator extends testing_data_generator {
     public function disable_protection() {
         protection::set_config(protection::PROTECT_HAS_STARTED, protection::ACTION_IGNORE);
         protection::set_config(protection::PROTECT_NOT_HIDDEN, protection::ACTION_IGNORE);
-        protection::set_config(protection::PROTECT_HAS_USER_DATA, protection::ACTION_IGNORE);
+        protection::set_config(protection::PROTECT_HAS_STUDENTS, protection::ACTION_IGNORE);
         protection::set_config(protection::PROTECT_NOT_EMPTY, protection::ACTION_IGNORE);
     }
 }
