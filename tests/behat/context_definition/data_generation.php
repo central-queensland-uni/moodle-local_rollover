@@ -189,4 +189,11 @@ trait local_rollover_behat_context_definition_for_data_generation {
     public function theCourseIsNotEmptyIsVisibleHasUserDataAndHasAlreadyStarted($course) {
         $this->generator()->create_activity($course, 'assignment', 'An activity');
     }
+
+    /**
+     * @Given /^all rollover protections are disabled +\# local_rollover$/
+     */
+    public function allRolloverProtectionsAreDisabled() {
+        $this->generator()->disable_protection();
+    }
 }

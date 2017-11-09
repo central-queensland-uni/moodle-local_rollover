@@ -4,6 +4,9 @@ Feature: Select source course for rollovers
   As a course coordinator
   I want an easy way to select which course to rollover from
 
+  Background:
+    Given all rollover protections are disabled     # local_rollover
+
 
   Scenario: Display a list courses that I can modify
     Given I am a teacher                                            # local_rollover
