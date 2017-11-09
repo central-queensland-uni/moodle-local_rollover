@@ -41,7 +41,8 @@ class step_precheck extends step {
     }
 
     public function create_form() {
-        return new form_precheck();
+        $protector = new protection($this->controller->get_destination_course());
+        return new form_precheck($protector->get_warnings(), $protector->get_errors());
     }
 
     public function process_form_data($data) {

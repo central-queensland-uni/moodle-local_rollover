@@ -40,6 +40,7 @@ class local_rollover_protection_test extends rollover_testcase {
         return [
             [protection::ACTION_IGNORE],
             [protection::ACTION_WARN],
+            [protection::ACTION_STOP],
         ];
     }
 

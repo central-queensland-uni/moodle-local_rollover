@@ -26,6 +26,7 @@
 
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Element\NodeElement;
+use Behat\Mink\Exception\ElementNotFoundException;
 use Behat\Mink\Exception\ExpectationException;
 
 require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
@@ -111,6 +112,24 @@ trait local_rollover_behat_context_definition_for_assertions {
         $element = $this->find_field($name);
         $ischecked = $element->isChecked();
         return $ischecked;
+    }
+
+    /**
+     * @Given /^I should (see|not see) the button "([^"]*)"                                             \# local_rollover$/
+     */
+    public function iShouldTheButton($seeornot, $button) {
+        $found = null;
+        try {
+            $found = $this->find_button($button);
+        } catch (ElementNotFoundException $e) {
+        }
+
+        $seeornot = ($seeornot == 'see');
+        $found = !is_null($found);
+        if ($seeornot != $found) {
+            $found = $found ? 'found' : 'not found';
+            throw new ExpectationException("Button '{$button}' {$found}.", $this->getSession());
+        }
     }
 
     private function is_not_modifiable_activity_selected($name) {

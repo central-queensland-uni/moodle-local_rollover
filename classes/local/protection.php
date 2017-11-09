@@ -51,15 +51,15 @@ class protection {
     const ACTION_IGNORE = 'ignore';
 
     public static function get_actions() {
-        return [protection::ACTION_STOP, rollover_settings::DEFAULT_PROTECTION_LEVEL, protection::ACTION_IGNORE];
+        return [self::ACTION_STOP, rollover_settings::DEFAULT_PROTECTION_LEVEL, self::ACTION_IGNORE];
     }
 
     public static function get_protections() {
         return [
-            protection::PROTECT_NOT_EMPTY,
-            protection::PROTECT_NOT_HIDDEN,
-            protection::PROTECT_HAS_USER_DATA,
-            protection::PROTECT_HAS_STARTED,
+            self::PROTECT_NOT_EMPTY,
+            self::PROTECT_NOT_HIDDEN,
+            self::PROTECT_HAS_USER_DATA,
+            self::PROTECT_HAS_STARTED,
         ];
     }
 
@@ -68,7 +68,7 @@ class protection {
     }
 
     public static function get_config($protection) {
-        $key = protection::get_config_key($protection);
+        $key = self::get_config_key($protection);
         $value = get_config('local_rollover', $key);
         if ($value === false) {
             $value = rollover_settings::DEFAULT_PROTECTION_LEVEL;
@@ -77,7 +77,7 @@ class protection {
     }
 
     public static function set_config($protection, $value) {
-        $key = protection::get_config_key($protection);
+        $key = self::get_config_key($protection);
         set_config($key, $value, 'local_rollover');
     }
 
@@ -101,6 +101,24 @@ class protection {
         }
     }
 
+    public function get_warnings() {
+        return $this->find_actions(self::ACTION_WARN);
+    }
+
+    public function get_errors() {
+        return $this->find_actions(self::ACTION_STOP);
+    }
+
+    public function find_actions($needle) {
+        $actions = [];
+        foreach ($this->actions as $protection => $action) {
+            if ($action == $needle) {
+                $actions[] = $protection;
+            }
+        }
+        return $actions;
+    }
+
     public function all_ignored() {
         foreach ($this->actions as $action) {
             if ($action != self::ACTION_IGNORE) {
@@ -112,29 +130,29 @@ class protection {
     }
 
     public function check_empty() {
-        $action = protection::get_config(protection::PROTECT_NOT_EMPTY);
-        if ($action == protection::ACTION_IGNORE) {
-            return protection::ACTION_IGNORE;
+        $action = self::get_config(self::PROTECT_NOT_EMPTY);
+        if ($action == self::ACTION_IGNORE) {
+            return self::ACTION_IGNORE;
         }
 
         $info = get_fast_modinfo($this->course, -1);
         $instances = $info->get_instances();
         if (count($instances) == 0) {
-            return protection::ACTION_IGNORE;
+            return self::ACTION_IGNORE;
         }
 
         return $action;
     }
 
     public function check_hidden() {
-        return true;
+        return self::ACTION_IGNORE;
     }
 
     public function check_user() {
-        return true;
+        return self::ACTION_IGNORE;
     }
 
     public function check_started() {
-        return true;
+        return self::ACTION_IGNORE;
     }
 }

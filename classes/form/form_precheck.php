@@ -23,6 +23,7 @@
 
 namespace local_rollover\form;
 
+use html_writer;
 use local_rollover\local\rollover\rollover_parameters;
 use moodleform;
 
@@ -38,6 +39,18 @@ require_once($CFG->libdir . '/formslib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class form_precheck extends moodleform {
+    /** @var string[] */
+    private $warnings;
+
+    /** @var string[] */
+    private $errors;
+
+    public function __construct($warnings, $errors) {
+        $this->warnings = $warnings;
+        $this->errors = $errors;
+        parent::__construct();
+    }
+
     /**
      * Form definition.
      */
@@ -50,7 +63,23 @@ class form_precheck extends moodleform {
         $mform->addElement('hidden', rollover_parameters::PARAM_DESTINATION_COURSE_ID);
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
-        $this->add_action_buttons(false, get_string('continue'));
+        foreach ($this->warnings as $warning) {
+            $mform->addElement('static',
+                               "precheck_{$warning}",
+                               html_writer::tag('strong', get_string('warning')),
+                               get_string("precheck_{$warning}", 'local_rollover'));
+        }
+
+        foreach ($this->errors as $errors) {
+            $mform->addElement('static',
+                               "precheck_{$errors}",
+                               html_writer::tag('strong', get_string('error')),
+                               get_string("precheck_{$errors}", 'local_rollover'));
+        }
+
+        if (count($this->errors) == 0) {
+            $this->add_action_buttons(false, get_string('continue'));
+        }
     }
 
     /**

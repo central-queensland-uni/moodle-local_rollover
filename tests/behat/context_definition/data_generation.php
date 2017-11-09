@@ -164,7 +164,7 @@ trait local_rollover_behat_context_definition_for_data_generation {
         $rows = $table->getColumnsHash();
         foreach ($rows as $row) {
             $option = $this->get_option_for_text($row['Protection']);
-            protection::set_config($option, $row['Option']);
+            protection::set_config($option, $row['Action']);
         }
     }
 
@@ -187,5 +187,6 @@ trait local_rollover_behat_context_definition_for_data_generation {
      * @Given /^the "([^"]*)" course is not empty, is visible, has user data and has already started +\# local_rollover$/
      */
     public function theCourseIsNotEmptyIsVisibleHasUserDataAndHasAlreadyStarted($course) {
+        $this->generator()->create_activity($course, 'assignment', 'An activity');
     }
 }
