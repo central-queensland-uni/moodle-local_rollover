@@ -57,4 +57,13 @@ class backup_history {
 
         return $location;
     }
+
+    public static function get_setting_duration() {
+        $duration = get_config('local_rollover', self::SETTING_BACKUP_DURATION);
+        if (empty($duration)) {
+            $duration = self::get_default_duration();
+        }
+
+        return $duration;
+    }
 }

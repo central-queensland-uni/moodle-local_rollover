@@ -37,6 +37,7 @@ $string['add_rule_field_regex'] = 'Regular Expression';
 $string['add_rule_field_regex_help'] = 'Regular Expression to match the name of the activity. For safety reasons, the regex must be a full match.';
 $string['add_new_rule'] = 'Add new rule';
 $string['add_rule'] = 'Add rule';
+$string['backup_history_cleaner_task'] = 'Rollover backup history cleaner';
 $string['change_rule'] = 'Change rule';
 $string['delete-rule-confirmation'] = 'Are you sure you want to remove the following rule?';
 $string['no_rules'] = 'No rules found.';
