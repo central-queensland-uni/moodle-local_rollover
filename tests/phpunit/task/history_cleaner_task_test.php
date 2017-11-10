@@ -26,7 +26,7 @@ use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_rollover_task_history_cleaner_test extends rollover_testcase {
+class local_rollover_task_history_cleaner_task_test extends rollover_testcase {
     public function test_it_has_a_name() {
         $task = new backup_history_cleaner_task();
         $name = $task->get_name();
