@@ -56,28 +56,34 @@ class local_rollover_task_history_cleaner_task_test extends rollover_testcase {
     public function test_it_cleans_old_files() {
         $this->prepare_setting_and_file(DAYSECS, 2 * DAYSECS);
 
-        $task = new backup_history_cleaner_task();
-        $task->execute();
+        $output = $this->execute_task();
 
         self::assertFileNotExists($this->filename);
+        self::assertContains('Deleted', $output);
     }
 
     public function test_it_does_not_clean_newer_files() {
         $this->prepare_setting_and_file(DAYSECS, 2 * HOURMINS);
 
-        $task = new backup_history_cleaner_task();
-        $task->execute();
+        $output = $this->execute_task();
 
         self::assertFileExists($this->filename);
+        self::assertContains('Kept', $output);
     }
 
     public function test_it_does_not_clean_if_date_format_not_valid() {
         $this->prepare_setting_and_file(DAYSECS, null, null, 'something.mbz');
 
-        $task = new backup_history_cleaner_task();
-        $task->execute();
+        $output = $this->execute_task();
 
         self::assertFileExists($this->filename);
+        self::assertContains('Unrecognized', $output);
+    }
+
+    public function test_it_outputs_the_date_to_delete_from_and_delete_count() {
+        $output = $this->execute_task();
+        self::assertContains('before', $output);
+        self::assertContains('Files deleted: 0', $output);
     }
 
     public function test_it_is_listed_in_the_tasks_file() {
@@ -120,5 +126,15 @@ class local_rollover_task_history_cleaner_task_test extends rollover_testcase {
 
         $actual = backup_history_cleaner_task::get_filename_timestamp($filename);
         self::assertSame($expected, $actual, "Filename: {$filename}");
+    }
+
+    private function execute_task() {
+        $task = new backup_history_cleaner_task();
+
+        ob_start();
+        $task->execute();
+        $output = ob_get_clean();
+
+        return $output;
     }
 }

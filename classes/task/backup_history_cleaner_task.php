@@ -59,19 +59,35 @@ class backup_history_cleaner_task extends scheduled_task {
      * Throw exceptions on errors (the job will be retried).
      */
     public function execute() {
-        $deletebefore = time() - backup_history::get_setting_duration();
+        $now = time();
+        $duration = backup_history::get_setting_duration();
+        $deletebefore = $now - $duration;
+        $deletedcount = 0;
+        echo "Deleting rollover history files before: " . date('Y-m-d H:i:s', $deletebefore) . "\n";
+        echo "Current timestamp: {$now} - History Duration: {$duration}\n";
 
         $path = backup_history::get_default_location();
-        $files = scandir($path);
+        $files = is_dir($path) ? scandir($path) : [];
         foreach ($files as $file) {
+            if (($file == '.') || ($file == '..')) {
+                continue; // Do not log it.
+            }
+
             $filetime = self::get_filename_timestamp($file);
             if (is_null($filetime)) {
+                printf("%15s: %s (%d)\n", "Unrecognized", $file, $filetime);
                 continue;
             }
 
             if ($filetime < $deletebefore) {
+                printf("%15s: %s (%d)\n", "Deleted", $file, $filetime);
                 unlink("{$path}/{$file}");
+                $deletedcount++;
+            } else {
+                printf("%15s: %s (%d)\n", "Kept", $file, $filetime);
             }
         }
+
+        echo "Files deleted: {$deletedcount}\n";
     }
 }
