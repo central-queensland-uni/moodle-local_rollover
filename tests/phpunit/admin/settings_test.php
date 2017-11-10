@@ -34,11 +34,12 @@ class local_rollover_admin_settings_test extends rollover_testcase {
         require(__DIR__ . '/../../../settings.php');
 
         $expected = [
-            'local_rollover'            => 'courses',
-            'local_rollover_options'    => 'local_rollover',
-            'local_rollover_filter'     => 'local_rollover',
-            'local_rollover_activities' => 'local_rollover',
-            'local_rollover_protection' => 'local_rollover',
+            'local_rollover'                => 'courses',
+            'local_rollover_options'        => 'local_rollover',
+            'local_rollover_filter'         => 'local_rollover',
+            'local_rollover_activities'     => 'local_rollover',
+            'local_rollover_protection'     => 'local_rollover',
+            'local_rollover_backup_history' => 'local_rollover',
         ];
         self::assertSame($expected, $ADMIN->tree);
     }

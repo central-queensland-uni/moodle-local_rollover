@@ -168,4 +168,15 @@ trait local_rollover_behat_context_definition_for_navigation {
         $this->iSelectInField('source', 'Original course');
         $this->execute('behat_forms::press_button', ['Next']);
     }
+
+    /**
+     * @Given /^I set the duration field "([^"]*)" to (\d+) (second|minute|hour|day|week)s? +\# local_rollover$/
+     */
+    public function iSetTheDurationFieldToDay($field, $number, $unit) {
+        $idvalue = $this->find_field($field)->getAttribute('id');
+        $idunit = substr($idvalue, 0, -1) . 'u';
+
+        $this->execute('behat_forms::set_field_value', [$field, $number]);
+        $this->iSelectInField("{$unit}s", $idunit);
+    }
 }
