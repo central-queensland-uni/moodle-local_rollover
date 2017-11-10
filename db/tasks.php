@@ -30,8 +30,8 @@ $tasks = [
     [
         'classname' => backup_history_cleaner_task::class,
         'blocking'  => 0,
-        'minute'    => 57,
-        'hour'      => 3,
+        'minute'    => 'R',
+        'hour'      => 'R',
         'day'       => '*',
         'dayofweek' => '*',
         'month'     => '*',
