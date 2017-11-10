@@ -27,8 +27,10 @@ use local_rollover\test\rollover_testcase;
 defined('MOODLE_INTERNAL') || die();
 
 class local_rollover_backup_backup_worker_test extends rollover_testcase {
+    /**
+     * There are many assertions to avoid running the backup process several times during tests.
+     */
     public function test_backup() {
-        global $DB;
         self::resetAfterTest(true);
 
         $sourcecourse = $this->generator()->create_course_by_shortname('backup-source-course');
@@ -37,10 +39,19 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         $backupworker = backup_worker::create($sourcecourse->id);
         $backupworker->backup();
 
-        $dbfiles = $DB->count_records('files', ['filename' => $backupworker->get_db_filename()]);
+        $this->assert_backup_leaves_no_files_in_moodle($backupworker->get_db_filename());
+        $this->assert_backup_xml_is_correct($backupworker->get_path());
+    }
+
+    private function assert_backup_leaves_no_files_in_moodle($filename) {
+        global $DB;
+        $dbfiles = $DB->count_records('files', ['filename' => $filename]);
         self::assertSame(0, $dbfiles, 'It should not leave files in Moodle.');
-        self::assertFileExists($backupworker->get_path());
-        $xml = file_get_contents($backupworker->get_path() . '/moodle_backup.xml');
+    }
+
+    private function assert_backup_xml_is_correct($path) {
+        self::assertFileExists($path);
+        $xml = file_get_contents($path . '/moodle_backup.xml');
         self::assertContains('<original_course_shortname>backup-source-course</original_course_shortname>', $xml);
         self::assertContains('<title>Backup Assignment</title>', $xml);
     }
