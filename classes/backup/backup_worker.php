@@ -26,6 +26,7 @@ namespace local_rollover\backup;
 use backup;
 use backup_controller;
 use backup_root_task;
+use local_rollover\local\backup_history;
 use local_rollover\local\rollover\rollover_controller;
 use stored_file;
 
@@ -43,6 +44,10 @@ require_once($CFG->dirroot . '/backup/moodle2/backup_plan_builder.class.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_worker {
+    /**
+     * @param $sourcecourseid
+     * @return backup_worker
+     */
     public static function create($sourcecourseid) {
         $backupcontroller = new backup_controller(backup::TYPE_1COURSE,
                                                   $sourcecourseid,
@@ -58,8 +63,18 @@ class backup_worker {
         return new static($backupcontroller);
     }
 
+    public static function prepare_shortname_for_filename($shortname) {
+        $shortname = strtolower($shortname);
+        $shortname = preg_replace('/[^a-z\d]+/', '-', $shortname);
+        $shortname = trim($shortname, '-');
+        return $shortname;
+    }
+
     /** @var backup_controller */
     private $backupcontroller;
+
+    /** @var string */
+    private $historyfilename;
 
     public function get_source_course_id() {
         return $this->backupcontroller->get_courseid();
@@ -74,6 +89,10 @@ class backup_worker {
         return $CFG->tempdir . '/backup/' . $this->get_backup_id();
     }
 
+    public function get_history_filename() {
+        return $this->historyfilename;
+    }
+
     public function backup() {
         $setting = $this->get_backup_root_setting_filename();
         $setting->set_value($this->get_db_filename());
@@ -83,11 +102,22 @@ class backup_worker {
         $results = $this->backupcontroller->get_results();
         $this->backupcontroller->destroy();
 
+        $this->create_backup_history($results['backup_destination']);
         $this->extract_file($results['backup_destination']);
     }
 
     protected function __construct(backup_controller $backupcontroller) {
         $this->backupcontroller = $backupcontroller;
+        $this->create_history_filename();
+    }
+
+    private function create_history_filename() {
+        $date = date('Y-m-d_H-i-s');
+
+        $course = get_course($this->backupcontroller->get_courseid());
+        $shortname = $this->prepare_shortname_for_filename($course->shortname);
+
+        $this->historyfilename = "{$date}_{$shortname}.mbz";
     }
 
     public function get_backup_root_task() {
@@ -151,5 +181,13 @@ class backup_worker {
 
     public function get_db_filename() {
         return 'local_rollover_' . $this->get_backup_id() . '.mbz';
+    }
+
+    private function create_backup_history(stored_file $file) {
+        $directory = backup_history::get_default_location();
+        mkdir($directory, 0777, true);
+
+        $location = backup_history::get_setting_location($this->historyfilename);
+        $file->copy_content_to($location);
     }
 }
