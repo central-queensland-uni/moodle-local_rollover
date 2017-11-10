@@ -19,11 +19,39 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
+
+namespace local_rollover\task;
+
+use context_course;
+use core\task\scheduled_task;
+use local_rollover\admin\rollover_settings;
+use moodle_exception;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017111000;
-$plugin->requires = 2016052300;
+/**
+ * @package     local_rollover
+ * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
+ * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class backup_history_cleaner_task extends scheduled_task {
+    /**
+     * Get a descriptive name for this task (shown to admins).
+     *
+     * @return string
+     */
+    public function get_name() {
+        return get_string('backup_history_cleaner_task', 'local_rollover');
+    }
+
+    /**
+     * Do the job.
+     * Throw exceptions on errors (the job will be retried).
+     */
+    public function execute() {
+        // TODO: Implement execute() method.
+    }
+}

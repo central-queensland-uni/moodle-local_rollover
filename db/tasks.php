@@ -22,8 +22,18 @@
  * @var stdClass $plugin
  */
 
+use local_rollover\task\backup_history_cleaner_task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017111000;
-$plugin->requires = 2016052300;
+$tasks = [
+    [
+        'classname' => backup_history_cleaner_task::class,
+        'blocking'  => 0,
+        'minute'    => 57,
+        'hour'      => 3,
+        'day'       => '*',
+        'dayofweek' => '*',
+        'month'     => '*',
+    ],
+];

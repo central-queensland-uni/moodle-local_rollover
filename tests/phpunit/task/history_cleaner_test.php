@@ -19,11 +19,40 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
+
+use local_rollover\task\backup_history_cleaner_task;
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017111000;
-$plugin->requires = 2016052300;
+class local_rollover_task_history_cleaner_test extends rollover_testcase {
+    public function test_it_has_a_name() {
+        $task = new backup_history_cleaner_task();
+        $name = $task->get_name();
+        self::assertContains('history', $name);
+    }
+
+    public function test_it_runs() {
+        $task = new backup_history_cleaner_task();
+        $task->execute();
+        // No exception should be thrown.
+    }
+
+    public function test_it_is_listed_in_the_tasks_file() {
+        global $CFG;
+
+        $tasks = [];
+        require($CFG->dirroot . '/local/rollover/db/tasks.php');
+
+        $found = false;
+        foreach ($tasks as $task) {
+            if ($task['classname'] == backup_history_cleaner_task::class) {
+                $found = true;
+                break;
+            }
+        }
+
+        self::assertTrue($found);
+    }
+}
