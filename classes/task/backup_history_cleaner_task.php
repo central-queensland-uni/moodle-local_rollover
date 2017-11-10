@@ -23,11 +23,8 @@
 
 namespace local_rollover\task;
 
-use context_course;
 use core\task\scheduled_task;
-use local_rollover\admin\rollover_settings;
-use moodle_exception;
-use stdClass;
+use local_rollover\local\backup_history;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -38,6 +35,16 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_history_cleaner_task extends scheduled_task {
+    public static function get_filename_timestamp($filename) {
+        $pattern = '/^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})_[a-z0-9\-]+\.mbz/';
+        if (!preg_match($pattern, $filename, $matches)) {
+            return null;
+        }
+        list(, $year, $month, $day, $hour, $minute, $second) = $matches;
+        $time = mktime($hour, $minute, $second, $month, $day, $year);
+        return $time;
+    }
+
     /**
      * Get a descriptive name for this task (shown to admins).
      *
@@ -52,6 +59,19 @@ class backup_history_cleaner_task extends scheduled_task {
      * Throw exceptions on errors (the job will be retried).
      */
     public function execute() {
-        // TODO: Implement execute() method.
+        $deletebefore = time() - backup_history::get_setting_duration();
+
+        $path = backup_history::get_default_location();
+        $files = scandir($path);
+        foreach ($files as $file) {
+            $filetime = self::get_filename_timestamp($file);
+            if (is_null($filetime)) {
+                continue;
+            }
+
+            if ($filetime < $deletebefore) {
+                unlink("{$path}/{$file}");
+            }
+        }
     }
 }
