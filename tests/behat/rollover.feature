@@ -30,7 +30,10 @@ Feature: Configure and perform course rollovers.
 
     When I select "<selected activities>" in the list of activities/resources            # local_rollover
     And I deselect "<unselected activities>" in the list of activities/resources         # local_rollover
-    And I press "Perform rollover"
+    And I press "Next"
+    Then I should see "Rollover: Confirm settings"
+
+    When I press "Perform rollover"
     Then I should see "Rollover successful"
     And I should see "ABC123-2017-1 rolled over into ABC123-2017-2"
 

@@ -43,10 +43,16 @@ class rollover_controller {
     const USERID = 2;
 
     const STEP_PRECHECK = 'precheck';
+
     const STEP_SELECT_SOURCE_COURSE = 'source_course';
+
     const STEP_SELECT_CONTENT_OPTIONS = 'content_options';
+
     const STEP_SELECT_ACTIVITIES_AND_RESOURCES = 'activities_and_resources';
-    const STEP_ROLLOVER_COMPLETE = 'complete';
+
+    const STEP_CONFIRMATION = 'confirmation';
+
+    const STEP_COMPLETE = 'complete';
 
     public static function get_steps() {
         return [
@@ -54,7 +60,8 @@ class rollover_controller {
             self::STEP_SELECT_SOURCE_COURSE,
             self::STEP_SELECT_CONTENT_OPTIONS,
             self::STEP_SELECT_ACTIVITIES_AND_RESOURCES,
-            self::STEP_ROLLOVER_COMPLETE,
+            self::STEP_CONFIRMATION,
+            self::STEP_COMPLETE,
         ];
     }
 
@@ -139,7 +146,7 @@ class rollover_controller {
     }
 
     private function complete_rollover() {
-        if ($this->get_current_step_name() != self::STEP_ROLLOVER_COMPLETE) {
+        if ($this->get_current_step_name() != self::STEP_COMPLETE) {
             return false;
         }
 

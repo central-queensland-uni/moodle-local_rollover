@@ -71,7 +71,7 @@ class form_activities_and_resources_selection extends form_step_base {
 
         $this->create_tasks();
 
-        $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
+        $this->add_action_buttons(false, get_string('next'));
     }
 
     private function create_tasks() {
