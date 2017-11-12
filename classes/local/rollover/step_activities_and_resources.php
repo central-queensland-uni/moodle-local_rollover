@@ -55,5 +55,6 @@ class step_activities_and_resources extends step {
                 }
             }
         }
+        $backupworker->save();
     }
 }
