@@ -21,11 +21,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\form\steps;
+namespace local_rollover\local\rollover;
 
-use backup_generic_setting;
-use local_rollover\form\steps\helpers\options_helper;
-use stdClass;
+use local_rollover\form\steps\form_confirmation;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -35,21 +33,11 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class form_options_selection extends form_step_base {
-    /** @var options_helper */
-    private $helper;
-
-    public function __construct($settings) {
-        $this->helper = new options_helper($settings);
-        parent::__construct();
+class step_confirmation extends step {
+    public function create_form() {
+        return new form_confirmation($this->controller->get_backup_worker());
     }
 
-    /**
-     * Step-specific form definition.
-     */
-    public function step_definition() {
-        $this->helper->set_form($this->_form);
-        $this->helper->create_options();
-        $this->add_action_buttons(false, get_string('next'));
+    public function process_form_data($data) {
     }
 }
