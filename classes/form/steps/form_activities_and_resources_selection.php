@@ -23,6 +23,7 @@
 
 namespace local_rollover\form\steps;
 
+use html_writer;
 use local_rollover\form\steps\helpers\activities_and_resources_helper;
 
 defined('MOODLE_INTERNAL') || die();
@@ -50,21 +51,28 @@ class form_activities_and_resources_selection extends form_step_base {
         $this->helper->set_form($mform);
 
         $mform->addElement('header', 'coursesettings', get_string('includeactivities', 'backup'));
-
+        $this->create_select_all_none_section();
         $this->helper->create_tasks();
 
         $this->add_action_buttons(false, get_string('next'));
     }
 
-    /**
-     * Validate the parts of the request form for this module
-     *
-     * @param mixed[]  $data  An array of form data
-     * @param string[] $files An array of form files
-     * @return string[] of error messages
-     */
-    public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-        return $errors;
+    private function create_select_all_none_section() {
+        $select = get_string('select', 'local_rollover');
+        $all = get_string('select_all', 'local_rollover');
+        $none = get_string('select_none', 'local_rollover');
+
+        $links = html_writer::link('#', $all, ['id' => 'backup-all-included']) .
+                 ' / ' .
+                 html_writer::link('#', $none, ['id' => 'backup-none-included']);
+
+        $html = html_writer::div($select, 'fitemtitle') .
+                html_writer::div($links, 'felement');
+
+        $html = html_writer::div($html, 'fitem fitem_fcheckbox backup_selector');
+        $html = html_writer::div($html, 'include_setting section_level');
+        $html = html_writer::div($html, 'grouped_settings section_level');
+
+        $this->_form->addElement('html', $html);
     }
 }
