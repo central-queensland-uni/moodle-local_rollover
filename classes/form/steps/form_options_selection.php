@@ -24,6 +24,7 @@
 namespace local_rollover\form\steps;
 
 use backup_generic_setting;
+use local_rollover\form\steps\helpers\options_helper;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -35,15 +36,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class form_options_selection extends form_step_base {
-    /** @var stdClass */
-    private $config;
-
-    /** @var backup_generic_setting */
-    private $settings;
+    /** @var options_helper */
+    private $helper;
 
     public function __construct($settings) {
-        $this->config = get_config('local_rollover');
-        $this->settings = $settings;
+        $this->helper = new options_helper($settings);
         parent::__construct();
     }
 
@@ -51,66 +48,8 @@ class form_options_selection extends form_step_base {
      * Step-specific form definition.
      */
     public function step_definition() {
-        foreach ($this->settings as $setting) {
-            $this->definition_add_setting($setting);
-        }
-
-        foreach ($this->settings as $setting) {
-            foreach ($setting->get_my_dependency_properties() as $dependency) {
-                call_user_func_array([$this->_form, 'disabledIf'], $dependency);
-            }
-        }
-
+        $this->helper->set_form($this->_form);
+        $this->helper->create_options();
         $this->add_action_buttons(false, get_string('next'));
-    }
-
-    private function definition_add_setting($setting) {
-        $name = $setting->get_name();
-        list($default, $locked) = $this->definition_get_default_and_locked($name);
-
-        $hidden = ($locked && !$default);
-
-        $attributes = $locked ? 'disabled' : null;
-        $mform = $this->_form;
-
-        $uiname = $setting->get_ui_name();
-        if ($hidden) {
-            $mform->addElement('hidden', $uiname);
-            $mform->setType($uiname, PARAM_BOOL);
-        } else {
-            $mform->addElement('checkbox',
-                               $uiname,
-                               get_string($this->get_label_for_setting($name), 'backup'),
-                               '',
-                               $attributes);
-        }
-        $mform->setDefault($uiname, $default);
-    }
-
-    private function definition_get_default_and_locked($name) {
-        $default = "option_{$name}";
-        $default = isset($this->config->$default) ? $this->config->$default : 0;
-
-        $locked = "option_{$name}_locked";
-        $locked = isset($this->config->$locked) ? $this->config->$locked : 0;
-
-        return [$default, $locked];
-    }
-
-    /**
-     * Validate the parts of the request form for this module
-     *
-     * @param mixed[]  $data  An array of form data
-     * @param string[] $files An array of form files
-     * @return string[] of error messages
-     */
-    public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-        return $errors;
-    }
-
-    private function get_label_for_setting($name) {
-        $name = str_replace('_', '', $name);
-        return "rootsetting{$name}";
     }
 }

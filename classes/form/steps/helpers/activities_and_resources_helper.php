@@ -43,6 +43,10 @@ class activities_and_resources_helper {
     /** @var MoodleQuickForm */
     private $form = null;
 
+    public function set_form($form) {
+        $this->form = $form;
+    }
+
     /** @var backup_task[] */
     private $tasks;
 
@@ -55,10 +59,6 @@ class activities_and_resources_helper {
         'section'  => false,
         'course'   => false,
     ];
-
-    public function set_form($form) {
-        $this->form = $form;
-    }
 
     public function __construct($tasks) {
         global $DB;
