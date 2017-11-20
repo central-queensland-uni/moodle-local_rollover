@@ -23,9 +23,11 @@
 
 namespace local_rollover\form\steps;
 
+use html_writer;
 use local_rollover\backup\backup_worker;
 use local_rollover\form\steps\helpers\activities_and_resources_helper;
 use local_rollover\form\steps\helpers\options_helper;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,6 +38,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class form_confirmation extends form_step_base {
+    /** @var backup_worker */
+    private $worker;
+
     /** @var options_helper */
     private $optionshelper;
 
@@ -44,6 +49,7 @@ class form_confirmation extends form_step_base {
 
     public function __construct(backup_worker $worker) {
         $worker->block_modifications();
+        $this->worker = $worker;
         $this->optionshelper = new options_helper($worker->get_backup_root_settings());
         $this->activitieshelper = new activities_and_resources_helper($worker->get_backup_tasks());
         parent::__construct();
@@ -55,6 +61,16 @@ class form_confirmation extends form_step_base {
     public function step_definition() {
         $mform = $this->_form;
 
+        $mform->addElement('header', 'coursesettings', get_string('courses', 'local_rollover'));
+        $mform->addElement('static',
+                           'originalcourse',
+                           get_string('originalcourse', 'local_rollover'),
+                           $this->get_original_course_link());
+        $mform->addElement('static',
+                           'destinationcourse',
+                           get_string('destinationcourse', 'local_rollover'),
+                           $this->get_destination_course_link());
+
         $mform->addElement('header', 'coursesettings', get_string('options', 'local_rollover'));
         $this->optionshelper->set_form($mform);
         $this->optionshelper->create_options();
@@ -64,5 +80,17 @@ class form_confirmation extends form_step_base {
         $this->activitieshelper->create_tasks();
 
         $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
+    }
+
+    private function get_original_course_link() {
+        $course = get_course($this->worker->get_source_course_id());
+        $url = new moodle_url('/course/view.php', ['name' => $course->shortname]);
+        return html_writer::link($url, $course->fullname);
+    }
+
+    private function get_destination_course_link() {
+        global $COURSE;
+        $url = new moodle_url('/course/view.php', ['name' => $COURSE->shortname]);
+        return html_writer::link($url, $COURSE->fullname);
     }
 }
