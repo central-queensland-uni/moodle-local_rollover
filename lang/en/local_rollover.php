@@ -55,6 +55,7 @@ $string['option_groups'] = 'Sets the default for including groups and groupings 
 $string['option_roleassignments'] = 'If enabled by default roles assignments will also be rolled over.';
 $string['option_userscompletion'] = 'If enabled user completion information will be included in rollovers by default.';
 $string['option_users'] = 'Sets the default for whether to include users in rollovers.';
+$string['options'] = 'Options:';
 $string['originalcourse'] = 'Original course';
 $string['originalcourse_help'] = 'Provide the shortname for course to be used as a source for this rollover.';
 $string['originalcourse_mycourses'] = 'My courses:';

@@ -72,9 +72,15 @@ class options_helper {
 
         $hidden = ($locked && !$default);
 
-        $attributes = $locked ? 'disabled' : null;
+        $ui = $setting->get_ui();
 
-        $uiname = $setting->get_ui_name();
+        if ($locked) {
+            $ui->disable();
+        }
+        $attributes = $ui->get_attributes();
+
+        $uiname = $ui->get_name();
+
         if ($hidden) {
             $this->form->addElement('hidden', $uiname);
             $this->form->setType($uiname, PARAM_BOOL);
@@ -85,6 +91,7 @@ class options_helper {
                                     '',
                                     $attributes);
         }
+
         $this->form->setDefault($uiname, $default);
     }
 

@@ -23,6 +23,10 @@
 
 namespace local_rollover\form\steps;
 
+use local_rollover\backup\backup_worker;
+use local_rollover\form\steps\helpers\activities_and_resources_helper;
+use local_rollover\form\steps\helpers\options_helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -32,22 +36,33 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class form_confirmation extends form_step_base {
+    /** @var options_helper */
+    private $optionshelper;
+
+    /** @var activities_and_resources_helper */
+    private $activitieshelper;
+
+    public function __construct(backup_worker $worker) {
+        $worker->block_modifications();
+        $this->optionshelper = new options_helper($worker->get_backup_root_settings());
+        $this->activitieshelper = new activities_and_resources_helper($worker->get_backup_tasks());
+        parent::__construct();
+    }
+
     /**
      * Step-specific form definition.
      */
     public function step_definition() {
-        $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
-    }
+        $mform = $this->_form;
 
-    /**
-     * Validate the parts of the request form for this module
-     *
-     * @param mixed[]  $data  An array of form data
-     * @param string[] $files An array of form files
-     * @return string[] of error messages
-     */
-    public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-        return $errors;
+        $mform->addElement('header', 'coursesettings', get_string('options', 'local_rollover'));
+        $this->optionshelper->set_form($mform);
+        $this->optionshelper->create_options();
+
+        $mform->addElement('header', 'coursesettings', get_string('includeactivities', 'backup'));
+        $this->activitieshelper->set_form($mform);
+        $this->activitieshelper->create_tasks();
+
+        $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
     }
 }

@@ -190,4 +190,12 @@ class backup_worker {
         $location = backup_history::get_setting_location($this->historyfilename);
         $file->copy_content_to($location);
     }
+
+    public function block_modifications() {
+        foreach ($this->get_backup_tasks() as $task) {
+            foreach ($task->get_settings() as $setting) {
+                $setting->get_ui()->disable();
+            }
+        }
+    }
 }
