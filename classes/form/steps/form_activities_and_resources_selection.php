@@ -39,6 +39,9 @@ class form_activities_and_resources_selection extends form_step_base {
     private $helper;
 
     public function __construct($tasks) {
+        global $PAGE;
+        $PAGE->requires->js_call_amd('local_rollover/activity-resources-selector', 'initialise');
+
         $this->helper = new activities_and_resources_helper($tasks);
         parent::__construct();
     }
@@ -62,9 +65,9 @@ class form_activities_and_resources_selection extends form_step_base {
         $all = get_string('select_all', 'local_rollover');
         $none = get_string('select_none', 'local_rollover');
 
-        $links = html_writer::link('#', $all, ['id' => 'backup-all-included']) .
+        $links = html_writer::link('#', $all, ['id' => 'rollover-all-included']) .
                  ' / ' .
-                 html_writer::link('#', $none, ['id' => 'backup-none-included']);
+                 html_writer::link('#', $none, ['id' => 'rollover-none-included']);
 
         $html = html_writer::div($select, 'fitemtitle') .
                 html_writer::div($links, 'felement');
