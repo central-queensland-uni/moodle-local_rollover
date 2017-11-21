@@ -138,8 +138,11 @@ trait local_rollover_behat_context_definition_for_assertions {
 
         foreach ($foundactivities as $foundactivity) {
             $label = $foundactivity->find('css', '.fstaticlabel');
-            $label = trim($label->getText());
+            if (is_null($label)) {
+                continue;
+            }
 
+            $label = trim($label->getText());
             if ($label == $name) {
                 $img = $foundactivity->find('css', 'img.smallicon');
                 $foundselected = strtolower($img->getAttribute('title'));
