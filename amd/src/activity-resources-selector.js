@@ -24,11 +24,15 @@ define(['jquery'], function ($) {
         initialise: function () {
             $('#rollover-all-included').on('click', this.selectAll.bind(this));
             $('#rollover-none-included').on('click', this.selectNone.bind(this));
+            $('.local_rollover_partial_select a').on('click', this.selectPartial.bind(this));
+        },
+
+        getCheckboxes: function () {
+            return $('.region-main-container form.mform input[type="checkbox"]:not([disabled])');
         },
 
         setAll: function (checked) {
-            var checkboxes = $('input[type="checkbox"]:not([disabled])');
-            checkboxes.prop('checked', checked);
+            this.getCheckboxes().prop('checked', checked);
         },
 
         selectAll: function () {
@@ -38,6 +42,32 @@ define(['jquery'], function ($) {
 
         selectNone: function () {
             this.setAll(false);
+            return false;
+        },
+
+        setPartial: function (module, selected) {
+            module += '_';
+            var prefix = 'id_setting_activity_';
+            var checkboxes = this.getCheckboxes();
+            checkboxes.each(function () {
+                var id = this.id;
+                if (!id.startsWith(prefix)) {
+                    return;
+                }
+                id = id.substring(prefix.length);
+                if (!id.startsWith(module)) {
+                    return;
+                }
+                this.checked = selected;
+            });
+        },
+
+        selectPartial: function (event) {
+            var id = event.currentTarget.id;
+            var parts = id.split('-');
+            var module = parts[1];
+            var selected = (parts[2] === 'all');
+            this.setPartial(module, selected);
             return false;
         }
     };
