@@ -50,6 +50,10 @@ class activities_and_resources_helper {
     /** @var backup_task[] */
     private $tasks;
 
+    public function get_tasks() {
+        return $this->tasks;
+    }
+
     /** @var array */
     private $modules;
 
