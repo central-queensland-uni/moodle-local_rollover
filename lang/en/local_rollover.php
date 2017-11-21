@@ -93,6 +93,7 @@ $string['regex_help'] = '
 $string['remove_rule'] = 'Remove rule';
 $string['rollover'] = 'Rollover';
 $string['rolloversuccessfulmessage'] = 'Course <b>{$a->from}</b> rolled over into <b>{$a->into}</b>.';
+$string['rollover:perform'] = 'Perform rollover';
 $string['rule-forbid'] = 'Forbid';
 $string['rule-enforce'] = 'Enforce';
 $string['rule-not_default'] = 'Not Default';

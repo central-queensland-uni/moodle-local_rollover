@@ -30,5 +30,7 @@ class local_rollover_capabilities_test extends rollover_testcase {
         $capabilities = null;
         require(__DIR__ . '/../../db/access.php');
         self::assertArrayHasKey('local/rollover:perform', $capabilities);
+
+        self::assertContains('Perform', get_string('rollover:perform', 'local_rollover'));
     }
 }
