@@ -19,11 +19,16 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
+
+use local_rollover\test\rollover_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017112200;
-$plugin->requires = 2016052300;
+class local_rollover_capabilities_test extends rollover_testcase {
+    public function test_it_defines_the_perform_rollover_capability() {
+        $capabilities = null;
+        require(__DIR__ . '/../../db/access.php');
+        self::assertArrayHasKey('local/rollover:perform', $capabilities);
+    }
+}

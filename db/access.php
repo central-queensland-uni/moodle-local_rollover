@@ -24,6 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_rollover';
-$plugin->version = 2017112200;
-$plugin->requires = 2016052300;
+$capabilities = [
+    'local/rollover:perform' => [
+        'riskbitmask'  => RISK_PERSONAL,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
+];
