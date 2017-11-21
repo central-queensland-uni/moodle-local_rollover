@@ -184,9 +184,6 @@ class backup_worker {
     }
 
     private function create_backup_history(stored_file $file) {
-        $directory = backup_history::get_default_location();
-        mkdir($directory, 0777, true);
-
         $location = backup_history::get_setting_location($this->historyfilename);
         $file->copy_content_to($location);
     }

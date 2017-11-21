@@ -41,7 +41,6 @@ class local_rollover_task_history_cleaner_task_test extends rollover_testcase {
             $filename = date('Y-m-d_H-i-s', $filetime) . "_my-course.{$extension}";
         }
         $filename = backup_history::get_setting_location($filename);
-        mkdir(backup_history::get_setting_location(), 0777, true);
         touch($filename);
 
         $this->filename = $filename;

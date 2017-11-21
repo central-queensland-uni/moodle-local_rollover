@@ -51,6 +51,10 @@ class backup_history {
             $location = self::get_default_location();
         }
 
+        if (!file_exists($location)) {
+            mkdir($location, 0777, true);
+        }
+
         if (!empty($filename)) {
             $location = "{$location}/{$filename}";
         }

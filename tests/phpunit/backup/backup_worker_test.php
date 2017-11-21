@@ -106,4 +106,14 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         $actual = backup_worker::prepare_shortname_for_filename($shortname);
         self::assertSame($expected, $actual, "Original: {$shortname}");
     }
+
+    public function test_it_creates_the_directory_even_or_ignores_it_if_already_exists() {
+        self::resetAfterTest();
+
+        $directory = backup_history::get_setting_location();
+        self::assertTrue(is_dir($directory));
+
+        $filename = backup_history::get_setting_location('file.txt');
+        self::assertFalse(is_file($filename));
+    }
 }
