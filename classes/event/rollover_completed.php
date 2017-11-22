@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class rollover_requested extends base {
+class rollover_completed extends base {
     /**
      * Returns localised general event name.
      *
@@ -43,7 +43,7 @@ class rollover_requested extends base {
      * @return string
      */
     public static function get_name() {
-        return get_string('event_rollover_requested', 'local_rollover');
+        return get_string('event_rollover_completed', 'local_rollover');
     }
 
     /**
@@ -54,7 +54,9 @@ class rollover_requested extends base {
     public function get_description() {
         $source = $this->get_source_course_id();
         $destination = $this->get_destination_course_id();
-        return "The user with the id '{$this->userid}' requested to rollover course id '{$source}' into '{$destination}'";
+        $filename = $this->get_filename();
+        return "The user with the id '{$this->userid}' completed rollover from course id '{$source}' into '{$destination}'" .
+               " with backup file: {$filename}";
     }
 
     /**
@@ -85,5 +87,9 @@ class rollover_requested extends base {
 
     public function get_backup_id() {
         return $this->data['other']['backupid'];
+    }
+
+    public function get_filename() {
+        return $this->data['other']['filename'];
     }
 }

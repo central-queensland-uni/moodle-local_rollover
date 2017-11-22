@@ -22,6 +22,7 @@
  */
 
 use local_rollover\backup\backup_worker;
+use local_rollover\event\rollover_completed;
 use local_rollover\event\rollover_started;
 use local_rollover\form\steps\form_confirmation;
 use local_rollover\local\rollover\rollover_controller;
@@ -77,7 +78,7 @@ class local_rollover_steps_rollover_complete_test extends rollover_testcase {
         ob_end_clean();
 
         $events = self::filter_rollover_events($sink->get_events());
-        self::assertCount(1, $events);
+        self::assertCount(2, $events);
 
         /** @var rollover_started $event */
         $event = $events[0];
@@ -87,5 +88,15 @@ class local_rollover_steps_rollover_complete_test extends rollover_testcase {
         self::assertSame($source->id, $event->get_source_course_id(), 'rollover_started: Invalid source.');
         self::assertSame($worker->get_backup_id(), $event->get_backup_id(), 'rollover_started: Invalid backup id.');
         self::assertSame($coursecontext, $event->get_context()->id, 'rollover_started: Invalid context.');
+
+        /** @var rollover_completed $event */
+        $event = $events[1];
+        self::assertInstanceOf(rollover_completed::class, $event);
+        $coursecontext = context_course::instance($destination->id)->id;
+        self::assertSame($destination->id, $event->get_destination_course_id(), 'rollover_completed: Invalid destination.');
+        self::assertSame($source->id, $event->get_source_course_id(), 'rollover_completed: Invalid source.');
+        self::assertSame($worker->get_backup_id(), $event->get_backup_id(), 'rollover_completed: Invalid backup id.');
+        self::assertSame($coursecontext, $event->get_context()->id, 'rollover_completed: Invalid context.');
+        self::assertSame($worker->get_history_filename(), $event->get_filename(), 'rollover_completed: Invalid file.');
     }
 }

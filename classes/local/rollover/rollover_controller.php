@@ -27,6 +27,7 @@ use context_course;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\capabilities;
+use local_rollover\event\rollover_completed;
 use local_rollover\event\rollover_started;
 use local_rollover\local\protection;
 use moodle_exception;
@@ -184,6 +185,8 @@ class rollover_controller {
         $destination = $this->destinationcourse->id;
         $restoreworker = new restore_worker($destination);
         $restoreworker->restore($backupworker->get_backup_id());
+
+        $this->fire_event(rollover_completed::class);
     }
 
     public function show_rollover_complete($from, $destination) {
@@ -263,6 +266,7 @@ class rollover_controller {
             'other'    => [
                 'sourceid' => $backupworker->get_source_course_id(),
                 'backupid' => $backupworker->get_backup_id(),
+                'filename' => $backupworker->get_history_filename(),
             ],
         ];
 
