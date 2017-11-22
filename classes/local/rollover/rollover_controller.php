@@ -27,6 +27,7 @@ use context_course;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\capabilities;
+use local_rollover\event\rollover_started;
 use local_rollover\local\protection;
 use moodle_exception;
 use moodle_url;
@@ -175,6 +176,8 @@ class rollover_controller {
     }
 
     public function rollover() {
+        $this->fire_event(rollover_started::class);
+
         $backupworker = $this->get_backup_worker();
         $backupworker->backup();
 
@@ -248,5 +251,22 @@ class rollover_controller {
         if ($protector->has_errors()) {
             $this->currentstep = self::get_step_index(self::STEP_PRECHECK);
         }
+    }
+
+    public function fire_event($class) {
+        $backupworker = $this->get_backup_worker();
+        $destinationcourseid = $this->get_destination_course()->id;
+
+        $data = [
+            'context'  => context_course::instance($destinationcourseid),
+            'objectid' => $destinationcourseid,
+            'other'    => [
+                'sourceid' => $backupworker->get_source_course_id(),
+                'backupid' => $backupworker->get_backup_id(),
+            ],
+        ];
+
+        $event = $class::create($data);
+        $event->trigger();
     }
 }

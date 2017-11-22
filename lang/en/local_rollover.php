@@ -43,6 +43,7 @@ $string['courses'] = 'Courses:';
 $string['delete-rule-confirmation'] = 'Are you sure you want to remove the following rule?';
 $string['destinationcourse'] = 'Destination course';
 $string['event_rollover_request'] = 'Rollover requested';
+$string['event_rollover_started'] = 'Rollover started';
 $string['no_rules'] = 'No rules found.';
 $string['no_matches'] = 'No matches.';
 $string['option_activities'] = 'Sets the default for including activities in a rollover.';

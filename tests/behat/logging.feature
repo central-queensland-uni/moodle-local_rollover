@@ -9,6 +9,6 @@ Feature: Log rollover attempts
     And I performed a rollover from course "ABC123-2017-1" into "ABC123-2017-2"                   # local_rollover
     When I view the logs page                                                                     # local_rollover
     Then I should see "requested to rollover course id"
-#    And I should see "administrator started to rollover 'ABC123-2017-1' into 'ABC123-2017-2'"
+    And I should see "started to rollover course id"
 #    And I should see "administrator completed rollover from 'ABC123-2017-1' into 'ABC123-2017-2'"
 #    And I should see "backup file location:"

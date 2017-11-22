@@ -126,22 +126,7 @@ class step_source_course extends step {
     public function process_form_data($data) {
         $backupworker = $this->controller->get_backup_worker();
         $data->rollover_backup_id = $backupworker->get_backup_id();
-        $this->fire_event();
+        $this->controller->fire_event(rollover_requested::class);
         $backupworker->save();
-    }
-
-    private function fire_event() {
-        $backupworker = $this->controller->get_backup_worker();
-        $destinationcourseid = $this->controller->get_destination_course()->id;
-        $data = [
-            'context'  => context_course::instance($destinationcourseid),
-            'objectid' => $destinationcourseid,
-            'other'    => [
-                'sourceid' => $backupworker->get_source_course_id(),
-                'backupid' => $backupworker->get_backup_id(),
-            ],
-        ];
-        $event = rollover_requested::create($data);
-        $event->trigger();
     }
 }

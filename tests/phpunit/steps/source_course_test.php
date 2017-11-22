@@ -276,7 +276,7 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $controller->index();
         ob_end_clean();
 
-        $events = $sink->get_events();
+        $events = self::filter_rollover_events($sink->get_events());
         self::assertCount(1, $events);
 
         /** @var rollover_requested $event */

@@ -32,6 +32,25 @@ defined('MOODLE_INTERNAL') || die();
  * @SuppressWarnings(PHPMD.NumberOfChildren) - All our tests inherit from this one, just put them in childcare.
  */
 class rollover_testcase extends advanced_testcase {
+    private static function is_rollover_event($event) {
+        $match = 'local_rollover\\';
+        $class = get_class($event);
+        $found = substr($class, 0, strlen($match));
+        return ($found === $match);
+    }
+
+    public static function filter_rollover_events($events) {
+        $result = [];
+
+        foreach ($events as $event) {
+            if (self::is_rollover_event($event)) {
+                $result[] = $event;
+            }
+        }
+
+        return $result;
+    }
+
     /** @var generator */
     private $generator = null;
 
