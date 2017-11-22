@@ -43,11 +43,11 @@ class local_rollover_steps_activities_and_resources_test extends rollover_testca
             [
                 rollover_parameters::PARAM_CURRENT_STEP          => $step,
                 rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destinationcourse->id,
-                rollover_parameters::PARAM_SOURCE_COURSE_ID      => $sourcecourse->id,
                 'setting_root_activities'                        => 1,
             ]
         );
         $controller = new rollover_controller();
+        $controller->set_source_course_id($sourcecourse->id);
 
         ob_start();
         $controller->index();

@@ -195,4 +195,35 @@ trait local_rollover_behat_context_definition_for_navigation {
         $this->execute('behat_forms::set_field_value', [$field, $number]);
         $this->iSelectInField("{$unit}s", $idunit);
     }
+
+    /**
+     * @Given /^I hack the HTML to select "([^"]*)" as the original course +\# local_rollover$/
+     */
+    public function iHackTheHTMLToSelectAsTheOriginalCourse($original) {
+        $session = $this->getSession();
+        $id = $this->generator()->get_course_id($original);
+        $session->executeScript("document.getElementById('local_rollover-your_units').options[0].value = {$id};");
+        $session->executeScript("document.getElementById('local_rollover-your_units').options[0].innerText = '{$original}';");
+        $this->execute('behat_forms::i_set_the_field_to', ['Original course', $original]);
+    }
+
+    /**
+     * @Given /^I try to press "([^"]*)"$/
+     */
+    public function iTryToPress($button) {
+        $this->lastexception = null;
+
+        $buttonnode = $this->find_button($button);
+        if ($this->running_javascript()) {
+            $buttonnode->focus();
+        }
+        $buttonnode->press();
+
+        try {
+            $this->look_for_exceptions();
+        } catch (Exception $exception) {
+            $this->lastexception = $exception;
+            $this->visitPath('/'); // Clear the exceptions to avoid failing the step.
+        }
+    }
 }
