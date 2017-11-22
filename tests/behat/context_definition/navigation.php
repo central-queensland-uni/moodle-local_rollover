@@ -226,4 +226,14 @@ trait local_rollover_behat_context_definition_for_navigation {
             $this->visitPath('/'); // Clear the exceptions to avoid failing the step.
         }
     }
+
+    /**
+     * @Given /^I hack the HTML so I can continue anyway +\# local_rollover$/
+     */
+    public function iHackTheHTMLSoICanContinueAnyway() {
+        $javascript = <<<JS
+document.forms[0].innerHTML += '<input name="submitbutton" value="Continue" type="submit" id="id_submitbutton">';
+JS;
+        $this->getSession()->executeScript($javascript);
+    }
 }

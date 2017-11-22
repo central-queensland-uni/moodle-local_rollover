@@ -106,6 +106,15 @@ class protection {
         return $this->find_actions(self::ACTION_WARN);
     }
 
+    public function has_errors() {
+        foreach ($this->actions as $action) {
+            if ($action == self::ACTION_STOP) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function get_errors() {
         return $this->find_actions(self::ACTION_STOP);
     }

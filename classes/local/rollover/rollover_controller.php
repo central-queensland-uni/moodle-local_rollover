@@ -27,6 +27,7 @@ use context_course;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
 use local_rollover\capabilities;
+use local_rollover\local\protection;
 use moodle_exception;
 use moodle_url;
 use stdClass;
@@ -217,6 +218,8 @@ class rollover_controller {
     }
 
     public function get_step() {
+        $this->enforce_protection();
+
         $class = step::class . '_' . $this->get_current_step_name();
         if (!class_exists($class)) {
             throw new moodle_exception("Invalid class '{$class}' for step: {$this->currentstep}");
@@ -238,5 +241,12 @@ class rollover_controller {
 
     private function get_current_step_name() {
         return self::get_steps()[$this->currentstep];
+    }
+
+    private function enforce_protection() {
+        $protector = new protection($this->get_destination_course());
+        if ($protector->has_errors()) {
+            $this->currentstep = self::get_step_index(self::STEP_PRECHECK);
+        }
     }
 }

@@ -115,7 +115,7 @@ trait local_rollover_behat_context_definition_for_assertions {
     }
 
     /**
-     * @Given /^I should (see|not see) the button "([^"]*)"                                             \# local_rollover$/
+     * @Given /^I should (see|not see) the button "([^"]*)" +\# local_rollover$/
      */
     public function iShouldTheButton($seeornot, $button) {
         $found = null;
