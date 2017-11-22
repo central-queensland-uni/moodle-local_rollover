@@ -27,3 +27,20 @@ Feature: Ensure capabilities are in effect.
     And I try to press "Next"
     Then I should see the "Missing source course id" exception                          # local_rollover
 
+  Scenario: A teacher cannot hack its way out of the rollover protection system
+    Given I am a teacher                                                                          # local_rollover
+    And the rollover protection is configured as follows:                                         # local_rollover
+      | Protection                                  | Action |
+      | If rollover destination is not empty        | stop   |
+      | If rollover destination is not hidden       | stop   |
+      | If rollover destination contains students   | stop   |
+      | If rollover destination has already started | stop   |
+    And I can modify the the course "destination"                                                 # local_rollover
+    And the "destination" course is not empty, is visible, has a student and has already started  # local_rollover
+    When I go to the rollover page for the course "destination"                                   # local_rollover
+    And I hack the HTML so I can continue anyway                                                  # local_rollover
+    And I press "Continue"
+    Then I should see "Rollover: Pre-check"
+    And I should see "Error"
+    And I should not see the button "Continue"                                                    # local_rollover
+    And I should not see the button "Next"                                                        # local_rollover
