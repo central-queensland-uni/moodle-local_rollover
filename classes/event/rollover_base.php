@@ -23,6 +23,10 @@
 
 namespace local_rollover\event;
 
+use core\event\base;
+use moodle_url;
+use ReflectionClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -31,15 +35,51 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class rollover_requested extends rollover_base {
+abstract class rollover_base extends base {
     /**
-     * Returns non-localised event description with id's for admin use only.
+     * Returns localised general event name.
+     *
+     * Override in subclass, we can not make it static and abstract at the same time.
      *
      * @return string
      */
-    public function get_description() {
-        $source = $this->get_source_course_id();
-        $destination = $this->get_destination_course_id();
-        return "The user with the id '{$this->userid}' requested to rollover course id '{$source}' into '{$destination}'";
+    public static function get_name() {
+        $reflect = new ReflectionClass(static::class);
+        $name = $reflect->getShortName();
+        return get_string("event_{$name}", 'local_rollover');
+    }
+
+    /**
+     * Returns relevant URL, override in subclasses.
+     *
+     * @return moodle_url
+     */
+    public function get_url() {
+        return new moodle_url('/course/view.php', ['id' => $this->get_destination_course_id()]);
+    }
+
+    /**
+     * Init method.
+     */
+    protected function init() {
+        $this->data['objecttable'] = 'course';
+        $this->data['crud'] = 'r';
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
+    }
+
+    public function get_destination_course_id() {
+        return $this->data['objectid'];
+    }
+
+    public function get_source_course_id() {
+        return $this->data['other']['sourceid'];
+    }
+
+    public function get_backup_id() {
+        return $this->data['other']['backupid'];
+    }
+
+    public function get_filename() {
+        return $this->data['other']['filename'];
     }
 }
