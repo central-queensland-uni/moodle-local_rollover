@@ -236,4 +236,27 @@ document.forms[0].innerHTML += '<input name="submitbutton" value="Continue" type
 JS;
         $this->getSession()->executeScript($javascript);
     }
+
+    /**
+     * @When /^I view the logs page +\# local_rollover$/
+     */
+    public function iViewTheLogsPage() {
+        $this->visitPath('/report/log/index.php?chooselog=1');
+    }
+
+    /**
+     * @Given /^I performed a rollover from course "([^"]*)" into "([^"]*)" +\# local_rollover$/
+     */
+    public function iPerformedARolloverFromCourseInto($source, $destination) {
+        $this->generator()->create_course_by_shortname($source);
+        $this->generator()->create_course_by_shortname($destination);
+
+        $this->allRolloverProtectionsAreDisabled();
+        $this->iGoToTheRolloverPageForTheCourse(false, $destination);
+        $this->iSelectInField('ABC123-2017-1', 'Original course');
+        $this->execute('behat_forms::press_button', ['Next']);
+        $this->execute('behat_forms::press_button', ['Next']);
+        $this->execute('behat_forms::press_button', ['Next']);
+        $this->execute('behat_forms::press_button', ['Perform rollover']);
+    }
 }

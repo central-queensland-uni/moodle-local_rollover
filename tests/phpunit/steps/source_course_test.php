@@ -22,6 +22,7 @@
  */
 
 use local_rollover\admin\settings_controller;
+use local_rollover\event\rollover_requested;
 use local_rollover\form\steps\form_source_course_selection;
 use local_rollover\local\rollover\rollover_controller;
 use local_rollover\local\rollover\rollover_parameters;
@@ -253,5 +254,39 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $step = new step_source_course($controller);
         $actual = $step->get_past_instances();
         self::assertSame([], $actual);
+    }
+
+    public function test_it_generates_a_log_event() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+        $source = $this->generator()->create_course_by_shortname('source');
+        $destination = $this->generator()->create_course_by_shortname('destination');
+
+        $step = rollover_controller::get_step_index(rollover_controller::STEP_SELECT_SOURCE_COURSE);
+        form_source_course_selection::mock_submit([
+                                                      rollover_parameters::PARAM_SOURCE_COURSE_ID      => $source->id,
+                                                      rollover_parameters::PARAM_DESTINATION_COURSE_ID => $destination->id,
+                                                      rollover_parameters::PARAM_CURRENT_STEP          => $step,
+                                                  ]);
+
+        $controller = new rollover_controller();
+
+        $sink = $this->redirectEvents();
+        ob_start();
+        $controller->index();
+        ob_end_clean();
+
+        $events = $sink->get_events();
+        self::assertCount(1, $events);
+
+        /** @var rollover_requested $event */
+        $event = $events[0];
+        self::assertInstanceOf(rollover_requested::class, $event);
+
+        $coursecontext = context_course::instance($destination->id)->id;
+        self::assertSame($destination->id, $event->get_destination_course_id(), 'Invalid destination course id.');
+        self::assertSame($source->id, $event->get_source_course_id(), 'Invalid source course id.');
+        self::assertSame($controller->get_backup_worker()->get_backup_id(), $event->get_backup_id(), 'Invalid backup id.');
+        self::assertSame($coursecontext, $event->get_context()->id, 'Invalid cpmtext id.');
     }
 }
