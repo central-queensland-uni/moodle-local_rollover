@@ -180,7 +180,7 @@ trait local_rollover_behat_context_definition_for_navigation {
         $this->generator()->create_course_by_shortname('source')->id;
         $this->generator()->create_course_by_shortname('destination')->id;
 
-        $this->iGoToTheRolloverPageForTheCourse('destination');
+        $this->iGoToTheRolloverPageForTheCourse('', 'destination');
         $this->iSelectInField('source', 'Original course');
         $this->execute('behat_forms::press_button', ['Next']);
     }
