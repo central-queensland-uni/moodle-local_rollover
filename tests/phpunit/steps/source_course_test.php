@@ -287,6 +287,6 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         self::assertSame($destination->id, $event->get_destination_course_id(), 'Invalid destination course id.');
         self::assertSame($source->id, $event->get_source_course_id(), 'Invalid source course id.');
         self::assertSame($controller->get_backup_worker()->get_backup_id(), $event->get_backup_id(), 'Invalid backup id.');
-        self::assertSame($coursecontext, $event->get_context()->id, 'Invalid cpmtext id.');
+        self::assertSame($coursecontext, $event->get_context()->id, 'Invalid context id.');
     }
 }
