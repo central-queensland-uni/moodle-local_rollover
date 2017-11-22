@@ -26,6 +26,7 @@ namespace local_rollover\local\rollover;
 use context_course;
 use local_rollover\backup\backup_worker;
 use local_rollover\backup\restore_worker;
+use local_rollover\capabilities;
 use moodle_exception;
 use moodle_url;
 use stdClass;
@@ -101,9 +102,13 @@ class rollover_controller {
     }
 
     public function index() {
-        global $PAGE;
+        global $PAGE, $USER;
+
+        $context = context_course::instance($this->destinationcourse->id);
+        require_capability(capabilities::CAPABILITY_PERFORM_ROLLOVER, $context, $USER);
 
         require_login($this->destinationcourse);
+
         $PAGE->set_context(context_course::instance($this->destinationcourse->id));
         $PAGE->set_url('/local/rollover/index.php',
                        [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);

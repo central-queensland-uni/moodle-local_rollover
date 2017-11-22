@@ -22,10 +22,12 @@
  * @var stdClass $plugin
  */
 
+use local_rollover\capabilities;
+
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    'local/rollover:perform' => [
+    capabilities::CAPABILITY_PERFORM_ROLLOVER => [
         'riskbitmask'  => RISK_PERSONAL,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSE,
