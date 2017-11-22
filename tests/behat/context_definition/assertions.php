@@ -152,4 +152,15 @@ trait local_rollover_behat_context_definition_for_assertions {
 
         throw new ExpectationException('Static "' . $name . '" not found. Maybe it is modifiable.', $this->getSession());
     }
+
+    /**
+     * @Then /^I should see a "([^"]*)" exception +\# local_rollover$/
+     */
+    public function iShouldSeeAException($expected) {
+        $exception = empty($this->lastexception) ? '' : $this->lastexception;
+        $actual = empty($exception) ? '' : $exception->getMessage();
+        if (strpos($actual, $expected) === false) {
+            throw new ExpectationException("Exception '{$expected}' not found.", $this->getSession());
+        }
+    }
 }

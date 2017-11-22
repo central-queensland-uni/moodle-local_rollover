@@ -23,6 +23,7 @@
 
 namespace local_rollover;
 
+use context_course;
 use local_rollover\local\rollover\rollover_parameters;
 use moodle_url;
 use navigation_node;
@@ -38,13 +39,20 @@ defined('MOODLE_INTERNAL') || die();
  */
 class navigation {
     public function add_course_administration($navigation, $courseid) {
-        $navigation->add(
-            get_string('rollover', 'local_rollover'),
-            new moodle_url('/local/rollover/index.php', [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $courseid]),
-            navigation_node::TYPE_SETTING,
-            null,
-            null,
-            new pix_icon('i/return', '')
-        );
+        global $USER;
+
+        $context = context_course::instance($courseid);
+        $canrollover = has_capability(capabilities::CAPABILITY_PERFORM_ROLLOVER, $context, $USER);
+
+        if ($canrollover) {
+            $navigation->add(
+                get_string('rollover', 'local_rollover'),
+                new moodle_url('/local/rollover/index.php', [rollover_parameters::PARAM_DESTINATION_COURSE_ID => $courseid]),
+                navigation_node::TYPE_SETTING,
+                null,
+                null,
+                new pix_icon('i/return', '')
+            );
+        }
     }
 }

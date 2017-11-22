@@ -39,6 +39,9 @@ trait local_rollover_behat_context_definition_for_navigation {
     /** @var string */
     protected $myusername = null;
 
+    /** @var string */
+    protected $lastexception = null;
+
     /**
      * @Given /^I am an? (administrator|teacher) +\# local_rollover$/
      */
@@ -76,11 +79,24 @@ trait local_rollover_behat_context_definition_for_navigation {
     }
 
     /**
-     * @When /^I go to the rollover page for the course "([^"]*)" +\# local_rollover$/
+     * @When /^I (try to )?go to the rollover page for the course "([^"]*)" +\# local_rollover$/
      */
-    public function iGoToTheRolloverPageForTheCourse($shortname) {
+    public function iGoToTheRolloverPageForTheCourse($try, $shortname) {
+        $try = !empty($try);
         $param = rollover_parameters::PARAM_DESTINATION_COURSE_ID . '=' . $this->generator()->get_course_id($shortname);
         $this->visitPath("/local/rollover/index.php?{$param}");
+        $this->lastexception = null;
+
+        if (!$try) {
+            return;
+        }
+
+        try {
+            $this->look_for_exceptions();
+        } catch (Exception $exception) {
+            $this->lastexception = $exception;
+            $this->visitPath("/"); // Clear the exceptions to avoid failing the step.
+        }
     }
 
     /**
