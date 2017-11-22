@@ -154,7 +154,7 @@ trait local_rollover_behat_context_definition_for_assertions {
     }
 
     /**
-     * @Then /^I should see a "([^"]*)" exception +\# local_rollover$/
+     * @Then /^I should see (?:a|the) "([^"]*)" exception +\# local_rollover$/
      */
     public function iShouldSeeAException($expected) {
         $exception = empty($this->lastexception) ? '' : $this->lastexception;

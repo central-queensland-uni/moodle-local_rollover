@@ -73,6 +73,13 @@ class rollover_controller {
     /** @var int */
     private $currentstep;
 
+    /** @var int */
+    private $sourcecourseid = null;
+
+    public function set_source_course_id($sourcecourseid) {
+        $this->sourcecourseid = $sourcecourseid;
+    }
+
     /** @var stdClass */
     private $destinationcourse;
 
@@ -87,8 +94,10 @@ class rollover_controller {
         if (is_null($this->backupworker)) {
             $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
             if (empty($backupid)) {
-                $sourceid = required_param(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
-                $this->backupworker = backup_worker::create($sourceid);
+                if (empty($this->sourcecourseid)) {
+                    throw new moodle_exception('Missing source course id.');
+                }
+                $this->backupworker = backup_worker::create($this->sourcecourseid);
             } else {
                 $this->backupworker = backup_worker::load($backupid);
             }
@@ -132,6 +141,9 @@ class rollover_controller {
         if (empty($data)) {
             $form->set_data([rollover_parameters::PARAM_DESTINATION_COURSE_ID => $this->destinationcourse->id]);
             return $form;
+        }
+        if (!empty($data->{rollover_parameters::PARAM_SOURCE_COURSE_ID})) {
+            $this->sourcecourseid = $data->{rollover_parameters::PARAM_SOURCE_COURSE_ID};
         }
 
         $this->get_step()->process_form_data($data);
