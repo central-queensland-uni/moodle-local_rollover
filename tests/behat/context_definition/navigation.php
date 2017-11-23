@@ -204,7 +204,7 @@ trait local_rollover_behat_context_definition_for_navigation {
         $id = $this->generator()->get_course_id($original);
         $session->executeScript("document.getElementById('local_rollover-your_units').options[0].value = {$id};");
         $session->executeScript("document.getElementById('local_rollover-your_units').options[0].innerText = '{$original}';");
-        $this->execute('behat_forms::i_set_the_field_to', ['Original course', $original]);
+        $session->executeScript("document.getElementById('local_rollover-your_units').selectedIndex = 0;");
     }
 
     /**

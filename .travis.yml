@@ -5,7 +5,7 @@ notifications:
     recipients:
       - daniel.roperto@catalyst-au.net
 
-sudo: false
+sudo: required
 
 addons:
   firefox: "35.0.1"
