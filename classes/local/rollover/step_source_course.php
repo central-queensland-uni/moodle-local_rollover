@@ -23,7 +23,9 @@
 
 namespace local_rollover\local\rollover;
 
+use context_course;
 use local_rollover\admin\settings_controller;
+use local_rollover\event\rollover_requested;
 use local_rollover\form\steps\form_source_course_selection;
 use local_rollover\regex_validator;
 
@@ -124,6 +126,7 @@ class step_source_course extends step {
     public function process_form_data($data) {
         $backupworker = $this->controller->get_backup_worker();
         $data->rollover_backup_id = $backupworker->get_backup_id();
+        $this->controller->fire_event(rollover_requested::class);
         $backupworker->save();
     }
 }
