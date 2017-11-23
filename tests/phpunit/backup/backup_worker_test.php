@@ -43,6 +43,7 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         $this->assert_backup_generates_history_file($backupworker->get_history_filename());
         $this->assert_backup_leaves_no_files_in_moodle($backupworker->get_db_filename());
         $this->assert_backup_xml_is_correct($backupworker->get_path());
+        $this->assert_backup_log_exists($backupworker->get_path());
     }
 
     private function assert_backup_leaves_no_files_in_moodle($filename) {
@@ -56,6 +57,10 @@ class local_rollover_backup_backup_worker_test extends rollover_testcase {
         $xml = file_get_contents($path . '/moodle_backup.xml');
         self::assertContains('<original_course_shortname>backup-source-course</original_course_shortname>', $xml);
         self::assertContains('<title>Backup Assignment</title>', $xml);
+    }
+
+    private function assert_backup_log_exists($path) {
+        self::assertFileExists("{$path}/moodle_backup.log");
     }
 
     private function assert_backup_generates_history_file($filename) {
