@@ -44,3 +44,10 @@ Feature: Ensure capabilities are in effect.
     And I should see "Error"
     And I should not see the button "Continue"                                                    # local_rollover
     And I should not see the button "Next"                                                        # local_rollover
+
+  Scenario: An editing teacher can perform a rollover even not allowed to perform backups.
+    Given teachers cannot perform backups                         # local_rollover
+    And I am a teacher                                            # local_rollover
+    And all rollover protections are disabled                     # local_rollover
+    When I performed a rollover from course "ABC" into "DEF"      # local_rollover
+    Then I should see "Rollover successful"
