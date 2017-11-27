@@ -24,6 +24,8 @@
 
 use local_rollover\local\rollover\rollover_controller;
 
+define('NO_OUTPUT_BUFFERING', true);
+
 require(__DIR__ . '/../../config.php');
 
 $controller = new rollover_controller();

@@ -32,6 +32,7 @@ use local_rollover\event\rollover_started;
 use local_rollover\local\protection;
 use moodle_exception;
 use moodle_url;
+use progress_bar;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -93,6 +94,9 @@ class rollover_controller {
     /** @var backup_worker */
     private $backupworker = null;
 
+    /** @var progress_bar */
+    private $progressbar = null;
+
     public function get_backup_worker() {
         if (is_null($this->backupworker)) {
             $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
@@ -109,6 +113,10 @@ class rollover_controller {
     }
 
     public function __construct() {
+        if (!defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING) {
+            debugging('Missing NO_OUTPUT_BUFFERING');
+        }
+
         $this->destinationcourse = get_course(required_param(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT));
         $this->currentstep = (int)optional_param(rollover_parameters::PARAM_CURRENT_STEP, 0, PARAM_INT);
     }
@@ -191,6 +199,8 @@ class rollover_controller {
     }
 
     public function start_rollover_ui() {
+        global $OUTPUT;
+
         $from = $this->get_backup_worker()->get_source_course_id();
         $destination = $this->destinationcourse->id;
 
@@ -199,20 +209,32 @@ class rollover_controller {
         $from = get_course($from);
         $destination = get_course($destination);
 
+        $this->progressbar = new progress_bar();
+        $this->progressbar->create();
+
         echo get_string('rolloversuccessfulmessage', 'local_rollover', [
             'from' => htmlentities($from->shortname),
             'into' => htmlentities($destination->shortname),
         ]);
         echo '<br /><br />';
-    }
-
-    public function finish_rollover_ui() {
-        global $OUTPUT;
 
         $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
         echo $OUTPUT->single_button($url, get_string('proceed', 'local_rollover'), 'get');
 
         $this->show_footer();
+    }
+
+    public function finish_rollover_ui() {
+        $progressbar = $this->progressbar;
+        $progressbar->update_full(0, '0%');
+        sleep(1);
+        $progressbar->update_full(25, '25%');
+        sleep(1);
+        $progressbar->update_full(50, '50%');
+        sleep(1);
+        $progressbar->update_full(75, '75%');
+        sleep(1);
+        $progressbar->update_full(100, '100%');
     }
 
     private function show_header() {
