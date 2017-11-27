@@ -58,12 +58,18 @@ class generator extends testing_data_generator {
     }
 
     public function create_user_by_username($username) {
-        $this->users[$username] = $this->create_user([
-                                                         'username'  => $username,
-                                                         'password'  => $username,
-                                                         'firstname' => $username,
-                                                         'lastname'  => 'Behat',
-                                                     ]);
+        if ($username === 'admin') {
+            $user = get_admin();
+        } else {
+            $user = $this->create_user([
+                                           'username'  => $username,
+                                           'password'  => $username,
+                                           'firstname' => $username,
+                                           'lastname'  => 'Behat',
+                                       ]);
+        }
+
+        $this->users[$username] = $user;
         return $this->users[$username];
     }
 

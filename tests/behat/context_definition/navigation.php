@@ -249,14 +249,36 @@ JS;
      */
     public function iPerformedARolloverFromCourseInto($source, $destination) {
         $this->generator()->create_course_by_shortname($source);
+        $this->generator()->enrol_editing_teacher($this->myusername, $source);
         $this->generator()->create_course_by_shortname($destination);
+        $this->generator()->enrol_editing_teacher($this->myusername, $destination);
 
         $this->allRolloverProtectionsAreDisabled();
         $this->iGoToTheRolloverPageForTheCourse(false, $destination);
-        $this->iSelectInField('ABC123-2017-1', 'Original course');
+        $this->iSelectInField($source, 'Original course');
         $this->execute('behat_forms::press_button', ['Next']);
         $this->execute('behat_forms::press_button', ['Next']);
         $this->execute('behat_forms::press_button', ['Next']);
         $this->execute('behat_forms::press_button', ['Perform rollover']);
+    }
+
+    /**
+     * @Given /^teachers cannot perform backups +\# local_rollover$/
+     */
+    public function teachersCannotPerformBackups() {
+        global $DB;
+
+        $role = $DB->get_record('role', ['shortname' => 'editingteacher']);
+        $roleid = $role->id;
+
+        $contextid = context_system::instance()->id;
+
+        $capabilitysearch = 'moodle/backup:';
+        foreach (array_keys(get_all_capabilities()) as $capability) {
+            $found = substr($capability, 0, strlen($capabilitysearch));
+            if ($found === $capabilitysearch) {
+                assign_capability($capability, 0, $roleid, $contextid, true);
+            }
+        };
     }
 }
