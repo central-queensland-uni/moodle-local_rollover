@@ -170,9 +170,10 @@ class rollover_controller {
             return false;
         }
 
+        $this->start_rollover_ui();
         $this->rollover();
-        $this->show_rollover_complete($this->get_backup_worker()->get_source_course_id(),
-                                      $this->destinationcourse->id);
+        $this->finish_rollover_ui();
+
         return true;
     }
 
@@ -189,8 +190,9 @@ class rollover_controller {
         $this->fire_event(rollover_completed::class);
     }
 
-    public function show_rollover_complete($from, $destination) {
-        global $OUTPUT;
+    public function start_rollover_ui() {
+        $from = $this->get_backup_worker()->get_source_course_id();
+        $destination = $this->destinationcourse->id;
 
         $this->show_header();
 
@@ -202,8 +204,12 @@ class rollover_controller {
             'into' => htmlentities($destination->shortname),
         ]);
         echo '<br /><br />';
+    }
 
-        $url = new moodle_url('/course/view.php', ['id' => $destination->id]);
+    public function finish_rollover_ui() {
+        global $OUTPUT;
+
+        $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
         echo $OUTPUT->single_button($url, get_string('proceed', 'local_rollover'), 'get');
 
         $this->show_footer();
