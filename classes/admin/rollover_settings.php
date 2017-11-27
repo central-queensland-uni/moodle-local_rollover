@@ -155,13 +155,6 @@ class rollover_settings {
                                                 new lang_string('settings-backup-history', 'local_rollover')
         );
 
-        $backupsettings->add(new admin_setting_configtext(
-                                 'local_rollover/' . backup_history::SETTING_BACKUP_LOCATION,
-                                 new lang_string('settings-backup-location', 'local_rollover'),
-                                 new lang_string('settings-backup-location-description', 'local_rollover'),
-                                 backup_history::get_default_location()
-                             ));
-
         $backupsettings->add(new admin_setting_configduration(
                                  'local_rollover/' . backup_history::SETTING_BACKUP_DURATION,
                                  new lang_string('settings-backup-duration', 'local_rollover'),

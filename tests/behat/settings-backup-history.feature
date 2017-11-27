@@ -8,13 +8,4 @@ Feature: Keep backup history
     Given I am an administrator                                             # local_rollover
     When I navigate to "Courses > Rollover settings > Backup history" in site administration
     Then I should see "Backup history"
-    And I should see "Path in server"
     And I should see "Retention period"
-
-  Scenario: I can change the backup history settings
-    Given I am an administrator                                             # local_rollover
-    When I go to the "Rollover Backup history" settings page                # local_rollover
-    And I set the field "Path in server" to "/tmp"
-    And I set the duration field "Retention period" to 1 hour               # local_rollover
-    And I press "Save"
-    Then I should see "Changes saved"

@@ -66,7 +66,7 @@ class backup_history_cleaner_task extends scheduled_task {
         echo "Deleting rollover history files before: " . date('Y-m-d H:i:s', $deletebefore) . "\n";
         echo "Current timestamp: {$now} - History Duration: {$duration}\n";
 
-        $path = backup_history::get_default_location();
+        $path = backup_history::get_setting_location();
         $files = is_dir($path) ? scandir($path) : [];
         foreach ($files as $file) {
             if (($file == '.') || ($file == '..')) {
