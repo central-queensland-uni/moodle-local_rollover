@@ -32,13 +32,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_history {
-    const SETTING_BACKUP_LOCATION = 'backup_location';
+    const BACKUP_LOCATION = 'local_rollover/backup_history';
 
     const SETTING_BACKUP_DURATION = 'backup_duration';
 
     public static function get_default_location() {
-        global $CFG;
-        return "{$CFG->dataroot}/local_rollover/backup_history";
     }
 
     public static function get_default_duration() {
@@ -46,11 +44,9 @@ class backup_history {
     }
 
     public static function get_setting_location($filename = '') {
-        $location = get_config('local_rollover', self::SETTING_BACKUP_LOCATION);
-        if (empty($location)) {
-            $location = self::get_default_location();
-        }
+        global $CFG;
 
+        $location = $CFG->dataroot . '/' . self::BACKUP_LOCATION;
         if (!file_exists($location)) {
             mkdir($location, 0777, true);
         }
