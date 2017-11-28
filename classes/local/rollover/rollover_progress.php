@@ -19,14 +19,30 @@
  * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @var stdClass $plugin
  */
 
-use local_rollover\local\rollover\rollover_controller;
+namespace local_rollover\local\rollover;
 
-define('NO_OUTPUT_BUFFERING', true);
+use core\progress\display;
 
-require(__DIR__ . '/../../config.php');
+defined('MOODLE_INTERNAL') || die();
 
-$controller = new rollover_controller();
-$controller->index();
+/**
+ * @package     local_rollover
+ * @author      Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
+ * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class rollover_progress extends display {
+    private $message;
+
+    public function __construct($message) {
+        parent::__construct(false);
+        $this->set_display_names(true);
+        $this->message = $message;
+    }
+
+    public function start_progress($description, $max = self::INDETERMINATE, $parentcount = 1) {
+        parent::start_progress("{$this->message}: $description", $max, $parentcount);
+    }
+}
