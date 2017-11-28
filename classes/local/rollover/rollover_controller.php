@@ -32,7 +32,6 @@ use local_rollover\event\rollover_started;
 use local_rollover\local\protection;
 use moodle_exception;
 use moodle_url;
-use progress_bar;
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -94,8 +93,11 @@ class rollover_controller {
     /** @var backup_worker */
     private $backupworker = null;
 
-    /** @var progress_bar */
-    private $progressbar = null;
+    /** @var rollover_progress */
+    private $progressbackup = null;
+
+    /** @var rollover_progress */
+    private $progressrestore = null;
 
     public function get_backup_worker() {
         if (is_null($this->backupworker)) {
@@ -178,9 +180,15 @@ class rollover_controller {
             return false;
         }
 
-        $this->start_rollover_ui();
+        $from = $this->get_backup_worker()->get_source_course_id();
+        $from = get_course($from);
+
+        $destination = $this->destinationcourse->id;
+        $destination = get_course($destination);
+
+        $this->start_rollover_ui($from, $destination);
         $this->rollover();
-        $this->finish_rollover_ui();
+        $this->finish_rollover_ui($from, $destination);
 
         return true;
     }
@@ -189,52 +197,39 @@ class rollover_controller {
         $this->fire_event(rollover_started::class);
 
         $backupworker = $this->get_backup_worker();
-        $backupworker->backup();
+        $backupworker->backup($this->progressbackup);
 
         $destination = $this->destinationcourse->id;
         $restoreworker = new restore_worker($destination);
-        $restoreworker->restore($backupworker->get_backup_id());
+        $restoreworker->restore($backupworker->get_backup_id(), $this->progressrestore);
 
         $this->fire_event(rollover_completed::class);
     }
 
-    public function start_rollover_ui() {
-        global $OUTPUT;
-
-        $from = $this->get_backup_worker()->get_source_course_id();
-        $destination = $this->destinationcourse->id;
-
+    public function start_rollover_ui($from, $destination) {
         $this->show_header();
+        echo '<hr />';
 
-        $from = get_course($from);
-        $destination = get_course($destination);
+        $loading = get_string('progress_loading', 'local_rollover', htmlentities($from->shortname));
+        $this->progressbackup = new rollover_progress($loading);
 
-        $this->progressbar = new progress_bar();
-        $this->progressbar->create();
+        $saving = get_string('progress_saving', 'local_rollover', htmlentities($destination->shortname));
+        $this->progressrestore = new rollover_progress($saving);
+    }
+
+    public function finish_rollover_ui($from, $destination) {
+        global $OUTPUT;
 
         echo get_string('rolloversuccessfulmessage', 'local_rollover', [
             'from' => htmlentities($from->shortname),
             'into' => htmlentities($destination->shortname),
         ]);
-        echo '<br /><br />';
+        echo '<hr />';
 
         $url = new moodle_url('/course/view.php', ['id' => $this->destinationcourse->id]);
         echo $OUTPUT->single_button($url, get_string('proceed', 'local_rollover'), 'get');
 
         $this->show_footer();
-    }
-
-    public function finish_rollover_ui() {
-        $progressbar = $this->progressbar;
-        $progressbar->update_full(0, '0%');
-        sleep(1);
-        $progressbar->update_full(25, '25%');
-        sleep(1);
-        $progressbar->update_full(50, '50%');
-        sleep(1);
-        $progressbar->update_full(75, '75%');
-        sleep(1);
-        $progressbar->update_full(100, '100%');
     }
 
     private function show_header() {

@@ -21,18 +21,11 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_rollover\backup;
+namespace local_rollover\local\rollover;
 
-use backup;
-use local_rollover\local\rollover\rollover_controller;
-use local_rollover\local\rollover\rollover_progress;
-use restore_controller;
+use core\progress\display;
 
 defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
-require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
 /**
  * @package     local_rollover
@@ -40,25 +33,16 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_worker {
-    /** @var int */
-    private $destinationcourseid;
+class rollover_progress extends display {
+    private $message;
 
-    public function __construct($destinationcourseid) {
-        $this->destinationcourseid = (int)$destinationcourseid;
+    public function __construct($message) {
+        parent::__construct(false);
+        $this->set_display_names(true);
+        $this->message = $message;
     }
 
-    public function restore($backupid, rollover_progress $progressbar) {
-        $restore = new restore_controller($backupid,
-                                          $this->destinationcourseid,
-                                          backup::INTERACTIVE_NO,
-                                          backup::MODE_GENERAL,
-                                          rollover_controller::USERID,
-                                          backup::TARGET_EXISTING_ADDING);
-
-        $restore->set_progress($progressbar);
-        $restore->execute_precheck();
-        $restore->execute_plan();
-        $restore->destroy();
+    public function start_progress($description, $max = self::INDETERMINATE, $parentcount = 1) {
+        parent::start_progress("{$this->message}: $description", $max, $parentcount);
     }
 }
