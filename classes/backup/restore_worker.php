@@ -25,7 +25,6 @@ namespace local_rollover\backup;
 
 use backup;
 use local_rollover\local\rollover\rollover_controller;
-use local_rollover\local\rollover\rollover_progress;
 use restore_controller;
 
 defined('MOODLE_INTERNAL') || die();
@@ -48,7 +47,7 @@ class restore_worker {
         $this->destinationcourseid = (int)$destinationcourseid;
     }
 
-    public function restore($backupid, rollover_progress $progressbar) {
+    public function restore($backupid, $progressbar = null) {
         $restore = new restore_controller($backupid,
                                           $this->destinationcourseid,
                                           backup::INTERACTIVE_NO,
@@ -56,7 +55,10 @@ class restore_worker {
                                           rollover_controller::USERID,
                                           backup::TARGET_EXISTING_ADDING);
 
-        $restore->set_progress($progressbar);
+        if (!is_null($progressbar)) {
+            $restore->set_progress($progressbar);
+        }
+
         $restore->execute_precheck();
         $restore->execute_plan();
         $restore->destroy();

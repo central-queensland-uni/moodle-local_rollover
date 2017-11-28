@@ -28,7 +28,6 @@ use backup_controller;
 use backup_root_task;
 use local_rollover\local\backup_history;
 use local_rollover\local\rollover\rollover_controller;
-use local_rollover\local\rollover\rollover_progress;
 use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
@@ -94,11 +93,14 @@ class backup_worker {
         return $this->historyfilename;
     }
 
-    public function backup(rollover_progress $progressbar) {
+    public function backup($progressbar = null) {
         $setting = $this->get_backup_root_setting_filename();
         $setting->set_value($this->get_db_filename());
 
-        $this->backupcontroller->set_progress($progressbar);
+        if (!is_null($progressbar)) {
+            $this->backupcontroller->set_progress($progressbar);
+        }
+
         $this->backupcontroller->finish_ui();
         $this->backupcontroller->execute_plan();
         $results = $this->backupcontroller->get_results();
