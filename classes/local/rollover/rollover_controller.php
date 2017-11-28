@@ -220,6 +220,8 @@ class rollover_controller {
     public function finish_rollover_ui($from, $destination) {
         global $OUTPUT;
 
+        echo $OUTPUT->heading(get_string("rolloversuccessful", 'local_rollover'));
+
         echo get_string('rolloversuccessfulmessage', 'local_rollover', [
             'from' => htmlentities($from->shortname),
             'into' => htmlentities($destination->shortname),
