@@ -33,7 +33,7 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
-require(__DIR__ . '/../../../../lib/adminlib.php');
+require_once(__DIR__ . '/../../../../lib/adminlib.php');
 
 /**
  * @package     local_rollover
