@@ -163,4 +163,23 @@ trait local_rollover_behat_context_definition_for_assertions {
             throw new ExpectationException("Exception '{$expected}' not found.", $this->getSession());
         }
     }
+
+    /**
+     * @Then /^I should be at the course "([^"]*)" page +\# local_rollover$/
+     */
+    public function iShouldBeAtTheCoursePageLocal_rollover($course) {
+        global $CFG;
+
+        $courseid = $this->generator()->get_course_id($course);
+
+        $options = [
+            "{$CFG->wwwroot}/course/view.php?id={$courseid}",
+            "{$CFG->wwwroot}/course/view.php?name={$course}",
+        ];
+
+        $url = $this->getSession()->getCurrentUrl();
+        if (!in_array($url, $options)) {
+            throw new ExpectationException("Current URL: {$url}", $this->getSession());
+        }
+    }
 }

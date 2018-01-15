@@ -79,7 +79,7 @@ class form_confirmation extends form_step_base {
         $this->activitieshelper->set_form($mform);
         $this->activitieshelper->create_tasks();
 
-        $this->add_action_buttons(false, get_string('performrollover', 'local_rollover'));
+        $this->add_action_buttons(true, get_string('performrollover', 'local_rollover'));
     }
 
     private function get_original_course_link() {

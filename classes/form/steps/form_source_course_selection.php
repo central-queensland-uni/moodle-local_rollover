@@ -97,7 +97,7 @@ class form_source_course_selection extends form_step_base {
                            get_string('originalcourse_search', 'local_rollover'));
         $mform->setType('search', PARAM_TEXT);
 
-        $this->add_action_buttons(false, get_string('next'));
+        $this->add_action_buttons(false);
     }
 
     /**

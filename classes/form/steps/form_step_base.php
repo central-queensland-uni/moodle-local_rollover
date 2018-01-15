@@ -60,4 +60,24 @@ abstract class form_step_base extends moodleform {
 
         $this->step_definition();
     }
+
+    /**
+     * @param bool   $showback
+     * @param string $nextlabel
+     */
+    public function add_action_buttons($showback = true, $nextlabel = null) {
+        if (is_null($nextlabel)) {
+            $nextlabel = get_string('next');
+        }
+
+        $mform = $this->_form;
+        $buttonarray = [];
+        if ($showback) {
+            $buttonarray[] = $mform->createElement('submit', 'back', get_string('back'));
+        }
+        $buttonarray[] = $mform->createElement('submit', 'submitbutton', $nextlabel);
+        $buttonarray[] = $mform->createElement('cancel');
+        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
+        $mform->closeHeaderBefore('buttonar');
+    }
 }

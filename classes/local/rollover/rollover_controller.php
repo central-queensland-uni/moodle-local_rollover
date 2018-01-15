@@ -149,6 +149,9 @@ class rollover_controller {
 
     private function process() {
         $form = $this->get_step()->create_form();
+        if ($form->is_cancelled()) {
+            redirect(course_get_url($this->destinationcourse));
+        }
 
         $data = $form->get_data();
         if (empty($data)) {
@@ -161,7 +164,7 @@ class rollover_controller {
 
         $this->get_step()->process_form_data($data);
 
-        $this->currentstep++;
+        $this->currentstep += empty($data->back) ? 1 : -1;
 
         if ($this->complete_rollover()) {
             return null;
