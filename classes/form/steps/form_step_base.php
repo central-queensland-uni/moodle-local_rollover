@@ -64,6 +64,8 @@ abstract class form_step_base extends moodleform {
     /**
      * @param bool   $showback
      * @param string $nextlabel
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function add_action_buttons($showback = true, $nextlabel = null) {
         if (is_null($nextlabel)) {
