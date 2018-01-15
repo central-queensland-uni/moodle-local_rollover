@@ -25,6 +25,7 @@
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Mink\Exception\ExpectationException;
 use local_rollover\admin\rollover_settings;
 use local_rollover\admin\settings_controller;
 use local_rollover\dml\activity_rule_db;
@@ -200,5 +201,42 @@ trait local_rollover_behat_context_definition_for_data_generation {
      */
     public function allRolloverProtectionsAreDisabled() {
         $this->generator()->disable_protection();
+    }
+
+    /**
+     * @Given /^the course "([^"]*)" has a page with the Catalyst logo +\# local_rollover$/
+     */
+    public function theCourseHasAPageWithTheCatalystLogoLocal_rollover($course) {
+        global $CFG;
+
+        $content = '<p><img src="@@PLUGINFILE@@/catalyst.png" alt="" width="218" height="66" ' .
+                   'role="presentation" class="img-responsive atto_image_button_text-bottom"><br></p>';
+        $content = ['content' => $content, 'contentformat' => 1];
+        $page = $this->generator()->create_activity($course, 'page', 'Catalyst IT', $content);
+
+        $filerecord = [
+            'contextid' => context_module::instance($page->cmid)->id,
+            'component' => 'mod_page',
+            'filearea'  => 'content',
+            'itemid'    => 0,
+            'filepath'  => '/',
+            'filename'  => 'catalyst.png',
+        ];
+        $fs = get_file_storage();
+        $fs->create_file_from_pathname($filerecord, "{$CFG->dirroot}/local/rollover/tests/fixtures/catalyst.png");
+    }
+
+    /**
+     * @Given /^the Catalyst logo is missing in the site data +\# local_rollover$/
+     */
+    public function theCatalystLogoIsMissingInTheSiteDataLocal_rollover() {
+        global $CFG;
+
+        $file = "{$CFG->dataroot}/filedir/7a/f7/7af7368dd3d71e8c34e211dbe716c14e41ad531c";
+
+        if (!file_exists($file)) {
+            throw new ExpectationException("Cannot delete: {$file}", $this->getSession());
+        }
+        unlink($file);
     }
 }

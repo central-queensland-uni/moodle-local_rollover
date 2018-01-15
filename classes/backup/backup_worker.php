@@ -199,4 +199,20 @@ class backup_worker {
             }
         }
     }
+
+    public function get_warnings() {
+        $warnings = [];
+
+        $results = $this->backupcontroller->get_plan()->get_results();
+
+        if (!empty($results['missing_files_in_pool'])) {
+            $warnings[] = 'missingfilesinpool';
+        }
+
+        if (!empty($results['include_file_references_to_external_content'])) {
+            $warnings[] = 'filereferencesincluded';
+        }
+
+        return $warnings;
+    }
 }
