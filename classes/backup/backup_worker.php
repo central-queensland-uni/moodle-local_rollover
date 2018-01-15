@@ -26,6 +26,7 @@ namespace local_rollover\backup;
 use backup;
 use backup_controller;
 use backup_root_task;
+use local_rollover\form\steps\helpers\options_helper;
 use local_rollover\local\backup_history;
 use local_rollover\local\rollover\rollover_controller;
 use stored_file;
@@ -214,5 +215,23 @@ class backup_worker {
         }
 
         return $warnings;
+    }
+
+    public function apply_defaults() {
+        $this->apply_defaults_content_options();
+    }
+
+    private function apply_defaults_content_options() {
+        $settings = $this->get_backup_root_settings();
+        $helper = new options_helper($settings);
+
+        foreach ($settings as $name => $setting) {
+            $value = $helper->get_default($name);
+            if ($value != $setting->get_value()) {
+                $setting->set_value($value);
+            }
+        }
+
+        $this->save();
     }
 }

@@ -38,7 +38,7 @@ class form_options_selection extends form_step_base {
     private $helper;
 
     public function __construct($settings) {
-        $this->helper = new options_helper($settings, true);
+        $this->helper = new options_helper($settings);
         parent::__construct();
     }
 
