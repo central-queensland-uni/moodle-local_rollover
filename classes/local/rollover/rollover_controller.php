@@ -107,7 +107,6 @@ class rollover_controller {
                     throw new moodle_exception('Missing source course id.');
                 }
                 $this->backupworker = backup_worker::create($this->sourcecourseid);
-                $this->backupworker->apply_defaults();
             } else {
                 $this->backupworker = backup_worker::load($backupid);
             }

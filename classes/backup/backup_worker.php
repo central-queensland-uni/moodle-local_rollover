@@ -56,7 +56,9 @@ class backup_worker {
                                                   backup::INTERACTIVE_YES,
                                                   backup::MODE_GENERAL,
                                                   rollover_controller::USERID);
-        return new static($backupcontroller);
+        $worker = new static($backupcontroller);
+        $worker->apply_defaults();
+        return $worker;
     }
 
     public static function load($backupid) {
@@ -217,11 +219,7 @@ class backup_worker {
         return $warnings;
     }
 
-    public function apply_defaults() {
-        $this->apply_defaults_content_options();
-    }
-
-    private function apply_defaults_content_options() {
+    private function apply_defaults() {
         $settings = $this->get_backup_root_settings();
         $helper = new options_helper($settings);
 
