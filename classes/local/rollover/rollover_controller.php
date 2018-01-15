@@ -220,9 +220,16 @@ class rollover_controller {
     public function finish_rollover_ui($from, $destination) {
         global $OUTPUT;
 
-        echo $OUTPUT->heading(get_string("rolloversuccessful", 'local_rollover'));
+        $warnings = $this->get_backup_worker()->get_warnings();
+        $sucessorwarn = 'rolloversuccessful' . (count($warnings) == 0 ? '' : 'warn');
 
-        echo get_string('rolloversuccessfulmessage', 'local_rollover', [
+        echo $OUTPUT->heading(get_string($sucessorwarn, 'local_rollover'));
+
+        foreach ($warnings as $warning) {
+            echo $OUTPUT->notification(get_string($warning, 'backup'), 'notifyproblem');
+        }
+
+        echo get_string("{$sucessorwarn}message", 'local_rollover', [
             'from' => htmlentities($from->shortname),
             'into' => htmlentities($destination->shortname),
         ]);
