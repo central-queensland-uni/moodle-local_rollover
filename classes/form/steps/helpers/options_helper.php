@@ -49,9 +49,13 @@ class options_helper {
     /** @var backup_generic_setting */
     private $settings;
 
-    public function __construct($settings) {
+    /** @var bool */
+    private $usedefaults;
+
+    public function __construct($settings, $usedefaults) {
         $this->config = get_config('local_rollover');
         $this->settings = $settings;
+        $this->usedefaults = $usedefaults;
     }
 
     public function create_options() {
@@ -69,6 +73,8 @@ class options_helper {
     private function definition_add_setting($setting) {
         $name = $setting->get_name();
         list($default, $locked) = $this->definition_get_default_and_locked($name);
+
+        $value = ($this->usedefaults) ? $default : $this->definition_get_value($name);
 
         $hidden = ($locked && !$default);
 
@@ -92,7 +98,7 @@ class options_helper {
                                     $attributes);
         }
 
-        $this->form->setDefault($uiname, $default);
+        $this->form->setDefault($uiname, $value);
     }
 
     private function definition_get_default_and_locked($name) {
@@ -108,5 +114,14 @@ class options_helper {
     private function get_label_for_setting($name) {
         $name = str_replace('_', '', $name);
         return "rootsetting{$name}";
+    }
+
+    private function definition_get_value($name) {
+        if (!array_key_exists($name, $this->settings)) {
+            return null;
+        }
+        $setting = $this->settings[$name];
+        $value = $setting->get_value();
+        return $value;
     }
 }
