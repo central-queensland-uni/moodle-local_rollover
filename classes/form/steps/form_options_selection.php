@@ -23,9 +23,7 @@
 
 namespace local_rollover\form\steps;
 
-use backup_generic_setting;
 use local_rollover\form\steps\helpers\options_helper;
-use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -40,7 +38,7 @@ class form_options_selection extends form_step_base {
     private $helper;
 
     public function __construct($settings) {
-        $this->helper = new options_helper($settings);
+        $this->helper = new options_helper($settings, true);
         parent::__construct();
     }
 
