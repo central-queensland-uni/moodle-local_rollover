@@ -29,6 +29,7 @@ use backup_root_task;
 use local_rollover\form\steps\helpers\options_helper;
 use local_rollover\local\backup_history;
 use local_rollover\local\rollover\rollover_controller;
+use local_rollover\test\backup_controller_debugger;
 use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
@@ -58,11 +59,13 @@ class backup_worker {
                                                   rollover_controller::USERID);
         $worker = new static($backupcontroller);
         $worker->apply_defaults();
+        backup_controller_debugger::debug($backupcontroller, 'Created');
         return $worker;
     }
 
     public static function load($backupid) {
         $backupcontroller = backup_controller::load_controller($backupid);
+        backup_controller_debugger::debug($backupcontroller, 'Loaded');
         return new static($backupcontroller);
     }
 
@@ -174,6 +177,7 @@ class backup_worker {
     }
 
     public function save() {
+        backup_controller_debugger::debug($this->backupcontroller, 'Saved');
         $this->backupcontroller->save_controller();
 
         // It cannot be reused, need to be reloaded.
