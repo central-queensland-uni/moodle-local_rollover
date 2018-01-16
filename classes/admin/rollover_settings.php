@@ -139,12 +139,20 @@ class rollover_settings {
         }
 
         foreach (protection::get_protections() as $protection) {
+            // Action (none, warn or error).
             $title = new lang_string("settings-protection-{$protection}", 'local_rollover');
-            $description = new lang_string("settings-protection-{$protection}-description", 'local_rollover');
-            $key = 'local_rollover/' . protection::get_config_key($protection);
+            $key = 'local_rollover/' . protection::get_config_action_key($protection);
             $protectionsetting->add(
-                new admin_setting_configselect($key, $title, $description, self::DEFAULT_PROTECTION_LEVEL, $options)
+                new admin_setting_configselect($key, $title, '', self::DEFAULT_PROTECTION_LEVEL, $options)
             );
+            // Message (if warn or error).
+            $title = new lang_string("settings-protection-{$protection}-text", 'local_rollover');
+            $key = 'local_rollover/' . protection::get_config_text_key($protection);
+            $protectionsetting->add(new admin_setting_configtext($key,
+                                                                 $title,
+                                                                 '',
+                                                                 protection::get_config_text_default($protection),
+                                                                 PARAM_TEXT));
         }
 
         $admin->add('local_rollover', $protectionsetting);

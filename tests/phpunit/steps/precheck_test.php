@@ -33,8 +33,8 @@ class local_rollover_steps_precheck_test extends rollover_testcase {
         $this->resetAfterTest(true);
         self::setAdminUser();
 
-        protection::set_config(protection::PROTECT_NOT_EMPTY,
-                               protection::ACTION_WARN);
+        protection::set_config_action(protection::PROTECT_NOT_EMPTY,
+                                      protection::ACTION_WARN);
 
         $destinationcourse = $this->generator()->create_course_by_shortname('precheck_test');
         $this->generator()->create_activity('precheck_test', 'assignment', 'An assignment');
