@@ -55,6 +55,8 @@ class form_precheck extends moodleform {
      * Form definition.
      */
     public function definition() {
+        global $OUTPUT;
+
         $mform = $this->_form;
 
         $mform->addElement('hidden', rollover_parameters::PARAM_CURRENT_STEP);
@@ -64,17 +66,15 @@ class form_precheck extends moodleform {
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
         foreach ($this->warnings as $warning) {
-            $mform->addElement('static',
-                               "precheck_{$warning}",
-                               html_writer::tag('strong', get_string('warning')),
-                               get_string("precheck_{$warning}", 'local_rollover'));
+            $warning = html_writer::tag('strong', get_string('warning')) .
+                       get_string("precheck_{$warning}", 'local_rollover');
+            $mform->addElement('html', $OUTPUT->notification($warning, 'notifywarning'));
         }
 
-        foreach ($this->errors as $errors) {
-            $mform->addElement('static',
-                               "precheck_{$errors}",
-                               html_writer::tag('strong', get_string('error')),
-                               get_string("precheck_{$errors}", 'local_rollover'));
+        foreach ($this->errors as $error) {
+            $error = html_writer::tag('strong', get_string('error')) .
+                     get_string("precheck_{$error}", 'local_rollover');
+            $mform->addElement('html', $OUTPUT->notification($error, 'notifyproblem'));
         }
 
         if (count($this->errors) == 0) {
