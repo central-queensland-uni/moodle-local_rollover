@@ -24,6 +24,7 @@
 namespace local_rollover\form;
 
 use html_writer;
+use local_rollover\local\protection;
 use local_rollover\local\rollover\rollover_parameters;
 use moodleform;
 
@@ -66,14 +67,14 @@ class form_precheck extends moodleform {
         $mform->setType(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT);
 
         foreach ($this->warnings as $warning) {
-            $warning = html_writer::tag('strong', get_string('warning')) .
-                       get_string("precheck_{$warning}", 'local_rollover');
+            $warning = html_writer::tag('strong', get_string('warning')) . ': ' .
+                       protection::get_config_text($warning);
             $mform->addElement('html', $OUTPUT->notification($warning, 'notifywarning'));
         }
 
         foreach ($this->errors as $error) {
-            $error = html_writer::tag('strong', get_string('error')) .
-                     get_string("precheck_{$error}", 'local_rollover');
+            $error = html_writer::tag('strong', get_string('error')) . ': ' .
+                     protection::get_config_text($error);
             $mform->addElement('html', $OUTPUT->notification($error, 'notifyproblem'));
         }
 

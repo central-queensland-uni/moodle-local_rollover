@@ -43,3 +43,22 @@ Feature: Rollover protection
       | Action | See     | Not see | See Continue |
       | warn   | Warning | Error   | see          |
       | stop   | Error   | Warning | not see      |
+
+
+  Scenario: I see the custom message for warnings or errors
+    Given I am a teacher                                                                          # local_rollover
+    And the rollover protection is configured as follows:                                         # local_rollover
+      | Protection                                  | Action | Text                      |
+      | If rollover destination is not empty        | warn   | The destination has stuff |
+      | If rollover destination is not hidden       | warn   | I can see it              |
+      | If rollover destination contains students   | stop   | There are students here   |
+      | If rollover destination has already started | stop   | You are late              |
+    And I can modify the the course "destination"                                                 # local_rollover
+    And the "destination" course is not empty, is visible, has a student and has already started  # local_rollover
+    When I go to the rollover page for the course "destination"                                   # local_rollover
+    Then I should see "Warning"
+    And I should see "Error"
+    And I should see "The destination has stuff"
+    And I should see "I can see it"
+    And I should see "There are students here"
+    And I should see "You are late"

@@ -68,6 +68,10 @@ class protection {
         return "protection_{$protection}";
     }
 
+    public static function get_config_text_key($protection) {
+        return self::get_config_action_key($protection) . '_text';
+    }
+
     public static function get_config_action($protection) {
         $key = self::get_config_action_key($protection);
         $value = get_config('local_rollover', $key);
@@ -77,8 +81,26 @@ class protection {
         return $value;
     }
 
+    public static function get_config_text($protection) {
+        $key = self::get_config_text_key($protection);
+        $value = get_config('local_rollover', $key);
+        if (empty($value)) {
+            $value = self::get_config_text_default($protection);
+        }
+        return $value;
+    }
+
+    public static function get_config_text_default($protection) {
+        return get_string("precheck_{$protection}", 'local_rollover');
+    }
+
     public static function set_config_action($protection, $value) {
         $key = self::get_config_action_key($protection);
+        set_config($key, $value, 'local_rollover');
+    }
+
+    public static function set_config_text($protection, $value) {
+        $key = self::get_config_text_key($protection);
         set_config($key, $value, 'local_rollover');
     }
 
