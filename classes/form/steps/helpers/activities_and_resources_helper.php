@@ -83,15 +83,15 @@ class activities_and_resources_helper {
                 $changeable = $setting->get_ui()->is_changeable();
                 $visible = ($setting->get_visibility() == backup_setting::VISIBLE);
                 if ($changeable && $visible) {
-                    $this->create_task_setting($setting, $task);
+                    $this->create_task_setting_unlocked($setting, $task);
                 } else {
-                    $this->create_task_fixed_setting($setting, $task);
+                    $this->create_task_setting_locked($setting, $task);
                 }
             }
         }
     }
 
-    private function create_task_setting(backup_setting $setting, base_task $task) {
+    private function create_task_setting_unlocked(backup_setting $setting, base_task $task) {
         global $OUTPUT;
 
         $this->add_html_formatting($setting);
@@ -108,7 +108,7 @@ class activities_and_resources_helper {
         $this->close_div();
     }
 
-    private function create_task_fixed_setting(backup_setting $setting, base_task $task) {
+    private function create_task_setting_locked(backup_setting $setting, base_task $task) {
         global $OUTPUT;
         $settingui = $setting->get_ui();
 
