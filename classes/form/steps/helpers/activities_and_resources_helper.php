@@ -25,6 +25,7 @@ namespace local_rollover\form\steps\helpers;
 
 use backup_root_task;
 use backup_setting;
+use backup_setting_ui;
 use backup_task;
 use base_task;
 use html_writer;
@@ -75,13 +76,19 @@ class activities_and_resources_helper {
         $applier = new activities_and_resources_rules_applier();
         $applier->apply($this->tasks);
 
+        $highestlevel = $this->get_highest_setting_level();
+
         foreach ($this->tasks as $task) {
             if ($task instanceof backup_root_task) {
                 continue;
             }
+            /** @var backup_setting $setting */
             foreach ($task->get_settings() as $setting) {
-                $changeable = $setting->get_ui()->is_changeable();
+                /** @var backup_setting_ui $ui */
+                $ui = $setting->get_ui();
+                $changeable = $ui->is_changeable($highestlevel);
                 $visible = ($setting->get_visibility() == backup_setting::VISIBLE);
+
                 if ($changeable && $visible) {
                     $this->create_task_setting_unlocked($setting, $task);
                 } else {
@@ -242,5 +249,22 @@ class activities_and_resources_helper {
 
     private function open_div($class) {
         $this->form->addElement('html', html_writer::start_tag('div', ['class' => $class]));
+    }
+
+    private function get_highest_setting_level() {
+        $highestlevel = backup_setting::ACTIVITY_LEVEL;
+
+        foreach ($this->tasks as $task) {
+            if ($task instanceof backup_root_task) {
+                continue;
+            }
+
+            /** @var backup_setting $setting */
+            foreach ($task->get_settings() as $setting) {
+                $highestlevel = min($setting->get_level(), $highestlevel);
+            }
+        }
+
+        return $highestlevel;
     }
 }
