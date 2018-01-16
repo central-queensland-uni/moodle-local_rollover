@@ -96,7 +96,9 @@ class activities_and_resources_helper {
 
         $this->add_html_formatting($setting);
 
-        call_user_func_array([$this->form, 'addElement'], $setting->get_ui()->get_element_properties($task, $OUTPUT));
+        $parameters = array_values($setting->get_ui()->get_element_properties($task, $OUTPUT));
+        $this->form->addElement(...$parameters);
+
         $this->form->setType($setting->get_ui_name(), $setting->get_param_validation());
         $this->form->setDefault($setting->get_ui_name(), $setting->get_value());
 
@@ -105,7 +107,16 @@ class activities_and_resources_helper {
             $this->form->addHelpButton($setting->get_ui_name(), $identifier, $component);
         }
 
+        $this->add_dependencies($setting);
+
         $this->close_div();
+    }
+
+    private function add_dependencies(backup_setting $setting) {
+        foreach ($setting->get_my_dependency_properties() as $dependency) {
+            $parameters = array_values($dependency);
+            $this->form->disabledIf(...$parameters);
+        }
     }
 
     private function create_task_setting_locked(backup_setting $setting, base_task $task) {
