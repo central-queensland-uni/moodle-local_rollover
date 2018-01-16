@@ -82,8 +82,9 @@ class activities_and_resources_helper {
             if ($task instanceof backup_root_task) {
                 continue;
             }
-            /** @var backup_setting $setting */
-            foreach ($task->get_settings() as $setting) {
+            /** @var backup_setting[] $settings */
+            $settings = $task->get_settings();
+            foreach ($settings as $setting) {
                 /** @var backup_setting_ui $ui */
                 $ui = $setting->get_ui();
                 $changeable = $ui->is_changeable($highestlevel);
@@ -259,8 +260,9 @@ class activities_and_resources_helper {
                 continue;
             }
 
-            /** @var backup_setting $setting */
-            foreach ($task->get_settings() as $setting) {
+            /** @var backup_setting[] $settings */
+            $settings = $task->get_settings();
+            foreach ($settings as $setting) {
                 $highestlevel = min($setting->get_level(), $highestlevel);
             }
         }

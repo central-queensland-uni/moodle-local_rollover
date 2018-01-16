@@ -125,13 +125,13 @@ class backup_controller_debugger {
 
         /** @var backup_plan $plan */
         $plan = $this->controller->get_plan();
+        /** @var backup_setting[] $settings */
         $settings = $plan->get_settings();
 
         $format = "%-30s %-8s %-10s %-3s %-5s %-4s %-s\n";
         $result .= sprintf($format, 'Name', 'Level', 'Lock', 'Vis', 'UI', 'Type', 'Value');
         $result .= sprintf($format, '----', '-----', '----', '---', '--', '----', '-----');
 
-        /** @var backup_setting[] $settings */
         foreach ($settings as $setting) {
             $result .= sprintf(
                 $format,
@@ -144,8 +144,9 @@ class backup_controller_debugger {
                 $setting->get_value()
             );
 
-            /** @var setting_dependency $dependency */
-            foreach ($setting->get_dependencies() as $dependency) {
+            /** @var setting_dependency[] $dependencies */
+            $dependencies = $setting->get_dependencies();
+            foreach ($dependencies as $dependency) {
                 $reflection = new ReflectionClass($dependency);
                 $name = str_replace('setting_dependency_disabledif_', '', $reflection->getShortName());
                 $name = str_replace('_', ' ', $name);
@@ -156,8 +157,9 @@ class backup_controller_debugger {
                 );
             }
 
-            /** @var setting_dependency $dependency */
-            foreach ($setting->get_settings_depended_on() as $dependency) {
+            /** @var setting_dependency[] $dependson */
+            $dependson = $setting->get_settings_depended_on();
+            foreach ($dependson as $dependency) {
                 $reflection = new ReflectionClass($dependency);
                 $name = str_replace('setting_dependency_disabledif_', '', $reflection->getShortName());
                 $name = str_replace('_', ' ', $name);
