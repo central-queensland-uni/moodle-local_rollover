@@ -26,6 +26,7 @@ namespace local_rollover\form\steps;
 use backup_activity_task;
 use html_writer;
 use local_rollover\form\steps\helpers\activities_and_resources_helper;
+use local_rollover\local\select_allnone;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -55,7 +56,9 @@ class form_activities_and_resources_selection extends form_step_base {
         $this->helper->set_form($mform);
 
         $mform->addElement('header', 'coursesettings', get_string('includeactivities', 'backup'));
-        $this->create_select_all_none_section();
+        if (select_allnone::should_display()) {
+            $this->create_select_all_none_section();
+        }
         $this->helper->create_tasks();
 
         $this->add_action_buttons();
@@ -81,7 +84,7 @@ class form_activities_and_resources_selection extends form_step_base {
 
         $html = html_writer::div($select, 'fitemtitle') .
                 html_writer::div($links, 'felement');
-        $html = html_writer::div($html, 'fitem fitem_fcheckbox backup_selector');
+        $html = html_writer::div($html, 'fitem fitem_fcheckbox backup_selector local_rollover_select_allnone');
 
         $html = html_writer::div($html, 'include_setting section_level');
 

@@ -182,4 +182,26 @@ trait local_rollover_behat_context_definition_for_assertions {
             throw new ExpectationException("Current URL: {$url}", $this->getSession());
         }
     }
+
+    /**
+     * @Then /^I should (see|not see) the "Select all\/none" section +\# local_rollover$/
+     */
+    public function iShouldSeeTheSectionLocal_rollover($sees) {
+        $sees = ($sees == 'see');
+
+        $found = true;
+        try {
+            $this->find('css', '.local_rollover_select_allnone');
+        } catch (ElementNotFoundException $e) {
+            $found = false;
+        }
+
+        if ($sees && !$found) {
+            throw new ExpectationException('Cannot find select all/none.', $this->getSession());
+        }
+
+        if (!$sees && $found) {
+            throw new ExpectationException('Found select all/none.', $this->getSession());
+        }
+    }
 }

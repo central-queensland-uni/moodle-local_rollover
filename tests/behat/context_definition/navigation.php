@@ -281,4 +281,13 @@ JS;
             }
         };
     }
+
+    /**
+     * @Given /^I (select|deselect|unselect) the checkbox "([^"]*)" +\# local_rollover/
+     */
+    public function iSelectTheCheckboxLocal_rollover($selected, $field) {
+        $selected = ($selected == 'select') ? 1 : 0;
+        $this->execute('behat_forms::i_set_the_field_to', [$field, $selected]);
+    }
+
 }
