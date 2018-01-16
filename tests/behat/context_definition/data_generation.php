@@ -169,7 +169,7 @@ trait local_rollover_behat_context_definition_for_data_generation {
         $rows = $table->getColumnsHash();
         foreach ($rows as $row) {
             $option = $this->get_option_for_text($row['Protection']);
-            protection::set_config($option, $row['Action']);
+            protection::set_config_action($option, $row['Action']);
         }
     }
 

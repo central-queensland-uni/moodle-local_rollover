@@ -64,12 +64,12 @@ class protection {
         ];
     }
 
-    public static function get_config_key($protection) {
+    public static function get_config_action_key($protection) {
         return "protection_{$protection}";
     }
 
-    public static function get_config($protection) {
-        $key = self::get_config_key($protection);
+    public static function get_config_action($protection) {
+        $key = self::get_config_action_key($protection);
         $value = get_config('local_rollover', $key);
         if ($value === false) {
             $value = rollover_settings::DEFAULT_PROTECTION_LEVEL;
@@ -77,8 +77,8 @@ class protection {
         return $value;
     }
 
-    public static function set_config($protection, $value) {
-        $key = self::get_config_key($protection);
+    public static function set_config_action($protection, $value) {
+        $key = self::get_config_action_key($protection);
         set_config($key, $value, 'local_rollover');
     }
 
@@ -140,7 +140,7 @@ class protection {
     }
 
     public function check_empty() {
-        $action = self::get_config(self::PROTECT_NOT_EMPTY);
+        $action = self::get_config_action(self::PROTECT_NOT_EMPTY);
         if ($action == self::ACTION_IGNORE) {
             return self::ACTION_IGNORE;
         }
@@ -155,7 +155,7 @@ class protection {
     }
 
     public function check_hidden() {
-        $action = self::get_config(self::PROTECT_NOT_HIDDEN);
+        $action = self::get_config_action(self::PROTECT_NOT_HIDDEN);
         if ($action == self::ACTION_IGNORE) {
             return self::ACTION_IGNORE;
         }
@@ -168,7 +168,7 @@ class protection {
     }
 
     public function check_students() {
-        $action = self::get_config(self::PROTECT_HAS_STUDENTS);
+        $action = self::get_config_action(self::PROTECT_HAS_STUDENTS);
         if ($action == self::ACTION_IGNORE) {
             return self::ACTION_IGNORE;
         }
@@ -189,7 +189,7 @@ class protection {
     }
 
     public function check_started() {
-        $action = self::get_config(self::PROTECT_HAS_STARTED);
+        $action = self::get_config_action(self::PROTECT_HAS_STARTED);
         if ($action == self::ACTION_IGNORE) {
             return self::ACTION_IGNORE;
         }

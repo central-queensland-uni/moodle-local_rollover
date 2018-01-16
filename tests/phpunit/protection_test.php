@@ -48,7 +48,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_always_skips_check_if_destination_course_empty($action) {
-        protection::set_config(protection::PROTECT_NOT_EMPTY, $action);
+        protection::set_config_action(protection::PROTECT_NOT_EMPTY, $action);
 
         $protector = new protection($this->course);
         $actual = $protector->check_empty();
@@ -62,7 +62,7 @@ class local_rollover_protection_test extends rollover_testcase {
     public function test_it_checks_if_destination_course_empty($action) {
         $this->generator()->create_activity($this->course->shortname, 'assignment', 'An assignment');
 
-        protection::set_config(protection::PROTECT_NOT_EMPTY, $action);
+        protection::set_config_action(protection::PROTECT_NOT_EMPTY, $action);
 
         $protector = new protection($this->course);
 
@@ -74,7 +74,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_always_skips_check_if_destination_course_hidden($action) {
-        protection::set_config(protection::PROTECT_NOT_HIDDEN, $action);
+        protection::set_config_action(protection::PROTECT_NOT_HIDDEN, $action);
         $this->course->visible = '0';
 
         $protector = new protection($this->course);
@@ -87,7 +87,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_checks_if_destination_course_hidden($action) {
-        protection::set_config(protection::PROTECT_NOT_HIDDEN, $action);
+        protection::set_config_action(protection::PROTECT_NOT_HIDDEN, $action);
 
         $protector = new protection($this->course);
 
@@ -99,7 +99,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_always_skips_check_if_destination_course_has_no_students($action) {
-        protection::set_config(protection::PROTECT_HAS_STUDENTS, $action);
+        protection::set_config_action(protection::PROTECT_HAS_STUDENTS, $action);
         $this->generator()->enrol_nonediting_teacher('tutor', $this->course->shortname);
 
         $protector = new protection($this->course);
@@ -112,7 +112,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_checks_if_destination_course_has_students($action) {
-        protection::set_config(protection::PROTECT_HAS_STUDENTS, $action);
+        protection::set_config_action(protection::PROTECT_HAS_STUDENTS, $action);
         $this->generator()->enrol_student('john', $this->course->shortname);
 
         $protector = new protection($this->course);
@@ -125,7 +125,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_always_skips_check_if_destination_course_has_not_started($action) {
-        protection::set_config(protection::PROTECT_HAS_STARTED, $action);
+        protection::set_config_action(protection::PROTECT_HAS_STARTED, $action);
         $this->course->startdate = time() + DAYSECS; // Starts tomorrow.
 
         $protector = new protection($this->course);
@@ -138,7 +138,7 @@ class local_rollover_protection_test extends rollover_testcase {
      * @dataProvider provider_for_protection_actions
      */
     public function test_it_checks_if_destination_course_already_started($action) {
-        protection::set_config(protection::PROTECT_HAS_STARTED, $action);
+        protection::set_config_action(protection::PROTECT_HAS_STARTED, $action);
         $this->course->startdate = time() - DAYSECS; // Started yesterday.
 
         $protector = new protection($this->course);
