@@ -26,6 +26,7 @@ namespace local_rollover\admin;
 use admin_category;
 use admin_externalpage;
 use admin_root;
+use admin_setting_configcheckbox;
 use admin_setting_configcheckbox_with_lock;
 use admin_setting_configduration;
 use admin_setting_configselect;
@@ -34,6 +35,7 @@ use admin_settingpage;
 use lang_string;
 use local_rollover\local\backup_history;
 use local_rollover\local\protection;
+use local_rollover\local\select_allnone;
 use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
@@ -91,6 +93,7 @@ class rollover_settings {
         $this->create_activities($admin);
         $this->create_protection($admin);
         $this->create_backup_history($admin);
+        $this->create_select_allnone($admin);
     }
 
     private function create_options($admin) {
@@ -168,6 +171,21 @@ class rollover_settings {
                                  new lang_string('settings-backup-duration', 'local_rollover'),
                                  new lang_string('settings-backup-duration-description', 'local_rollover'),
                                  backup_history::get_default_duration()
+                             ));
+
+        $admin->add('local_rollover', $backupsettings);
+    }
+
+    private function create_select_allnone($admin) {
+        $backupsettings = new admin_settingpage('local_rollover_select_allnone',
+                                                new lang_string('settings-select-allnone', 'local_rollover')
+        );
+
+        $backupsettings->add(new admin_setting_configcheckbox(
+                                 'local_rollover/' . select_allnone::SETTING_KEY,
+                                 new lang_string('settings-select-allnone-title', 'local_rollover'),
+                                 new lang_string('settings-select-allnone-description', 'local_rollover'),
+                                 select_allnone::DEFAULT_VALUE
                              ));
 
         $admin->add('local_rollover', $backupsettings);
