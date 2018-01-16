@@ -1,0 +1,372 @@
+From 6f1642266c927d4ff235f906b1b0f4552667524a Mon Sep 17 00:00:00 2001
+From: Daniel Thee Roperto <daniel@theeroperto.com>
+Date: Tue, 16 Jan 2018 09:56:32 +1100
+Subject: [PATCH] MDL-27886 squashed:
+
+pick 4071241 MDL-27886 backup: Added behat tests for user data settings
+pick 796cc6b MDL-27886 backup: Enabled unlocking of backup settings
+pick 3df38ab MDL-27886 backup: Decision if a setting is fixed based on level
+pick e0093c5 MDL-27886 backup: When setting is unlocked set it to original value
+---
+ backup/util/settings/base_setting.class.php        |   7 ++
+ backup/util/settings/setting_dependency.class.php  |  26 ++---
+ backup/util/ui/backup_ui_setting.class.php         |  23 +++-
+ backup/util/ui/base_moodleform.class.php           |  13 ++-
+ .../behat/restore_moodle2_courses_settings.feature | 125 +++++++++++++++++++++
+ 5 files changed, 174 insertions(+), 20 deletions(-)
+ create mode 100644 backup/util/ui/tests/behat/restore_moodle2_courses_settings.feature
+
+diff --git a/backup/util/settings/base_setting.class.php b/backup/util/settings/base_setting.class.php
+index c5cb567..ebc89ab 100644
+--- a/backup/util/settings/base_setting.class.php
++++ b/backup/util/settings/base_setting.class.php
+@@ -65,6 +65,7 @@ abstract class base_setting {
+ 
+     protected $name;  // name of the setting
+     protected $value; // value of the setting
++    protected $unlockedvalue; // Value to set after the setting is unlocked.
+     protected $vtype; // type of value (setting_base::IS_BOOLEAN/setting_base::IS_INTEGER...)
+ 
+     protected $visibility; // visibility of the setting (setting_base::VISIBLE/setting_base::HIDDEN)
+@@ -117,6 +118,7 @@ abstract class base_setting {
+         $this->value       = $value;
+         $this->visibility  = $visibility;
+         $this->status      = $status;
++        $this->unlockedvalue = $this->value;
+ 
+         // Generate a default ui
+         $this->uisetting = new base_setting_ui($this);
+@@ -218,6 +220,11 @@ abstract class base_setting {
+         $this->status = $status;
+         if ($status !== $oldstatus) { // Status has changed, let's inform dependencies
+             $this->inform_dependencies(self::CHANGED_STATUS, $oldstatus);
++
++            if ($status == base_setting::NOT_LOCKED) {
++                // When setting gets unlocked set it to the original value.
++                $this->set_value($this->unlockedvalue);
++            }
+         }
+     }
+ 
+diff --git a/backup/util/settings/setting_dependency.class.php b/backup/util/settings/setting_dependency.class.php
+index eebb6f1..ebd3c37 100644
+--- a/backup/util/settings/setting_dependency.class.php
++++ b/backup/util/settings/setting_dependency.class.php
+@@ -153,7 +153,7 @@ abstract class setting_dependency {
+      */
+     abstract public function get_moodleform_properties();
+     /**
+-     * Returns true if the dependent setting is locked.
++     * Returns true if the dependent setting is locked by this setting_dependency.
+      * @return bool
+      */
+     abstract public function is_locked();
+@@ -185,7 +185,7 @@ class setting_dependency_disabledif_equals extends setting_dependency {
+         $this->value = ($value)?(string)$value:0;
+     }
+     /**
+-     * Returns true if the dependent setting is locked.
++     * Returns true if the dependent setting is locked by this setting_dependency.
+      * @return bool
+      */
+     public function is_locked() {
+@@ -193,8 +193,8 @@ class setting_dependency_disabledif_equals extends setting_dependency {
+         if ($this->setting->get_status() !== base_setting::NOT_LOCKED || $this->setting->get_value() == $this->value) {
+             return true;
+         }
+-        // Else return based upon the dependent settings status
+-        return ($this->dependentsetting->get_status() !== base_setting::NOT_LOCKED);
++        // Else the dependent setting is not locked by this setting_dependency.
++        return false;
+     }
+     /**
+      * Processes a value change in the primary setting
+@@ -338,7 +338,7 @@ class setting_dependency_disabledif_equals2 extends setting_dependency {
+         $this->value = $value;
+     }
+     /**
+-     * Returns true if the dependent setting is locked.
++     * Returns true if the dependent setting is locked by this setting_dependency.
+      * @return bool
+      */
+     public function is_locked() {
+@@ -346,8 +346,8 @@ class setting_dependency_disabledif_equals2 extends setting_dependency {
+         if ($this->setting->get_status() !== base_setting::NOT_LOCKED || in_array($this->setting->get_value(), $this->value)) {
+             return true;
+         }
+-        // Else return based upon the dependent settings status
+-        return ($this->dependentsetting->get_status() !== base_setting::NOT_LOCKED);
++        // Else the dependent setting is not locked by this setting_dependency.
++        return false;
+     }
+     /**
+      * Processes a value change in the primary setting
+@@ -532,7 +532,7 @@ class setting_dependency_disabledif_not_empty extends setting_dependency_disable
+     }
+ 
+     /**
+-     * Returns true if the dependent setting is locked.
++     * Returns true if the dependent setting is locked by this setting_dependency.
+      * @return bool
+      */
+     public function is_locked() {
+@@ -540,8 +540,8 @@ class setting_dependency_disabledif_not_empty extends setting_dependency_disable
+         if ($this->setting->get_status() !== base_setting::NOT_LOCKED || !empty($value)) {
+             return true;
+         }
+-        // Else return based upon the dependent settings status
+-        return ($this->dependentsetting->get_status() !== base_setting::NOT_LOCKED);
++        // Else the dependent setting is not locked by this setting_dependency.
++        return false;
+     }
+ }
+ 
+@@ -596,7 +596,7 @@ class setting_dependency_disabledif_empty extends setting_dependency_disabledif_
+         return ($prevalue != $this->dependentsetting->get_value());
+     }
+     /**
+-     * Returns true if the dependent setting is locked.
++     * Returns true if the dependent setting is locked by this setting_dependency.
+      * @return bool
+      */
+     public function is_locked() {
+@@ -604,7 +604,7 @@ class setting_dependency_disabledif_empty extends setting_dependency_disabledif_
+         if ($this->setting->get_status() !== base_setting::NOT_LOCKED || empty($value)) {
+             return true;
+         }
+-        // Else return based upon the dependent settings status
+-        return ($this->dependentsetting->get_status() !== base_setting::NOT_LOCKED);
++        // Else the dependent setting is not locked by this setting_dependency.
++        return false;
+     }
+ }
+diff --git a/backup/util/ui/backup_ui_setting.class.php b/backup/util/ui/backup_ui_setting.class.php
+index 37d6e75..4acd49c 100644
+--- a/backup/util/ui/backup_ui_setting.class.php
++++ b/backup/util/ui/backup_ui_setting.class.php
+@@ -307,10 +307,12 @@ abstract class backup_setting_ui extends base_setting_ui {
+      * 2. The setting is locked but only by settings that are of the same level (same page)
+      *
+      * Condition 2 is really why we have this function
+-     *
++     * @param int $level Optional, if provided only depedency_settings below or equal to this level are considered,
++     *          when checking if the ui_setting is changeable. Although dependencies might cause a lock on this setting,
++     *          they could be changeable in the same view.
+      * @return bool
+      */
+-    public function is_changeable() {
++    public function is_changeable($level = null) {
+         if ($this->setting->get_status() === backup_setting::NOT_LOCKED) {
+             // Its not locked so its chanegable.
+             return true;
+@@ -319,6 +321,9 @@ abstract class backup_setting_ui extends base_setting_ui {
+             return false;
+         } else if ($this->setting->has_dependencies_on_settings()) {
+             foreach ($this->setting->get_settings_depended_on() as $dependency) {
++                if ($level && $dependency->get_setting()->get_level() >= $level) {
++                    continue;
++                }
+                 if ($dependency->is_locked() && $dependency->get_setting()->get_level() !== $this->setting->get_level()) {
+                     // Its not changeable because one or more dependancies arn't changeable.
+                     return false;
+@@ -456,13 +461,16 @@ class backup_setting_ui_checkbox extends backup_setting_ui {
+ 
+     /**
+      * Returns true if the setting is changeable
++     * @param int $level Optional, if provided only depedency_settings below or equal to this level are considered,
++     *          when checking if the ui_setting is changeable. Although dependencies might cause a lock on this setting,
++     *          they could be changeable in the same view.
+      * @return bool
+      */
+-    public function is_changeable() {
++    public function is_changeable($level = null) {
+         if ($this->changeable === false) {
+             return false;
+         } else {
+-            return parent::is_changeable();
++            return parent::is_changeable($level);
+         }
+     }
+ 
+@@ -635,13 +643,16 @@ class backup_setting_ui_select extends backup_setting_ui {
+     /**
+      * Returns true if the setting is changeable, false otherwise
+      *
++     * @param int $level Optional, if provided only depedency_settings below or equal to this level are considered,
++     *          when checking if the ui_setting is changeable. Although dependencies might cause a lock on this setting,
++     *          they could be changeable in the same view.
+      * @return bool
+      */
+-    public function is_changeable() {
++    public function is_changeable($level = null) {
+         if (count($this->values) == 1) {
+             return false;
+         } else {
+-            return parent::is_changeable();
++            return parent::is_changeable($level);
+         }
+     }
+ }
+diff --git a/backup/util/ui/base_moodleform.class.php b/backup/util/ui/base_moodleform.class.php
+index b5c8159..5beded5 100644
+--- a/backup/util/ui/base_moodleform.class.php
++++ b/backup/util/ui/base_moodleform.class.php
+@@ -183,11 +183,22 @@ abstract class base_moodleform extends moodleform {
+     public function add_settings(array $settingstasks) {
+         global $OUTPUT;
+ 
++        // Determine highest setting level, which is displayed in this stage. This is relevant for considering only
++        // locks of dependency settings for parent settings, which are not displayed in this stage.
++        $highestlevel = backup_setting::ACTIVITY_LEVEL;
++        foreach ($settingstasks as $st) {
++            list($setting, $task) = $st;
++            if ($setting->get_level() < $highestlevel) {
++                $highestlevel = $setting->get_level();
++            }
++        }
++
+         $defaults = array();
+         foreach ($settingstasks as $st) {
+             list($setting, $task) = $st;
+             // If the setting cant be changed or isn't visible then add it as a fixed setting.
+-            if (!$setting->get_ui()->is_changeable() || $setting->get_visibility() != backup_setting::VISIBLE) {
++            if (!$setting->get_ui()->is_changeable($highestlevel) ||
++                $setting->get_visibility() != backup_setting::VISIBLE) {
+                 $this->add_fixed_setting($setting, $task);
+                 continue;
+             }
+diff --git a/backup/util/ui/tests/behat/restore_moodle2_courses_settings.feature b/backup/util/ui/tests/behat/restore_moodle2_courses_settings.feature
+new file mode 100644
+index 0000000..b851957
+--- /dev/null
++++ b/backup/util/ui/tests/behat/restore_moodle2_courses_settings.feature
+@@ -0,0 +1,125 @@
++@core @core_backup
++Feature: Restore Moodle 2 course backups with different user data settings
++  In order to decide upon including user data during backup and restore of courses
++  As a teacher and an admin
++  I need to be able to set and override backup and restore settings
++
++  Background:
++    Given the following "users" exist:
++      | username | firstname | lastname | email |
++      | student1 | Student | 1 | student1@example.com |
++      | teacher1 | Teacher | 1 | teacher1@example.com |
++    And the following "courses" exist:
++      | fullname | shortname | category |
++      | Course 1 | C1 | 0 |
++    And the following "course enrolments" exist:
++      | user | course | role |
++      | teacher1 | C1 | editingteacher |
++      | student1 | C1 | student |
++    And the following "activities" exist:
++      | activity | name               | intro | course | idnumber |
++      | data     | Test database name | n     | C1     | data1    |
++    And I log in as "teacher1"
++    And I am on "Course 1" course homepage
++    And I add a "Text input" field to "Test database name" database and I fill the form with:
++      | Field name | Test field name |
++      | Field description | Test field description |
++    And I follow "Templates"
++    And I wait until the page is ready
++    And I log out
++    And I log in as "student1"
++    And I am on "Course 1" course homepage
++    And I add an entry to "Test database name" database with:
++      | Test field name | Student entry |
++    And I press "Save and view"
++    And I log out
++    And I log in as "admin"
++    And I backup "Course 1" course using this options:
++      | Initial |  Include enrolled users | 1 |
++      | Confirmation | Filename | test_backup.mbz |
++
++  @javascript
++  Scenario: Restore a backup with user data
++    # "User data" marks the user data field for the section
++    # "-" marks the user data field for the data activity
++    When I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 1 |
++      | Schema | User data | 1 |
++      | Schema | - | 1 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should see "Student entry"
++
++  @javascript
++  Scenario: Restore a backup without user data for data activity
++    # "User data" marks the user data field for the section
++    # "-" marks the user data field for the data activity
++    When I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 1 |
++      | Schema | User data | 1 |
++      | Schema | - | 0 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should not see "Student entry"
++
++  @javascript
++  Scenario: Restore a backup without user data for section and data activity
++    # "User data" marks the user data field for the section
++    # "-" marks the user data field for the data activity
++    When I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 1 |
++      | Schema | User data | 0 |
++      | Schema | - | 0 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should not see "Student entry"
++
++  @javascript
++  Scenario: Restore a backup without user data for section
++    # "User data" marks the user data field for the section
++    # "-" marks the user data field for the data activity
++    When I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 1 |
++      | Schema | - | 1 |
++      | Schema | User data | 0 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should not see "Student entry"
++
++  @javascript
++  Scenario: Restore a backup with user data with local config for including users set to 0
++    And I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 0 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should not see "Student entry"
++
++  @javascript
++  Scenario: Restore a backup with user data with site config for including users set to 0
++    Given I navigate to "General restore defaults" node in "Site administration > Courses > Backups"
++    And I set the field "s_restore_restore_general_users" to ""
++    And I press "Save changes"
++    And I am on "Course 1" course homepage
++    And I navigate to "Restore" node in "Course administration"
++    # "User data" marks the user data field for the section
++    # "-" marks the user data field for the data activity
++    And I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 1 |
++      | Schema | User data | 1 |
++      | Schema | - | 1 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should see "Student entry"
++
++  @javascript
++  Scenario: Restore a backup with user data with local and site config config for including users set to 0
++    Given I navigate to "General restore defaults" node in "Site administration > Courses > Backups"
++    And I set the field "s_restore_restore_general_users" to ""
++    And I press "Save changes"
++    And I am on "Course 1" course homepage
++    And I navigate to "Restore" node in "Course administration"
++    When I restore "test_backup.mbz" backup into a new course using this options:
++      | Settings |  Include enrolled users | 0 |
++    Then I should see "Test database name"
++    When I follow "Test database name"
++    Then I should not see "Student entry"
+\ No newline at end of file
+-- 
+2.7.4
+

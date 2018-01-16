@@ -57,6 +57,7 @@ before_install:
 
 install:
   - moodle-plugin-ci install -vvv
+  - if [ "$MOODLE_VERSION" -eq 31 ]; then (cd /home/travis/build/moodle; git apply local/rollover/MDL27886.patch); fi
 
 script:
   - moodle-plugin-ci validate

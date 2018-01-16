@@ -58,7 +58,7 @@ class form_activities_and_resources_selection extends form_step_base {
         $this->create_select_all_none_section();
         $this->helper->create_tasks();
 
-        $this->add_action_buttons(false, get_string('next'));
+        $this->add_action_buttons();
     }
 
     private function create_select_all_none_section() {

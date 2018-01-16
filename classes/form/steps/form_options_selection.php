@@ -38,7 +38,7 @@ class form_options_selection extends form_step_base {
     private $helper;
 
     public function __construct($settings) {
-        $this->helper = new options_helper($settings, true);
+        $this->helper = new options_helper($settings);
         parent::__construct();
     }
 
@@ -48,6 +48,6 @@ class form_options_selection extends form_step_base {
     public function step_definition() {
         $this->helper->set_form($this->_form);
         $this->helper->create_options();
-        $this->add_action_buttons(false, get_string('next'));
+        $this->add_action_buttons();
     }
 }

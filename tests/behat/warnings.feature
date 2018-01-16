@@ -13,11 +13,11 @@ Feature: Show warnings in case of errors
     And there is a course with shortname "destination"                      # local_rollover
     And I am at the course "destination" page                               # local_rollover
     When I press "Rollover" in the Course Administration block              # local_rollover
-    When I select "source" in "Original course"                             # local_rollover
+    And I select "source" in "Original course"                             # local_rollover
     And I press "Next"
     And I select "Include activities and resources" in the list of activities/resources   # local_rollover
     And I press "Next"
     And I press "Next"
-    When I press "Perform rollover"
+    And I press "Perform rollover"
     Then I should see "Rollover successful with warnings"
     And I should see "files could not be saved"
