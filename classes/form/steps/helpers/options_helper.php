@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class options_helper {
+class options_helper extends setting_helper {
     /** @var MoodleQuickForm */
     private $form = null;
 
@@ -80,15 +80,21 @@ class options_helper {
         }
         $attributes = $ui->get_attributes();
 
+        $label = get_string($this->get_label_for_setting($name), 'backup');
         $uiname = $ui->get_name();
 
         if ($hidden) {
             $this->form->addElement('hidden', $uiname);
             $this->form->setType($uiname, PARAM_BOOL);
+        } else if ($this->is_readonly()) {
+            $this->form->addElement('static',
+                                    'static_' . $uiname,
+                                    $label,
+                                    $ui->get_static_value());
         } else {
             $this->form->addElement('checkbox',
                                     $uiname,
-                                    get_string($this->get_label_for_setting($name), 'backup'),
+                                    $label,
                                     '',
                                     $attributes);
         }

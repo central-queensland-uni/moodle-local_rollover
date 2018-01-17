@@ -25,6 +25,7 @@ namespace local_rollover\form\steps\helpers;
 
 use backup_root_task;
 use backup_setting;
+use backup_setting_ui;
 use backup_task;
 use base_task;
 use html_writer;
@@ -39,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class activities_and_resources_helper {
+class activities_and_resources_helper extends setting_helper {
     /** @var MoodleQuickForm */
     private $form = null;
 
@@ -75,28 +76,37 @@ class activities_and_resources_helper {
         $applier = new activities_and_resources_rules_applier();
         $applier->apply($this->tasks);
 
+        $highestlevel = $this->get_highest_setting_level();
+
         foreach ($this->tasks as $task) {
             if ($task instanceof backup_root_task) {
                 continue;
             }
-            foreach ($task->get_settings() as $setting) {
-                $changeable = $setting->get_ui()->is_changeable();
+            /** @var backup_setting[] $settings */
+            $settings = $task->get_settings();
+            foreach ($settings as $setting) {
+                /** @var backup_setting_ui $ui */
+                $ui = $setting->get_ui();
+                $changeable = $ui->is_changeable($highestlevel);
                 $visible = ($setting->get_visibility() == backup_setting::VISIBLE);
-                if ($changeable && $visible) {
-                    $this->create_task_setting($setting, $task);
+
+                if (!$this->is_readonly() && $changeable && $visible) {
+                    $this->create_task_setting_unlocked($setting, $task);
                 } else {
-                    $this->create_task_fixed_setting($setting, $task);
+                    $this->create_task_setting_locked($setting, $task);
                 }
             }
         }
     }
 
-    private function create_task_setting(backup_setting $setting, base_task $task) {
+    private function create_task_setting_unlocked(backup_setting $setting, base_task $task) {
         global $OUTPUT;
 
         $this->add_html_formatting($setting);
 
-        call_user_func_array([$this->form, 'addElement'], $setting->get_ui()->get_element_properties($task, $OUTPUT));
+        $parameters = array_values($setting->get_ui()->get_element_properties($task, $OUTPUT));
+        $this->form->addElement(...$parameters);
+
         $this->form->setType($setting->get_ui_name(), $setting->get_param_validation());
         $this->form->setDefault($setting->get_ui_name(), $setting->get_value());
 
@@ -105,10 +115,19 @@ class activities_and_resources_helper {
             $this->form->addHelpButton($setting->get_ui_name(), $identifier, $component);
         }
 
+        $this->add_dependencies($setting);
+
         $this->close_div();
     }
 
-    private function create_task_fixed_setting(backup_setting $setting, base_task $task) {
+    private function add_dependencies(backup_setting $setting) {
+        foreach ($setting->get_my_dependency_properties() as $dependency) {
+            $parameters = array_values($dependency);
+            $this->form->disabledIf(...$parameters);
+        }
+    }
+
+    private function create_task_setting_locked(backup_setting $setting, base_task $task) {
         global $OUTPUT;
         $settingui = $setting->get_ui();
 
@@ -126,8 +145,10 @@ class activities_and_resources_helper {
             $this->close_div();
         }
 
-        $this->form->addElement('hidden', $settingui->get_name(), $settingui->get_value());
-        $this->form->setType($settingui->get_name(), $settingui->get_param_validation());
+        if (!$this->is_readonly()) {
+            $this->form->addElement('hidden', $settingui->get_name(), $settingui->get_value());
+            $this->form->setType($settingui->get_name(), $settingui->get_param_validation());
+        }
     }
 
     private function get_fixed_setting_locked_icon(backup_setting $setting) {
@@ -231,5 +252,23 @@ class activities_and_resources_helper {
 
     private function open_div($class) {
         $this->form->addElement('html', html_writer::start_tag('div', ['class' => $class]));
+    }
+
+    private function get_highest_setting_level() {
+        $highestlevel = backup_setting::ACTIVITY_LEVEL;
+
+        foreach ($this->tasks as $task) {
+            if ($task instanceof backup_root_task) {
+                continue;
+            }
+
+            /** @var backup_setting[] $settings */
+            $settings = $task->get_settings();
+            foreach ($settings as $setting) {
+                $highestlevel = min($setting->get_level(), $highestlevel);
+            }
+        }
+
+        return $highestlevel;
     }
 }

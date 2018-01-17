@@ -75,6 +75,7 @@ class local_rollover_steps_rollover_complete_test extends rollover_testcase {
         $sink = $this->redirectEvents();
         ob_start();
         $controller->index();
+        $worker = $controller->get_backup_worker();
         ob_end_clean();
 
         $events = self::filter_rollover_events($sink->get_events());
