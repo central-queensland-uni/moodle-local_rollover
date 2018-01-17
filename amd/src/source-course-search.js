@@ -44,7 +44,14 @@ define(['jquery'], function ($) {
         });
     };
 
-    SourceCourseSearch.prototype.trigger = function () {
+    SourceCourseSearch.prototype.trigger = function (event) {
+        // Do not submit form when pressing ENTER.
+        var keyCode = event.keyCode || event.which;
+        if (keyCode === 13) {
+            event.preventDefault();
+            return false;
+        }
+
         if (this.timer !== null) {
             clearTimeout(this.timer);
         }
