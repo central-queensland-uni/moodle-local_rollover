@@ -40,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class activities_and_resources_helper {
+class activities_and_resources_helper extends setting_helper {
     /** @var MoodleQuickForm */
     private $form = null;
 
@@ -90,7 +90,7 @@ class activities_and_resources_helper {
                 $changeable = $ui->is_changeable($highestlevel);
                 $visible = ($setting->get_visibility() == backup_setting::VISIBLE);
 
-                if ($changeable && $visible) {
+                if (!$this->is_readonly() && $changeable && $visible) {
                     $this->create_task_setting_unlocked($setting, $task);
                 } else {
                     $this->create_task_setting_locked($setting, $task);
@@ -145,8 +145,10 @@ class activities_and_resources_helper {
             $this->close_div();
         }
 
-        $this->form->addElement('hidden', $settingui->get_name(), $settingui->get_value());
-        $this->form->setType($settingui->get_name(), $settingui->get_param_validation());
+        if (!$this->is_readonly()) {
+            $this->form->addElement('hidden', $settingui->get_name(), $settingui->get_value());
+            $this->form->setType($settingui->get_name(), $settingui->get_param_validation());
+        }
     }
 
     private function get_fixed_setting_locked_icon(backup_setting $setting) {

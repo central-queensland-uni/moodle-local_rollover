@@ -48,10 +48,13 @@ class form_confirmation extends form_step_base {
     private $activitieshelper;
 
     public function __construct(backup_worker $worker) {
-        $worker->block_modifications();
         $this->worker = $worker;
         $this->optionshelper = new options_helper($worker->get_backup_root_settings());
         $this->activitieshelper = new activities_and_resources_helper($worker->get_backup_tasks());
+
+        $this->optionshelper->make_readonly();
+        $this->activitieshelper->make_readonly();
+
         parent::__construct();
     }
 

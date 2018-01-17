@@ -199,14 +199,6 @@ class backup_worker {
         $file->copy_content_to($location);
     }
 
-    public function block_modifications() {
-        foreach ($this->get_backup_tasks() as $task) {
-            foreach ($task->get_settings() as $setting) {
-                $setting->get_ui()->disable();
-            }
-        }
-    }
-
     public function get_warnings() {
         $warnings = [];
 
