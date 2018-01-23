@@ -125,6 +125,12 @@ class step_source_course extends step {
 
     public function process_form_data($data) {
         $backupworker = $this->controller->get_backup_worker();
+        $sourcecourseid = $backupworker->get_source_course_id();
+
+        if ($sourcecourseid != $data->{rollover_parameters::PARAM_SOURCE_COURSE_ID}) {
+            $backupworker = $this->controller->create_backup_worker();
+        }
+
         $data->rollover_backup_id = $backupworker->get_backup_id();
         $this->controller->fire_event(rollover_requested::class);
         $backupworker->save();
