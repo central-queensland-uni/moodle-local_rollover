@@ -157,5 +157,5 @@ $string['step_complete'] = 'Performing rollover';
 $string['step_confirmation'] = 'Rollover: Confirm settings';
 $string['step_content_options'] = 'Rollover: Select content options';
 $string['step_precheck'] = 'Rollover: Pre-check';
-$string['step_source_course'] = 'Rollover: Select source course';
+$string['step_source_course'] = 'Rollover: Select original course';
 $string['update_rule'] = 'Update rule';

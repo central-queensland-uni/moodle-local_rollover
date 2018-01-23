@@ -1,5 +1,5 @@
 @local @local_rollover @javascript
-Feature: Select source course for rollovers
+Feature: Select original course for rollovers
   In order to perform a rollover
   As a course coordinator
   I want an easy way to select which course to rollover from

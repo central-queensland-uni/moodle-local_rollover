@@ -15,7 +15,7 @@ Feature: Allow navigating back When adjusting a rollober
     And I am at the course "ABC123-2017-2" page                                     # local_rollover
 
     When I press "Rollover" in the Course Administration block                      # local_rollover
-    Then I should see "Select source course"
+    Then I should see "Select original course"
     And I should see the button "Cancel"                                            # local_rollover
     But I should not see the button "Back"                                          # local_rollover
 
@@ -33,7 +33,7 @@ Feature: Allow navigating back When adjusting a rollober
     And I press "Cancel"
     Then I should be at the course "ABC123-2017-2" page                             # local_rollover
 
-  Scenario: Restart rollover if another source course selected
+  Scenario: Restart rollover if another original course selected
     Given I am an administrator                                                     # local_rollover
     And the default rollover settings do not include anything by default            # local_rollover
     And all rollover protections are disabled                                       # local_rollover

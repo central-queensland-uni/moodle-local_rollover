@@ -18,7 +18,7 @@ Feature: Configure and perform course rollovers.
     And I am at the course "ABC123-2017-2" page                                          # local_rollover
 
     When I press "Rollover" in the Course Administration block                           # local_rollover
-    Then I should see "Rollover: Select source course"
+    Then I should see "Rollover: Select original course"
 
     When I select "ABC123-2017-1" in "Original course"                                   # local_rollover
     And I press "Next"
