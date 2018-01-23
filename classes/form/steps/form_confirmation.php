@@ -66,8 +66,8 @@ class form_confirmation extends form_step_base {
 
         $mform->addElement('header', 'coursesettings', get_string('courses', 'local_rollover'));
         $mform->addElement('static',
-                           'originalcourse',
-                           get_string('originalcourse', 'local_rollover'),
+                           'sourcecourse',
+                           get_string('sourcecourse', 'local_rollover'),
                            $this->get_original_course_link());
         $mform->addElement('static',
                            'destinationcourse',

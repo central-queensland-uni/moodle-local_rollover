@@ -23,7 +23,7 @@ Feature: Ensure capabilities are in effect.
     And I can modify the the course "ABC123-2017-2"                                      # local_rollover
     And I cannot modify the the course "DEF456-2017-1"                                   # local_rollover
     When I go to the rollover page for the course "ABC123-2017-2"                        # local_rollover
-    And I hack the HTML to select "DEF456-2017-1" as the original course                 # local_rollover
+    And I hack the HTML to select "DEF456-2017-1" as the source course                 # local_rollover
     And I try to press "Next"
     Then I should see the "Missing source course id" exception                          # local_rollover
 

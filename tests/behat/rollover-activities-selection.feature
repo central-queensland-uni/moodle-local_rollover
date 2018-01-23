@@ -1,5 +1,5 @@
 @local @local_rollover @javascript
-Feature: Select original course for rollovers
+Feature: Select source course for rollovers
   In order to perform a rollover
   As a course coordinator
   I want an easy way to select which activities and resources to rollover
@@ -19,7 +19,7 @@ Feature: Select original course for rollovers
       | rule        | activity | regex |
       | not default |          |       |
     When I go to the rollover page for the course "Destination"                                         # local_rollover
-    And I select "Source" in "Original course"                                                          # local_rollover
+    And I select "Source" in "Source course"                                                          # local_rollover
     And I press "Next"
     And I select "Include activities and resources" in the list of activities/resources                 # local_rollover
     And I select "Include question bank" in the list of activities/resources                            # local_rollover
@@ -41,7 +41,7 @@ Feature: Select original course for rollovers
       | rule        | activity   | regex |
       | not default | assignment |       |
     When I go to the rollover page for the course "Destination"                                         # local_rollover
-    And I select "Source" in "Original course"                                                          # local_rollover
+    And I select "Source" in "Source course"                                                          # local_rollover
     And I press "Next"
     And I select "Include activities and resources" in the list of activities/resources                 # local_rollover
     And I select "Include question bank" in the list of activities/resources                            # local_rollover
@@ -64,7 +64,7 @@ Feature: Select original course for rollovers
       | rule    | activity | regex             |
       | enforce |          | /^.*important.*$/ |
     When I go to the rollover page for the course "Destination"                                         # local_rollover
-    And I select "Source" in "Original course"                                                          # local_rollover
+    And I select "Source" in "Source course"                                                          # local_rollover
     And I press "Next"
     And I select "Include activities and resources" in the list of activities/resources                 # local_rollover
     And I select "Include question bank" in the list of activities/resources                            # local_rollover
@@ -88,7 +88,7 @@ Feature: Select original course for rollovers
       | rule   | activity | regex             |
       | forbid | forum    | /^Announcements$/ |
     When I go to the rollover page for the course "Destination"                                         # local_rollover
-    And I select "Source" in "Original course"                                                          # local_rollover
+    And I select "Source" in "Source course"                                                          # local_rollover
     And I press "Next"
     And I select "Include activities and resources" in the list of activities/resources                 # local_rollover
     And I press "Next"

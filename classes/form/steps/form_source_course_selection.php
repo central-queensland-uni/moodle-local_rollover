@@ -73,8 +73,8 @@ class form_source_course_selection extends form_step_base {
         }
 
         return [
-            get_string('originalcourse_pastinstances', 'local_rollover') => $pastinstances,
-            get_string('originalcourse_mycourses', 'local_rollover')     => $mycourses,
+            get_string('sourcecourse_pastinstances', 'local_rollover') => $pastinstances,
+            get_string('sourcecourse_mycourses', 'local_rollover')     => $mycourses,
         ];
     }
 
@@ -86,15 +86,15 @@ class form_source_course_selection extends form_step_base {
 
         $mform->addElement('selectgroups',
                            rollover_parameters::PARAM_SOURCE_COURSE_ID,
-                           get_string('originalcourse', 'local_rollover'),
+                           get_string('sourcecourse', 'local_rollover'),
                            $this->prepare_options(),
                            ['id' => 'local_rollover-your_units', 'size' => 10]);
         $mform->setType(rollover_parameters::PARAM_SOURCE_COURSE_ID, PARAM_INT);
-        $mform->addHelpButton(rollover_parameters::PARAM_SOURCE_COURSE_ID, 'originalcourse', 'local_rollover');
+        $mform->addHelpButton(rollover_parameters::PARAM_SOURCE_COURSE_ID, 'sourcecourse', 'local_rollover');
 
         $mform->addElement('text',
                            'search',
-                           get_string('originalcourse_search', 'local_rollover'));
+                           get_string('sourcecourse_search', 'local_rollover'));
         $mform->setType('search', PARAM_TEXT);
 
         $this->add_action_buttons(false);

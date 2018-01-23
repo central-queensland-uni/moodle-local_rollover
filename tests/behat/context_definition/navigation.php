@@ -181,7 +181,7 @@ trait local_rollover_behat_context_definition_for_navigation {
         $this->generator()->create_course_by_shortname('destination')->id;
 
         $this->iGoToTheRolloverPageForTheCourse('', 'destination');
-        $this->iSelectInField('source', 'Original course');
+        $this->iSelectInField('source', 'Source course');
         $this->execute('behat_forms::press_button', ['Next']);
     }
 
@@ -197,7 +197,7 @@ trait local_rollover_behat_context_definition_for_navigation {
     }
 
     /**
-     * @Given /^I hack the HTML to select "([^"]*)" as the original course +\# local_rollover$/
+     * @Given /^I hack the HTML to select "([^"]*)" as the source course +\# local_rollover$/
      */
     public function iHackTheHTMLToSelectAsTheOriginalCourse($original) {
         $session = $this->getSession();
@@ -255,7 +255,7 @@ JS;
 
         $this->allRolloverProtectionsAreDisabled();
         $this->iGoToTheRolloverPageForTheCourse(false, $destination);
-        $this->iSelectInField($source, 'Original course');
+        $this->iSelectInField($source, 'Source course');
         $this->execute('behat_forms::press_button', ['Next']);
         $this->execute('behat_forms::press_button', ['Next']);
         $this->execute('behat_forms::press_button', ['Next']);

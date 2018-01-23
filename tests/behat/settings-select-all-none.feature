@@ -13,7 +13,7 @@ Feature: Allow hiding the select all/none section when selecting activities
     And I <Display> the checkbox "Display select all/none section"                              # local_rollover
     And I press "Save changes"
     And I go to the rollover page for the course "Destination"                                  # local_rollover
-    And I select "Source" in "Original course"                                                  # local_rollover
+    And I select "Source" in "Source course"                                                  # local_rollover
     And I press "Next"
     And I select "Include activities and resources" in the list of activities/resources         # local_rollover
     And I press "Next"
