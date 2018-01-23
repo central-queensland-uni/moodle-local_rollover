@@ -52,7 +52,7 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         $controller->index();
         $html = ob_get_clean();
 
-        self::assertContains('Rollover: Select source course', $html);
+        self::assertContains('Rollover: Select original course', $html);
     }
 
     public function test_it_creates_a_form_with_the_user_courses() {
@@ -160,10 +160,10 @@ class local_rollover_steps_source_course_test extends rollover_testcase {
         self::assertSame(1, $actual, 'Wrong form used.');
 
         $actual = $crawler->filter('select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"]')->count();
-        self::assertSame(1, $actual, 'Missing source course field.');
+        self::assertSame(1, $actual, 'Missing original course field.');
 
         $actual = $crawler->filter('select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"] option')->count();
-        self::assertSame(2, $actual, 'Source course options count is not invalid.');
+        self::assertSame(2, $actual, 'Original course options count is not invalid.');
 
         $selector = 'select[name="' . rollover_parameters::PARAM_SOURCE_COURSE_ID . '"] option[value="' . $option1 . '"]';
         $actual = $crawler->filter($selector)->text();
