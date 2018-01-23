@@ -31,6 +31,7 @@ define(['jquery'], function ($) {
         this.cache = [];
         this.cacheOptions();
 
+        this.$search.on('keypress', this.ignoreEnter.bind(this));
         this.$search.on('input', this.trigger.bind(this));
     }
 
@@ -44,14 +45,15 @@ define(['jquery'], function ($) {
         });
     };
 
-    SourceCourseSearch.prototype.trigger = function (event) {
-        // Do not submit form when pressing ENTER.
+    SourceCourseSearch.prototype.ignoreEnter = function (event) {
         var keyCode = event.keyCode || event.which;
         if (keyCode === 13) {
             event.preventDefault();
             return false;
         }
+    };
 
+    SourceCourseSearch.prototype.trigger = function () {
         if (this.timer !== null) {
             clearTimeout(this.timer);
         }
