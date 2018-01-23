@@ -290,4 +290,10 @@ JS;
         $this->execute('behat_forms::i_set_the_field_to', [$field, $selected]);
     }
 
+    /**
+     * @Given /^I press "([^"]*)" again +\# local_rollover$/
+     */
+    public function iPressAgainLocal_rollover($button) {
+        $this->execute('behat_forms::press_button', [$button]);
+    }
 }

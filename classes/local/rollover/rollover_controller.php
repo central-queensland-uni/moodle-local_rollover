@@ -103,14 +103,19 @@ class rollover_controller {
         if (is_null($this->backupworker)) {
             $backupid = optional_param(rollover_parameters::PARAM_BACKUP_ID, null, PARAM_ALPHANUM);
             if (empty($backupid)) {
-                if (empty($this->sourcecourseid)) {
-                    throw new moodle_exception('Missing source course id.');
-                }
-                $this->backupworker = backup_worker::create($this->sourcecourseid);
+                $this->create_backup_worker();
             } else {
                 $this->backupworker = backup_worker::load($backupid);
             }
         }
+        return $this->backupworker;
+    }
+
+    public function create_backup_worker() {
+        if (empty($this->sourcecourseid)) {
+            throw new moodle_exception('Missing source course id.');
+        }
+        $this->backupworker = backup_worker::create($this->sourcecourseid);
         return $this->backupworker;
     }
 
