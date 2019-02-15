@@ -44,11 +44,14 @@ class local_rollover_generator_test extends rollover_testcase {
             'blockname'         => 'html',
             'parentcontextid'   => (string)context_course::instance($course->id)->id,
             'showinsubcontexts' => '0',
+            'requiredbytheme' => '0',
             'pagetypepattern'   => 'course-view-*',
             'subpagepattern'    => null,
             'defaultregion'     => 'side-pre',
             'defaultweight'     => '0',
             'configdata'        => $configdata,
+            'timecreated'       => (string)time(),
+            'timemodified'      => (string)time(),
         ];
         self::assertSame($expected, (array)$actual);
     }
