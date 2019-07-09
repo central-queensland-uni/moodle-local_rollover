@@ -121,7 +121,9 @@ class rollover_controller {
 
     public function __construct() {
         if (!defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING) {
-            debugging('Missing NO_OUTPUT_BUFFERING');
+            // Catalyst change - MDL-60978 Moodle now doesn't define NO_OUTPUT_BUFFERING in phpunit bootstrap
+            //debugging('Missing NO_OUTPUT_BUFFERING');
+            // End of catalyst change
         }
 
         $this->destinationcourse = get_course(required_param(rollover_parameters::PARAM_DESTINATION_COURSE_ID, PARAM_INT));
