@@ -92,7 +92,7 @@ class backup_worker {
 
     public function get_path() {
         global $CFG;
-        return $CFG->tempdir . '/backup/' . $this->get_backup_id();
+        return $CFG->backuptempdir . $this->get_backup_id();
     }
 
     public function get_history_filename() {
